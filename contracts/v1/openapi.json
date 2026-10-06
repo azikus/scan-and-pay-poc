@@ -1,0 +1,2024 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Scan and Pay",
+    "version": "1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/profiles": {
+      "get": {
+        "summary": "Profiles",
+        "operationId": "profiles_v1_profiles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfilesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/scans": {
+      "post": {
+        "summary": "Submit",
+        "operationId": "submit_v1_scans_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_submit_v1_scans_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/v1/scans/{scan_id}": {
+      "get": {
+        "summary": "Get Scan",
+        "operationId": "get_scan_v1_scans__scan_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Scan"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Scan",
+        "operationId": "delete_scan_v1_scans__scan_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scan Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Accepted": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "scan_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Scan Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "partially_completed",
+              "failed",
+              "interrupted"
+            ],
+            "title": "State"
+          },
+          "status_url": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Status Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "scan_id",
+          "state",
+          "status_url"
+        ],
+        "title": "Accepted"
+      },
+      "Alternative": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Value"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Reason"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "value",
+          "reason"
+        ],
+        "title": "Alternative"
+      },
+      "Amount": {
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "amount_due",
+              "invoice_total",
+              "instalment",
+              "other",
+              "unknown"
+            ],
+            "title": "Role",
+            "default": "unknown"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Amount"
+      },
+      "BillerDestination": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "biller_reference",
+            "title": "Kind",
+            "default": "biller_reference"
+          },
+          "scheme": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "biller_code": {
+            "$ref": "#/components/schemas/Observation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "BillerDestination"
+      },
+      "Body_submit_v1_scans_post": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Image"
+          },
+          "options": {
+            "type": "string",
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image",
+          "options"
+        ],
+        "title": "Body_submit_v1_scans_post"
+      },
+      "Candidate": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "account_country": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "beneficiary_name": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "account_holder_name": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "destination": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UKDestination"
+              },
+              {
+                "$ref": "#/components/schemas/IBANDestination"
+              },
+              {
+                "$ref": "#/components/schemas/BillerDestination"
+              },
+              {
+                "$ref": "#/components/schemas/UnresolvedDestination"
+              }
+            ],
+            "title": "Destination",
+            "discriminator": {
+              "propertyName": "kind",
+              "mapping": {
+                "biller_reference": "#/components/schemas/BillerDestination",
+                "iban": "#/components/schemas/IBANDestination",
+                "uk_domestic": "#/components/schemas/UKDestination",
+                "unresolved": "#/components/schemas/UnresolvedDestination"
+              }
+            }
+          },
+          "remittance": {
+            "$ref": "#/components/schemas/Remittance"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "destination"
+        ],
+        "title": "Candidate"
+      },
+      "Cost": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "estimated",
+              "unknown",
+              "not_applicable"
+            ],
+            "title": "Status",
+            "default": "unknown"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "pricing_source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pricing Source"
+          },
+          "priced_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priced At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Cost"
+      },
+      "DestinationMetadata": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Method"
+          },
+          "execution": {
+            "type": "string",
+            "enum": [
+              "local",
+              "external"
+            ],
+            "title": "Execution"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "endpoint_host": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint Host"
+          },
+          "payload_classes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Payload Classes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "method",
+          "execution",
+          "payload_classes"
+        ],
+        "title": "DestinationMetadata"
+      },
+      "Diagnostics": {
+        "properties": {
+          "requested_model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Model"
+          },
+          "returned_model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Returned Model"
+          },
+          "versions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Versions"
+          },
+          "timings_ms": {
+            "$ref": "#/components/schemas/Timings"
+          },
+          "validation": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array",
+            "title": "Validation"
+          },
+          "routing": {
+            "$ref": "#/components/schemas/Routing"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/Stage"
+            },
+            "type": "array",
+            "title": "Stages"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Diagnostics"
+      },
+      "DocumentContext": {
+        "properties": {
+          "language": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "issuer_country": {
+            "$ref": "#/components/schemas/Observation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "DocumentContext"
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Message"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable",
+            "default": false
+          },
+          "details": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Error"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse"
+      },
+      "Evidence": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "image_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Image Id"
+          },
+          "excerpt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excerpt"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number",
+                  "maximum": 1.0,
+                  "minimum": 0.0
+                },
+                "type": "array",
+                "maxItems": 4,
+                "minItems": 4
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bbox"
+          },
+          "grounding": {
+            "type": "string",
+            "enum": [
+              "ocr_span",
+              "barcode_payload",
+              "model_claim",
+              "synthetic_fixture"
+            ],
+            "title": "Grounding"
+          },
+          "source_stage_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Source Stage Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "image_id",
+          "grounding",
+          "source_stage_id"
+        ],
+        "title": "Evidence"
+      },
+      "ExcludedProfile": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "reason"
+        ],
+        "title": "ExcludedProfile"
+      },
+      "Finding": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Code"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/",
+            "title": "Path"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Message"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "not_checked",
+              "unknown"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "path",
+          "message",
+          "status"
+        ],
+        "title": "Finding"
+      },
+      "Hints": {
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "issuer_country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer Country"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Hints"
+      },
+      "IBANDestination": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "iban",
+            "title": "Kind",
+            "default": "iban"
+          },
+          "iban": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "bic": {
+            "$ref": "#/components/schemas/Observation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "IBANDestination"
+      },
+      "ImageInput": {
+        "properties": {
+          "image_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Image Id"
+          },
+          "original_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Original Sha256"
+          },
+          "canonical_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Canonical Sha256"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Width"
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Height"
+          },
+          "mime_type": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png"
+            ],
+            "title": "Mime Type"
+          },
+          "hints": {
+            "$ref": "#/components/schemas/Hints"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "image_id",
+          "original_sha256",
+          "canonical_sha256",
+          "width",
+          "height",
+          "mime_type"
+        ],
+        "title": "ImageInput"
+      },
+      "Observation": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "raw_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Text"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "missing",
+              "unreadable",
+              "ambiguous",
+              "inferred",
+              "unsupported"
+            ],
+            "title": "State",
+            "default": "missing"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "document",
+              "barcode",
+              "caller_hint",
+              "derived"
+            ],
+            "title": "Origin",
+            "default": "document"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          },
+          "normalization": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Normalization"
+          },
+          "alternatives": {
+            "items": {
+              "$ref": "#/components/schemas/Alternative"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Alternatives"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Observation"
+      },
+      "Payment": {
+        "properties": {
+          "document_context": {
+            "$ref": "#/components/schemas/DocumentContext"
+          },
+          "supplier_name": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "invoice_number": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "customer_number": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "due_date": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            },
+            "type": "array",
+            "title": "Candidates"
+          },
+          "selected_candidate_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Candidate Id"
+          },
+          "review": {
+            "$ref": "#/components/schemas/Review"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Payment"
+      },
+      "Profile": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Version"
+          },
+          "method": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Method"
+          },
+          "component_ids": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Component Ids"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "processor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processor"
+          },
+          "supported_image_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supported Image Types",
+            "default": [
+              "image/jpeg",
+              "image/png"
+            ]
+          },
+          "known_languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Known Languages",
+            "default": []
+          },
+          "stage_destinations": {
+            "items": {
+              "$ref": "#/components/schemas/DestinationMetadata"
+            },
+            "type": "array",
+            "title": "Stage Destinations",
+            "default": []
+          },
+          "implemented": {
+            "type": "boolean",
+            "title": "Implemented",
+            "default": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": false
+          },
+          "configured": {
+            "type": "boolean",
+            "title": "Configured",
+            "default": false
+          },
+          "live_validated": {
+            "type": "boolean",
+            "title": "Live Validated",
+            "default": false
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "method",
+          "component_ids"
+        ],
+        "title": "Profile"
+      },
+      "ProfileRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "version"
+        ],
+        "title": "ProfileRef"
+      },
+      "ProfilesResponse": {
+        "properties": {
+          "profiles": {
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "type": "array",
+            "title": "Profiles"
+          },
+          "default_extract_profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Extract Profile Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "profiles"
+        ],
+        "title": "ProfilesResponse"
+      },
+      "Reason": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Code"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/",
+            "title": "Path"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "path",
+          "message"
+        ],
+        "title": "Reason"
+      },
+      "Remittance": {
+        "properties": {
+          "reference": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "model": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "purpose_code": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "reference_requirement": {
+            "type": "string",
+            "enum": [
+              "required",
+              "not_stated",
+              "unknown"
+            ],
+            "title": "Reference Requirement",
+            "default": "unknown"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Remittance"
+      },
+      "Rendition": {
+        "properties": {
+          "image_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Image Id"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Width"
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Height"
+          },
+          "transform": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Transform"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "image_id",
+          "width",
+          "height"
+        ],
+        "title": "Rendition"
+      },
+      "Review": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "ready_for_review",
+              "needs_review",
+              "insufficient_data"
+            ],
+            "title": "State",
+            "default": "insufficient_data"
+          },
+          "user_confirmation_required": {
+            "type": "boolean",
+            "const": true,
+            "title": "User Confirmation Required",
+            "default": true
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Review"
+      },
+      "Routing": {
+        "properties": {
+          "applied_rule_packs": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Applied Rule Packs"
+          },
+          "reasons": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Routing"
+      },
+      "Run": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "profile_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Profile Id"
+          },
+          "profile_version": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Profile Version"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed",
+              "interrupted"
+            ],
+            "title": "State",
+            "default": "queued"
+          },
+          "payment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Payment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "diagnostics": {
+            "$ref": "#/components/schemas/Diagnostics"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Error"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "profile_id",
+          "profile_version"
+        ],
+        "title": "Run"
+      },
+      "Scan": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "execution_kind": {
+            "type": "string",
+            "enum": [
+              "live",
+              "synthetic_fixture"
+            ],
+            "title": "Execution Kind"
+          },
+          "scan_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Scan Id"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "extract",
+              "compare"
+            ],
+            "title": "Mode"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "partially_completed",
+              "failed",
+              "interrupted"
+            ],
+            "title": "State",
+            "default": "queued"
+          },
+          "created_at": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Updated At"
+          },
+          "input": {
+            "$ref": "#/components/schemas/ImageInput"
+          },
+          "resolved_profiles": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileRef"
+            },
+            "type": "array",
+            "title": "Resolved Profiles"
+          },
+          "excluded_profiles": {
+            "items": {
+              "$ref": "#/components/schemas/ExcludedProfile"
+            },
+            "type": "array",
+            "title": "Excluded Profiles"
+          },
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/Run"
+            },
+            "type": "array",
+            "title": "Runs"
+          },
+          "final_result_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Result Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "execution_kind",
+          "scan_id",
+          "mode",
+          "created_at",
+          "updated_at",
+          "input",
+          "resolved_profiles",
+          "runs"
+        ],
+        "title": "Scan"
+      },
+      "Stage": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "method": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Method"
+          },
+          "execution": {
+            "type": "string",
+            "enum": [
+              "local",
+              "external"
+            ],
+            "title": "Execution"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "endpoint_host": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint Host"
+          },
+          "account_alias": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Alias"
+          },
+          "configured_region": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Configured Region"
+          },
+          "verified_processing_region": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Processing Region"
+          },
+          "payload_classes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "image",
+                "crop",
+                "ocr_text",
+                "layout",
+                "fields"
+              ]
+            },
+            "type": "array",
+            "title": "Payload Classes"
+          },
+          "input_hash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Hash"
+          },
+          "rendition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Rendition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "usage": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Usage"
+          },
+          "cost": {
+            "$ref": "#/components/schemas/Cost"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "method",
+          "execution"
+        ],
+        "title": "Stage"
+      },
+      "Timings": {
+        "properties": {
+          "queue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Queue"
+          },
+          "preprocess": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preprocess"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "postprocess": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postprocess"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Timings"
+      },
+      "UKDestination": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "uk_domestic",
+            "title": "Kind",
+            "default": "uk_domestic"
+          },
+          "sort_code": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "account_number": {
+            "$ref": "#/components/schemas/Observation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "UKDestination"
+      },
+      "UnresolvedDestination": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "unresolved",
+            "title": "Kind",
+            "default": "unresolved"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "UnresolvedDestination"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

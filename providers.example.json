@@ -1,0 +1,27 @@
+{
+  "openai": {
+    "enabled": false,
+    "account_alias": "local-operator",
+    "endpoint_host": "api.openai.com",
+    "configured_region": "unknown",
+    "verified_processing_region": null,
+    "account_access_checked_at": null,
+    "data_terms_checked_at": null,
+    "data_terms_note": null,
+    "pricing_checked_at": null,
+    "max_call_eur": null
+  },
+  "mistral": {
+    "enabled": false,
+    "account_alias": "local-operator",
+    "endpoint_host": "api.mistral.ai",
+    "configured_region": "unknown",
+    "verified_processing_region": null,
+    "account_access_checked_at": null,
+    "data_terms_checked_at": null,
+    "data_terms_note": null,
+    "pricing_checked_at": null,
+    "max_call_eur": null
+  },
+  "default_extract_profile_id": null
+}

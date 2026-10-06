@@ -1,0 +1,40 @@
+# Private source documents and evaluation output
+/samples/
+/.local/
+/results/
+/reference/
+/reports/
+.coverage
+.coverage.*
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+*.db-wal
+*.db-shm
+
+# Secrets and local environments
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets*.json
+dist/
+build/
+*.egg-info/
+.venv/
+venv/
+
+# Generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store

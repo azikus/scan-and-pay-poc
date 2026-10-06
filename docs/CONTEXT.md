@@ -1,0 +1,106 @@
+# Product context and requirements
+
+Reconciled for coding handoff, 1 October 2026; current implementation/access state refreshed 6 October. Planning record reconstructed from visible user requests, the blueprint and workspace inspection; not a verbatim transcript. Latest user instructions take precedence over historical references. See ROADMAP.md for the phase/milestone map and CODING_HANDOFF.md for the next chat.
+
+## 1. What we are making
+
+A reusable Scan and Pay capability: photograph a bill, invoice or other payment document and receive an editable payment draft. The user must review and confirm the extracted details. They should not need to know whether the system used a barcode, OCR, document API or language model; all methods feed the same review journey.
+
+The initial eight examples are a starting point, not the product's boundary. A document with a payee, amount and payment identifiers is a candidate. It may still lack a complete payment route: a customer number is not a beneficiary bank account, and some biller references need an integration.
+
+The goal is useful extraction, transparent uncertainty and a report of measured results. A few successful scans cannot establish universal invoice support or rare-error reliability.
+
+## 2. Two cohorts, one engine
+
+### UK / London
+
+Prioritise English-language UK invoice photographs, linked sort code/account number, payee/account holder, amount, currency and required payment reference. Preserve leading zeroes and distinguish supplier, billed customer and remittance beneficiary.
+
+The customer demonstration is a native mobile app, not a browser payment flow. iOS first on Markus's test device, Android follows. A separate polished companion display lets attendees see the actual processing, evidence and selected tools. It is not Swagger or a log console.
+
+### Original client examples
+
+Retain all eight original documents, including images. Evaluate their languages, IBANs, references and biller identifiers separately from the UK cohort. Explicitly accommodate Croatian model and poziv na broj, without assuming every client sample is Croatian.
+
+No Aircash service or credentials are required to run the standalone PoC. Historical ReadCode fields provide context, not hard requirements. A future client integration would map the common extraction output separately.
+
+## 3. Confirmed delivery direction
+
+1. Independent project and monorepo, outside the client repository.
+2. Localhost backend first, accepting one JPEG or PNG still image. No PDF, page-selection, HEIC or multipage API.
+3. Agree mobile designs before writing the apps. iOS first, then Android; do not wait for every optional provider experiment.
+4. Hybrid direction: local rules, barcode parsing, OCR, document services and selectable LLM/vision models. The original LLM idea remains a baseline, not a restriction.
+5. Freely select models per provider, including smaller models and selected stronger controls; no mandated pairing. Provider-hosted proprietary and open-weight models are allowed; self-hosted inference locally or on project-operated cloud/GPU servers is excluded.
+6. Compare mode independently runs selected or all enabled compatible profiles. Extract mode selects one potentially composed pipeline.
+7. Ordinary phone photographs suffice for initial backend tests. Explore on-device OCR/ML during mobile work, possibly supplying image-linked text, boxes and quality observations.
+8. Keep shared samples and record latency, usage, cost, failures and actual data destinations.
+9. Python is selected and Milestone 1 is complete. The next local coding chat starts M2 provider coverage/tooling, with general OCR improvements alongside it. HTML findings reporting is deferred to the end. See CODING_HANDOFF.md and API_CONTRACT.md for scope and wire semantics.
+
+## 4. Delivery resources and budget
+
+Markus and the assistant are building this together. Engineer availability and an internal code-freeze date are not planning blockers.
+
+The total experiment budget is up to €500. Provider-hosted open-weight inference is in scope under the existing API budget. Self-hosted inference infrastructure and weight downloads are out of scope. The full requested upfront credential/resource set was supplied on 6 October. Preserve the existing private `.env` and SDK-managed cloud authentication; request only specific missing/expired access. Do not paste secrets into chat or automatically purchase recurring subscriptions. Record costs including retries, minimum billing, taxes/FX uncertainty and unknown charges.
+
+Client samples are authorised for provider testing. This does not authorise public publication of personal/banking data. The report and future companion must make it clear when an image, text or fields leave the machine. Selected provider account, region, endpoint and payload type are recorded per stage; geographical residency is unknown unless verified.
+
+Defer bespoke upload-limit and artifact-expiry work. Keep basic image decoding safety and actual provider constraints. Existing originals are not cleanup targets.
+
+Third-party SDKs may be used. Check licences and write high-value unit/contract tests rather than rebuilding standard clients. Coverage targets are ≥90% statements/≥85% branches in domain/orchestration; Milestone 1 achieved 98.77%/95.17%, with evidence in IMPLEMENTATION_STATUS.md.
+
+## 5. How the idea evolved
+
+The discussion started with broadening a barcode-driven mobile feature using several LLMs, comparing extraction, time and cost. It expanded into a client-owned hybrid stack that can incorporate OCR, document APIs, deterministic rules and mobile ML.
+
+The commercial proposition is to demonstrate and offer an integrated capability that clients can operate and adapt. It is not a claim to invent invoice photo-payment. Nanonets and document APIs are commercial building blocks; Docling/PaddleOCR were researched but running their model pipelines ourselves is out of scope; a suitable provider-operated API is eligible for evaluation. Deterministic libraries such as invoice2data may still be evaluated against image-derived managed OCR text without running model inference locally.
+
+The existing business blueprint remains a reference. Detailed engineering plans now describe a separate backend, rather than modifications to the client app.
+
+## 6. Guardrails from earlier decisions
+
+- Do not claim the category is new or no similar solution exists.
+- Do not promise savings, scale or accuracy before measuring. Client ownership still has infrastructure, provider, licence and maintenance costs.
+- Do not make every scan invoke every provider. A comparison tournament is not the eventual extraction policy.
+- Paid/direct-debit wording is not a mandatory rejection condition or the purpose of extraction. Historic due dates do not invalidate test documents.
+- Keep language, issuer location, account country and payment scheme separate. Currency is not inferred solely from an address or language.
+- Never silently replace a missing/ambiguous bank digit because a candidate passes a checksum.
+- User review/confirmation remains mandatory. Benchmark answer keys only provide a way to score raw, unedited outputs; they do not require a separate human review team.
+- No business go/no-go exercise, invented fixed delivery duration or browser payment demo.
+
+## 7. What exists and what remains unproved
+
+Existing: the implemented localhost backend and v1 contract, CLI, 184 passing offline tests after the 6 October cleanup, two live starter profiles, private images/raw outputs/results and cost ledger. Twelve provider dispatches include preserved failures; successful vision/OCR runs have measured timings and usage-based USD cost estimates. All upfront credentials/resources are supplied. No mobile app exists, and broader-provider adapters/full-corpus evaluation are next.
+
+The separate 30 September audit passed 15 historical CLI tests; those do not count toward new-backend coverage. Source samples, reference code and archived HTML remain private and preserved.
+
+Still unproved: verified sample answer keys, broader-provider inference compatibility, comparative extraction accuracy, general camera performance, reconciled per-document bills and production readiness. No additional inference occurred during the 6 October account/documentation preparation. The old HTML is historical material, not measured results or current guidance.
+
+## 8. Samples and provenance
+
+The shared folder contains eight original PDF/image files, a five-page UK print pack and the added barcode-free Croatian invoice PNG. The UK pack represents five invoices: Continental Landscapes, Active8 Managed Technologies, Pestcotek, Lasercut Works and CAPALC. Verify the logical grouping of the original files; do not count photographs or every source page as independent layouts.
+
+Original files: WATERBOARD_40_6598_2026_1.PDF; QR code.pdf; Paid utility bill from Nestor.pdf; FATTURA_2025_41_RZ02779403.pdf; 20210430330872169039909.pdf; 525517680719_2025_s.pdf; PROTERGIA BILL.jpeg; image-1.png.
+
+Existing PDFs are historical source assets. One-off rasterisation outside the backend can prepare image fixtures, but PDF ingestion is not a planned feature. Keep real data private and preserve provenance in the private manifest.
+
+Račun-12793-26.pdf was subsequently supplied from Desktop on 1 October. The first page contains the payment details and a separate 2D-barcode image object; the second is a supporting breakdown. Removed only the barcode object and rendered page one as samples/racun-12793-26-no-barcode.png (300 DPI, 2481 × 3508). Verification: all PDF text unchanged, all rendered pixels outside the barcode identical, removed region white, original PDF unchanged. A private provenance sidecar records source/output hashes and the transformation. Only the verified image and sidecar entered the project; page two remains in the original source and is not an independent sample. The Aircash screenshot is still missing and has not been inspected.
+
+## 9. Report, companion and event
+
+Also produce a [separate per-option cost report](COST_REPORT_PLAN.md), beginning with M2 evaluation and delivered with M4 selection. Compare exact options, stage/retry and document-minimum costs, coverage, unknowns and qualified volume estimates; refresh it for M8.
+
+At the end, produce an Azikus-styled HTML findings report with measured approaches, limitations, costs and data destinations. Do not build it during handoff or the initial backend milestone. Private sample data must not be embedded in public material.
+
+ARCHITECTURE.md distinguishes the current service boundaries from planned compositions and later consumers. IMPLEMENTATION_STATUS.md records actual behavior. The later conference companion must reflect real backend events and evidence; any replay must be clearly labelled.
+
+The previously checked official event page lists 13–14 October 2026 in London. This is context, not a fabricated internal deadline. [Event website](https://www.openbankingexpo.com/uk/).
+
+## 10. Remaining choices
+
+- Start a fresh local chat at M2 using the updated handoff; Python and completed Milestone 1 are settled. No further broad research round or blanket credential request is required.
+- Verify actual provider accounts, regions and accessible models before calls; budget and sample-testing permission are already settled.
+- Reattach the missing client screenshot when convenient; it is not a backend prerequisite. The invoice sample is prepared and verified.
+- Decide which sanitised material can be displayed publicly.
+- Design mobile screens before coding them; choose on-device experiments then.
+
+Aircash reuse currently means supporting its sample cohort, not a live client API integration. Broader integration/publication would be separately agreed.

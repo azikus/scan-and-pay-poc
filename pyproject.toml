@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scan-and-pay"
+version = "0.1.0"
+description = "Private image-to-payment-draft PoC"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic>=2.10,<3",
+  "python-multipart>=0.0.20,<1", "pillow>=11.1,<13",
+  "httpx>=0.28,<1", "openai>=2,<3", "python-dotenv>=1,<2",
+  "schwifty>=2025.1,<2027", "pycountry>=24,<27",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "pytest-cov>=6,<8", "jsonschema>=4.23,<5", "ruff>=0.11,<1", "mypy>=1.15,<2", "types-jsonschema>=4", "pip-tools>=7,<8", "hatchling>=1.27,<2", "editables>=0.5,<1"]
+
+[project.scripts]
+scanpay = "backend.cli:main"
+scanpay-contracts = "backend.export:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend"]
+exclude = ["backend/tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+asyncio_mode = "auto"
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+exclude = ["backend/tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["backend"]
+omit = ["backend/tests/*"]
+
+[tool.coverage.report]
+show_missing = true

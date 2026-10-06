@@ -1,0 +1,354 @@
+"""Durable single-process store: atomic acceptance, spend holds and deletion tombstones."""
+
+import fcntl
+import json
+import os
+import shutil
+import sqlite3
+import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
+from datetime import UTC, datetime
+from decimal import ROUND_CEILING
+from pathlib import Path
+from typing import Any
+from uuid import uuid4
+
+from backend.config import Settings
+from backend.errors import ServiceError
+from backend.images import PreparedImage, sha256
+from backend.models import Diagnostics, Error, ExcludedProfile, Options, ProfileRef, Run, Scan
+from backend.profiles import Definition
+
+
+def utcnow() -> str:
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+
+
+def private_write(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    temporary = path.with_name(path.name + ".tmp")
+    with os.fdopen(os.open(temporary, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600), "wb") as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(temporary, path)
+
+
+def request_digest(data: bytes, options: Options) -> str:
+    canonical = json.dumps(options.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
+    return sha256((sha256(data) + "\n" + canonical).encode())
+
+
+class Store:
+    def __init__(self, settings: Settings):
+        self.settings = settings
+        self.root = settings.data_dir.resolve()
+        self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.root.chmod(0o700)
+        self.artifacts = self.root / "jobs"
+        self.artifacts.mkdir(exist_ok=True, mode=0o700)
+        self._lock_file = (self.root / "owner.lock").open("a+")
+        os.chmod(self.root / "owner.lock", 0o600)
+        try:
+            fcntl.flock(self._lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            self._lock_file.close()
+            raise RuntimeError("Only one API process may own this data directory") from None
+        self.db_path = self.root / "jobs.sqlite3"
+        self._mutex = threading.RLock()
+        with self.connection() as db:
+            db.execute("PRAGMA journal_mode=DELETE")
+            db.executescript("""
+                CREATE TABLE IF NOT EXISTS jobs (
+                    id TEXT PRIMARY KEY, state TEXT NOT NULL, body TEXT NOT NULL,
+                    options TEXT NOT NULL, snapshots TEXT NOT NULL, transforms TEXT NOT NULL,
+                    preprocess_ms REAL NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS idempotency (
+                    key_hash TEXT PRIMARY KEY, digest TEXT NOT NULL,
+                    scan_id TEXT, deleted INTEGER NOT NULL DEFAULT 0
+                );
+                CREATE TABLE IF NOT EXISTS budget (
+                    id INTEGER PRIMARY KEY, run_id TEXT UNIQUE, hold_microeur INTEGER NOT NULL,
+                    dispatched INTEGER NOT NULL DEFAULT 0, cost TEXT
+                );
+                CREATE TABLE IF NOT EXISTS validated_profiles (
+                    profile_id TEXT NOT NULL, version TEXT NOT NULL, validated_at TEXT NOT NULL,
+                    PRIMARY KEY(profile_id, version)
+                );
+                CREATE TABLE IF NOT EXISTS stages (
+                    id TEXT PRIMARY KEY, scan_id TEXT NOT NULL, run_id TEXT NOT NULL,
+                    started_at TEXT NOT NULL, finished_at TEXT, body TEXT NOT NULL
+                );
+            """)
+        self.db_path.chmod(0o600)
+
+    @contextmanager
+    def connection(self) -> Iterator[sqlite3.Connection]:
+        with self._mutex:
+            db = sqlite3.connect(self.db_path, timeout=5)
+            db.row_factory = sqlite3.Row
+            db.execute("PRAGMA secure_delete=ON")
+            db.execute("PRAGMA synchronous=FULL")
+            try:
+                with db:
+                    yield db
+            finally:
+                db.close()
+
+    def close(self) -> None:
+        self._lock_file.close()
+
+    def ready(self) -> bool:
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            db.execute("SELECT 1 FROM jobs LIMIT 1")
+        probe = self.root / f"health-probe-{uuid4().hex}"
+        private_write(probe, b"ok")
+        probe.unlink()
+        return True
+
+    @staticmethod
+    def _existing(db: sqlite3.Connection, key: str, digest: str) -> Scan | None:
+        row = db.execute(
+            "SELECT * FROM idempotency WHERE key_hash=?", (sha256(key.encode()),)
+        ).fetchone()
+        if row is None:
+            return None
+        if row["deleted"]:
+            raise ServiceError(
+                410, "deleted_key", "This idempotency key belongs to a deleted scan."
+            )
+        if row["digest"] != digest:
+            raise ServiceError(
+                409, "idempotency_conflict", "Idempotency key was already used for different input."
+            )
+        job = db.execute("SELECT body FROM jobs WHERE id=?", (row["scan_id"],)).fetchone()
+        return Scan.model_validate_json(job["body"])
+
+    def existing(self, key: str, digest: str) -> Scan | None:
+        with self.connection() as db:
+            return self._existing(db, key, digest)
+
+    def accept(
+        self,
+        key: str,
+        digest: str,
+        image: PreparedImage,
+        options: Options,
+        definitions: list[Definition],
+        excluded: list[ExcludedProfile],
+    ) -> tuple[Scan, bool]:
+        scan_id = "scan-" + uuid4().hex
+        created_dir = False
+        try:
+            with self.connection() as db:
+                db.execute("BEGIN IMMEDIATE")
+                existing = self._existing(db, key, digest)
+                if existing:
+                    return existing, False
+                active = db.execute(
+                    "SELECT COUNT(*) FROM jobs WHERE state IN ('queued','running')"
+                ).fetchone()[0]
+                if active >= self.settings.queue_capacity + self.settings.workers:
+                    raise ServiceError(429, "queue_full", "The bounded job queue is full.", True)
+                holds = [
+                    int((d.ceiling_eur * 1_000_000).to_integral_value(rounding=ROUND_CEILING))
+                    for d in definitions
+                    if not d.synthetic
+                ]
+                used, count = db.execute(
+                    "SELECT COALESCE(SUM(hold_microeur),0), COUNT(*) FROM budget"
+                ).fetchone()
+                if holds and (
+                    used + sum(holds) > int(self.settings.smoke_budget_eur * 1_000_000)
+                    or count + len(holds) > self.settings.max_calls
+                    or any(h <= 0 for h in holds)
+                ):
+                    raise ServiceError(
+                        422,
+                        "budget_exceeded",
+                        "The entire batch exceeds the remaining call or EUR reservation budget.",
+                    )
+                now = utcnow()
+                runs = [
+                    Run(
+                        id="run-" + uuid4().hex,
+                        profile_id=d.metadata.id,
+                        profile_version=d.metadata.version,
+                        diagnostics=Diagnostics(
+                            requested_model=d.metadata.model or d.metadata.processor,
+                            versions={
+                                "schema": "1.0",
+                                "adapter": d.adapter + "@1",
+                                "review": "1",
+                                **{k: str(v) for k, v in d.parameters.items()},
+                            },
+                        ),
+                    )
+                    for d in definitions
+                ]
+                scan = Scan(
+                    execution_kind="synthetic_fixture" if definitions[0].synthetic else "live",
+                    scan_id=scan_id,
+                    mode=options.mode,
+                    created_at=now,
+                    updated_at=now,
+                    input=image.identity,
+                    resolved_profiles=[
+                        ProfileRef(id=d.metadata.id, version=d.metadata.version)
+                        for d in definitions
+                    ],
+                    excluded_profiles=excluded,
+                    runs=runs,
+                )
+                created_dir = True
+                private_write(self.artifacts / scan_id / "original", image.original)
+                private_write(self.artifacts / scan_id / "canonical.png", image.canonical)
+                db.execute(
+                    "INSERT INTO jobs VALUES(?,?,?,?,?,?,?)",
+                    (
+                        scan_id,
+                        scan.state,
+                        scan.model_dump_json(),
+                        options.model_dump_json(),
+                        json.dumps([d.snapshot() for d in definitions]),
+                        json.dumps(image.transforms),
+                        image.duration_ms,
+                    ),
+                )
+                db.execute(
+                    "INSERT INTO idempotency(key_hash,digest,scan_id) VALUES(?,?,?)",
+                    (sha256(key.encode()), digest, scan_id),
+                )
+                for run, d in zip(runs, definitions, strict=True):
+                    if not d.synthetic:
+                        hold = int(
+                            (d.ceiling_eur * 1_000_000).to_integral_value(rounding=ROUND_CEILING)
+                        )
+                        db.execute(
+                            "INSERT INTO budget(run_id,hold_microeur) VALUES(?,?)", (run.id, hold)
+                        )
+                return scan, True
+        except BaseException:
+            if created_dir:
+                shutil.rmtree(self.artifacts / scan_id, ignore_errors=True)
+            raise
+
+    def get(self, scan_id: str) -> Scan:
+        with self.connection() as db:
+            row = db.execute("SELECT body FROM jobs WHERE id=?", (scan_id,)).fetchone()
+            if row is None:
+                raise ServiceError(404, "not_found", "Scan not found.")
+            return Scan.model_validate_json(row["body"])
+
+    def save(self, scan: Scan) -> None:
+        scan.updated_at = utcnow()
+        # Validate nested invariants after mutable orchestration changes.
+        checked = Scan.model_validate(scan.model_dump())
+        with self.connection() as db:
+            db.execute(
+                "UPDATE jobs SET state=?,body=? WHERE id=?",
+                (checked.state, checked.model_dump_json(), checked.scan_id),
+            )
+
+    def preprocessing(self, scan_id: str) -> tuple[list[str], float]:
+        with self.connection() as db:
+            row = db.execute(
+                "SELECT transforms,preprocess_ms FROM jobs WHERE id=?", (scan_id,)
+            ).fetchone()
+            return json.loads(row["transforms"]), row["preprocess_ms"]
+
+    def mark_dispatched(self, run_id: str) -> None:
+        with self.connection() as db:
+            db.execute("UPDATE budget SET dispatched=1 WHERE run_id=?", (run_id,))
+
+    def record_stages(self, scan: Scan, run: Run) -> None:
+        with self.connection() as db:
+            for stage in run.diagnostics.stages:
+                db.execute(
+                    "INSERT INTO stages VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET finished_at=COALESCE(stages.finished_at,excluded.finished_at),body=excluded.body",
+                    (
+                        stage.id,
+                        scan.scan_id,
+                        run.id,
+                        utcnow(),
+                        utcnow() if stage.duration_ms is not None else None,
+                        stage.model_dump_json(),
+                    ),
+                )
+
+    def reconcile(self, run: Run) -> None:
+        # Preserve EUR holds even on known USD estimates: no implicit FX or forgiveness.
+        with self.connection() as db:
+            costs = [
+                s.cost.model_dump() for s in run.diagnostics.stages if s.execution == "external"
+            ]
+            db.execute("UPDATE budget SET cost=? WHERE run_id=?", (json.dumps(costs), run.id))
+            if run.state == "completed" and costs:
+                db.execute(
+                    "INSERT OR REPLACE INTO validated_profiles VALUES(?,?,?)",
+                    (run.profile_id, run.profile_version, utcnow()),
+                )
+
+    def is_validated(self, profile_id: str, version: str) -> bool:
+        with self.connection() as db:
+            return (
+                db.execute(
+                    "SELECT 1 FROM validated_profiles WHERE profile_id=? AND version=?",
+                    (profile_id, version),
+                ).fetchone()
+                is not None
+            )
+
+    def recover(self) -> None:
+        with self.connection() as db:
+            rows = db.execute(
+                "SELECT body FROM jobs WHERE state IN ('queued','running')"
+            ).fetchall()
+            for row in rows:
+                scan = Scan.model_validate_json(row["body"])
+                scan.state = "interrupted"
+                for run in scan.runs:
+                    if run.state in {"queued", "running"}:
+                        run.state = "interrupted"
+                        run.error = Error(
+                            code="interrupted",
+                            message="Process stopped; no automatic upstream replay.",
+                        )
+                        db.execute("DELETE FROM budget WHERE run_id=? AND dispatched=0", (run.id,))
+                scan.updated_at = utcnow()
+                db.execute(
+                    "UPDATE jobs SET state=?,body=? WHERE id=?",
+                    (scan.state, scan.model_dump_json(), scan.scan_id),
+                )
+            known = {row[0] for row in db.execute("SELECT id FROM jobs")}
+            # Only app-owned per-job directories; samples/ and other .local/ assets are untouched.
+            for path in self.artifacts.iterdir():
+                if path.is_dir() and path.name not in known:
+                    shutil.rmtree(path)
+
+    def delete(self, scan_id: str) -> None:
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT body FROM jobs WHERE id=?", (scan_id,)).fetchone()
+            if row is None:
+                raise ServiceError(404, "not_found", "Scan not found.")
+            scan = Scan.model_validate_json(row["body"])
+            if scan.state in {"queued", "running"}:
+                raise ServiceError(409, "active_scan", "Active scans cannot be deleted.")
+            if (self.artifacts / scan_id).exists():
+                shutil.rmtree(self.artifacts / scan_id, ignore_errors=False)
+            for run in scan.runs:
+                db.execute("DELETE FROM budget WHERE run_id=? AND dispatched=0", (run.id,))
+                db.execute("UPDATE budget SET run_id=NULL WHERE run_id=?", (run.id,))
+            db.execute("DELETE FROM jobs WHERE id=?", (scan_id,))
+            db.execute("DELETE FROM stages WHERE scan_id=?", (scan_id,))
+            db.execute("UPDATE idempotency SET deleted=1,scan_id=NULL WHERE scan_id=?", (scan_id,))
+
+    def save_raw(self, scan_id: str, run_id: str, value: Any) -> None:
+        private_write(
+            self.artifacts / scan_id / (run_id + ".raw.json"),
+            json.dumps(value, ensure_ascii=False).encode(),
+        )

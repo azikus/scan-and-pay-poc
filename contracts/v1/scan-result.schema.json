@@ -1,0 +1,1308 @@
+{
+  "$defs": {
+    "Alternative": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "value",
+        "reason"
+      ],
+      "title": "Alternative",
+      "type": "object"
+    },
+    "Amount": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/Observation"
+        },
+        "currency": {
+          "$ref": "#/$defs/Observation"
+        },
+        "role": {
+          "default": "unknown",
+          "enum": [
+            "amount_due",
+            "invoice_total",
+            "instalment",
+            "other",
+            "unknown"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "title": "Amount",
+      "type": "object"
+    },
+    "BillerDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "biller_reference",
+          "default": "biller_reference",
+          "title": "Kind",
+          "type": "string"
+        },
+        "scheme": {
+          "$ref": "#/$defs/Observation"
+        },
+        "biller_code": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "BillerDestination",
+      "type": "object"
+    },
+    "Candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "account_country": {
+          "$ref": "#/$defs/Observation"
+        },
+        "beneficiary_name": {
+          "$ref": "#/$defs/Observation"
+        },
+        "account_holder_name": {
+          "$ref": "#/$defs/Observation"
+        },
+        "amount": {
+          "$ref": "#/$defs/Amount"
+        },
+        "destination": {
+          "discriminator": {
+            "mapping": {
+              "biller_reference": "#/$defs/BillerDestination",
+              "iban": "#/$defs/IBANDestination",
+              "uk_domestic": "#/$defs/UKDestination",
+              "unresolved": "#/$defs/UnresolvedDestination"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UKDestination"
+            },
+            {
+              "$ref": "#/$defs/IBANDestination"
+            },
+            {
+              "$ref": "#/$defs/BillerDestination"
+            },
+            {
+              "$ref": "#/$defs/UnresolvedDestination"
+            }
+          ],
+          "title": "Destination"
+        },
+        "remittance": {
+          "$ref": "#/$defs/Remittance"
+        }
+      },
+      "required": [
+        "id",
+        "destination"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
+    "Cost": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "reported",
+            "estimated",
+            "unknown",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "pricing_source": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pricing Source"
+        },
+        "priced_at": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Priced At"
+        }
+      },
+      "title": "Cost",
+      "type": "object"
+    },
+    "Diagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_model": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requested Model"
+        },
+        "returned_model": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Returned Model"
+        },
+        "versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Versions",
+          "type": "object"
+        },
+        "timings_ms": {
+          "$ref": "#/$defs/Timings"
+        },
+        "validation": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Validation",
+          "type": "array"
+        },
+        "routing": {
+          "$ref": "#/$defs/Routing"
+        },
+        "stages": {
+          "items": {
+            "$ref": "#/$defs/Stage"
+          },
+          "title": "Stages",
+          "type": "array"
+        }
+      },
+      "title": "Diagnostics",
+      "type": "object"
+    },
+    "DocumentContext": {
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "$ref": "#/$defs/Observation"
+        },
+        "issuer_country": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "DocumentContext",
+      "type": "object"
+    },
+    "Error": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "default": false,
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "details": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "Error",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "image_id": {
+          "minLength": 1,
+          "title": "Image Id",
+          "type": "string"
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "items": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "grounding": {
+          "enum": [
+            "ocr_span",
+            "barcode_payload",
+            "model_claim",
+            "synthetic_fixture"
+          ],
+          "title": "Grounding",
+          "type": "string"
+        },
+        "source_stage_id": {
+          "minLength": 1,
+          "title": "Source Stage Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "image_id",
+        "grounding",
+        "source_stage_id"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "ExcludedProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "reason"
+      ],
+      "title": "ExcludedProfile",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^/",
+          "title": "Path",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "path",
+        "message",
+        "status"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "Hints": {
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "issuer_country": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issuer Country"
+        }
+      },
+      "title": "Hints",
+      "type": "object"
+    },
+    "IBANDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "iban",
+          "default": "iban",
+          "title": "Kind",
+          "type": "string"
+        },
+        "iban": {
+          "$ref": "#/$defs/Observation"
+        },
+        "bic": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "IBANDestination",
+      "type": "object"
+    },
+    "ImageInput": {
+      "additionalProperties": false,
+      "properties": {
+        "image_id": {
+          "minLength": 1,
+          "title": "Image Id",
+          "type": "string"
+        },
+        "original_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Original Sha256",
+          "type": "string"
+        },
+        "canonical_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Canonical Sha256",
+          "type": "string"
+        },
+        "width": {
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        },
+        "mime_type": {
+          "enum": [
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Mime Type",
+          "type": "string"
+        },
+        "hints": {
+          "$ref": "#/$defs/Hints"
+        }
+      },
+      "required": [
+        "image_id",
+        "original_sha256",
+        "canonical_sha256",
+        "width",
+        "height",
+        "mime_type"
+      ],
+      "title": "ImageInput",
+      "type": "object"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "raw_text": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Text"
+        },
+        "state": {
+          "default": "missing",
+          "enum": [
+            "observed",
+            "missing",
+            "unreadable",
+            "ambiguous",
+            "inferred",
+            "unsupported"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "origin": {
+          "default": "document",
+          "enum": [
+            "document",
+            "barcode",
+            "caller_hint",
+            "derived"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "normalization": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Normalization",
+          "type": "array"
+        },
+        "alternatives": {
+          "items": {
+            "$ref": "#/$defs/Alternative"
+          },
+          "maxItems": 8,
+          "title": "Alternatives",
+          "type": "array"
+        }
+      },
+      "title": "Observation",
+      "type": "object"
+    },
+    "Payment": {
+      "additionalProperties": false,
+      "properties": {
+        "document_context": {
+          "$ref": "#/$defs/DocumentContext"
+        },
+        "supplier_name": {
+          "$ref": "#/$defs/Observation"
+        },
+        "invoice_number": {
+          "$ref": "#/$defs/Observation"
+        },
+        "customer_number": {
+          "$ref": "#/$defs/Observation"
+        },
+        "description": {
+          "$ref": "#/$defs/Observation"
+        },
+        "due_date": {
+          "$ref": "#/$defs/Observation"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/Candidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "selected_candidate_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Candidate Id"
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        }
+      },
+      "title": "Payment",
+      "type": "object"
+    },
+    "ProfileRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "title": "ProfileRef",
+      "type": "object"
+    },
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^/",
+          "title": "Path",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "path",
+        "message"
+      ],
+      "title": "Reason",
+      "type": "object"
+    },
+    "Remittance": {
+      "additionalProperties": false,
+      "properties": {
+        "reference": {
+          "$ref": "#/$defs/Observation"
+        },
+        "model": {
+          "$ref": "#/$defs/Observation"
+        },
+        "purpose_code": {
+          "$ref": "#/$defs/Observation"
+        },
+        "reference_requirement": {
+          "default": "unknown",
+          "enum": [
+            "required",
+            "not_stated",
+            "unknown"
+          ],
+          "title": "Reference Requirement",
+          "type": "string"
+        }
+      },
+      "title": "Remittance",
+      "type": "object"
+    },
+    "Rendition": {
+      "additionalProperties": false,
+      "properties": {
+        "image_id": {
+          "minLength": 1,
+          "title": "Image Id",
+          "type": "string"
+        },
+        "width": {
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        },
+        "transform": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Transform",
+          "type": "array"
+        }
+      },
+      "required": [
+        "image_id",
+        "width",
+        "height"
+      ],
+      "title": "Rendition",
+      "type": "object"
+    },
+    "Review": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "default": "insufficient_data",
+          "enum": [
+            "ready_for_review",
+            "needs_review",
+            "insufficient_data"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "user_confirmation_required": {
+          "const": true,
+          "default": true,
+          "title": "User Confirmation Required",
+          "type": "boolean"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "title": "Review",
+      "type": "object"
+    },
+    "Routing": {
+      "additionalProperties": false,
+      "properties": {
+        "applied_rule_packs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Applied Rule Packs",
+          "type": "array"
+        },
+        "reasons": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "title": "Routing",
+      "type": "object"
+    },
+    "Run": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "profile_version": {
+          "minLength": 1,
+          "title": "Profile Version",
+          "type": "string"
+        },
+        "state": {
+          "default": "queued",
+          "enum": [
+            "queued",
+            "running",
+            "completed",
+            "failed",
+            "interrupted"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "payment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Payment"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/Diagnostics"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Error"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "profile_id",
+        "profile_version"
+      ],
+      "title": "Run",
+      "type": "object"
+    },
+    "Stage": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "method": {
+          "minLength": 1,
+          "title": "Method",
+          "type": "string"
+        },
+        "execution": {
+          "enum": [
+            "local",
+            "external"
+          ],
+          "title": "Execution",
+          "type": "string"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "endpoint_host": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint Host"
+        },
+        "account_alias": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Alias"
+        },
+        "configured_region": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Configured Region"
+        },
+        "verified_processing_region": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verified Processing Region"
+        },
+        "payload_classes": {
+          "items": {
+            "enum": [
+              "image",
+              "crop",
+              "ocr_text",
+              "layout",
+              "fields"
+            ],
+            "type": "string"
+          },
+          "title": "Payload Classes",
+          "type": "array"
+        },
+        "input_hash": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Hash"
+        },
+        "rendition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rendition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        },
+        "usage": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Usage",
+          "type": "object"
+        },
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        }
+      },
+      "required": [
+        "id",
+        "method",
+        "execution"
+      ],
+      "title": "Stage",
+      "type": "object"
+    },
+    "Timings": {
+      "additionalProperties": false,
+      "properties": {
+        "queue": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Queue"
+        },
+        "preprocess": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Preprocess"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "postprocess": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Postprocess"
+        },
+        "total": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total"
+        }
+      },
+      "title": "Timings",
+      "type": "object"
+    },
+    "UKDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "uk_domestic",
+          "default": "uk_domestic",
+          "title": "Kind",
+          "type": "string"
+        },
+        "sort_code": {
+          "$ref": "#/$defs/Observation"
+        },
+        "account_number": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "UKDestination",
+      "type": "object"
+    },
+    "UnresolvedDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "unresolved",
+          "default": "unresolved",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "title": "UnresolvedDestination",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "execution_kind": {
+      "enum": [
+        "live",
+        "synthetic_fixture"
+      ],
+      "title": "Execution Kind",
+      "type": "string"
+    },
+    "scan_id": {
+      "minLength": 1,
+      "title": "Scan Id",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "extract",
+        "compare"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "state": {
+      "default": "queued",
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "partially_completed",
+        "failed",
+        "interrupted"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "created_at": {
+      "minLength": 1,
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "minLength": 1,
+      "title": "Updated At",
+      "type": "string"
+    },
+    "input": {
+      "$ref": "#/$defs/ImageInput"
+    },
+    "resolved_profiles": {
+      "items": {
+        "$ref": "#/$defs/ProfileRef"
+      },
+      "title": "Resolved Profiles",
+      "type": "array"
+    },
+    "excluded_profiles": {
+      "items": {
+        "$ref": "#/$defs/ExcludedProfile"
+      },
+      "title": "Excluded Profiles",
+      "type": "array"
+    },
+    "runs": {
+      "items": {
+        "$ref": "#/$defs/Run"
+      },
+      "title": "Runs",
+      "type": "array"
+    },
+    "final_result_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Final Result Id"
+    }
+  },
+  "required": [
+    "execution_kind",
+    "scan_id",
+    "mode",
+    "created_at",
+    "updated_at",
+    "input",
+    "resolved_profiles",
+    "runs"
+  ],
+  "title": "Scan",
+  "type": "object"
+}

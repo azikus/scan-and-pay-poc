@@ -1,0 +1,613 @@
+{
+  "$defs": {
+    "Alternative": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "value",
+        "reason",
+        "evidence_ids"
+      ],
+      "title": "Alternative",
+      "type": "object"
+    },
+    "Amount": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string",
+                  "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Value"
+            },
+            "raw_text": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Raw Text"
+            },
+            "state": {
+              "enum": [
+                "observed",
+                "missing",
+                "unreadable",
+                "ambiguous",
+                "inferred",
+                "unsupported"
+              ],
+              "title": "State",
+              "type": "string"
+            },
+            "origin": {
+              "enum": [
+                "document",
+                "barcode",
+                "caller_hint",
+                "derived"
+              ],
+              "title": "Origin",
+              "type": "string"
+            },
+            "evidence_ids": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Evidence Ids",
+              "type": "array"
+            },
+            "normalization": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Normalization",
+              "type": "array"
+            },
+            "alternatives": {
+              "items": {
+                "$ref": "#/$defs/Alternative"
+              },
+              "maxItems": 8,
+              "title": "Alternatives",
+              "type": "array"
+            }
+          },
+          "title": "Observation",
+          "type": "object",
+          "required": [
+            "value",
+            "raw_text",
+            "state",
+            "origin",
+            "evidence_ids",
+            "normalization",
+            "alternatives"
+          ]
+        },
+        "currency": {
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string",
+                  "pattern": "^[A-Z]{3}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Value"
+            },
+            "raw_text": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Raw Text"
+            },
+            "state": {
+              "enum": [
+                "observed",
+                "missing",
+                "unreadable",
+                "ambiguous",
+                "inferred",
+                "unsupported"
+              ],
+              "title": "State",
+              "type": "string"
+            },
+            "origin": {
+              "enum": [
+                "document",
+                "barcode",
+                "caller_hint",
+                "derived"
+              ],
+              "title": "Origin",
+              "type": "string"
+            },
+            "evidence_ids": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Evidence Ids",
+              "type": "array"
+            },
+            "normalization": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Normalization",
+              "type": "array"
+            },
+            "alternatives": {
+              "items": {
+                "$ref": "#/$defs/Alternative"
+              },
+              "maxItems": 8,
+              "title": "Alternatives",
+              "type": "array"
+            }
+          },
+          "title": "Observation",
+          "type": "object",
+          "required": [
+            "value",
+            "raw_text",
+            "state",
+            "origin",
+            "evidence_ids",
+            "normalization",
+            "alternatives"
+          ]
+        },
+        "role": {
+          "enum": [
+            "amount_due",
+            "invoice_total",
+            "instalment",
+            "other",
+            "unknown"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "title": "Amount",
+      "type": "object",
+      "required": [
+        "value",
+        "currency",
+        "role"
+      ]
+    },
+    "BillerDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "biller_reference",
+          "title": "Kind",
+          "type": "string"
+        },
+        "scheme": {
+          "$ref": "#/$defs/Observation"
+        },
+        "biller_code": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "BillerDestination",
+      "type": "object",
+      "required": [
+        "kind",
+        "scheme",
+        "biller_code"
+      ]
+    },
+    "Candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "account_country": {
+          "$ref": "#/$defs/Observation"
+        },
+        "beneficiary_name": {
+          "$ref": "#/$defs/Observation"
+        },
+        "account_holder_name": {
+          "$ref": "#/$defs/Observation"
+        },
+        "amount": {
+          "$ref": "#/$defs/Amount"
+        },
+        "destination": {
+          "title": "Destination",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UKDestination"
+            },
+            {
+              "$ref": "#/$defs/IBANDestination"
+            },
+            {
+              "$ref": "#/$defs/BillerDestination"
+            },
+            {
+              "$ref": "#/$defs/UnresolvedDestination"
+            }
+          ]
+        },
+        "remittance": {
+          "$ref": "#/$defs/Remittance"
+        }
+      },
+      "required": [
+        "id",
+        "account_country",
+        "beneficiary_name",
+        "account_holder_name",
+        "amount",
+        "destination",
+        "remittance"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Excerpt"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bbox"
+        }
+      },
+      "required": [
+        "id",
+        "excerpt",
+        "bbox"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "DocumentContext": {
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "$ref": "#/$defs/Observation"
+        },
+        "issuer_country": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "DocumentContext",
+      "type": "object",
+      "required": [
+        "language",
+        "issuer_country"
+      ]
+    },
+    "IBANDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "iban",
+          "title": "Kind",
+          "type": "string"
+        },
+        "iban": {
+          "$ref": "#/$defs/Observation"
+        },
+        "bic": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "IBANDestination",
+      "type": "object",
+      "required": [
+        "kind",
+        "iban",
+        "bic"
+      ]
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "raw_text": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Raw Text"
+        },
+        "state": {
+          "enum": [
+            "observed",
+            "missing",
+            "unreadable",
+            "ambiguous",
+            "inferred",
+            "unsupported"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "document",
+            "barcode",
+            "caller_hint",
+            "derived"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "normalization": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Normalization",
+          "type": "array"
+        },
+        "alternatives": {
+          "items": {
+            "$ref": "#/$defs/Alternative"
+          },
+          "maxItems": 8,
+          "title": "Alternatives",
+          "type": "array"
+        }
+      },
+      "title": "Observation",
+      "type": "object",
+      "required": [
+        "value",
+        "raw_text",
+        "state",
+        "origin",
+        "evidence_ids",
+        "normalization",
+        "alternatives"
+      ]
+    },
+    "PaymentFields": {
+      "additionalProperties": false,
+      "properties": {
+        "document_context": {
+          "$ref": "#/$defs/DocumentContext"
+        },
+        "supplier_name": {
+          "$ref": "#/$defs/Observation"
+        },
+        "invoice_number": {
+          "$ref": "#/$defs/Observation"
+        },
+        "customer_number": {
+          "$ref": "#/$defs/Observation"
+        },
+        "description": {
+          "$ref": "#/$defs/Observation"
+        },
+        "due_date": {
+          "$ref": "#/$defs/Observation"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/Candidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        }
+      },
+      "title": "PaymentFields",
+      "type": "object",
+      "required": [
+        "document_context",
+        "supplier_name",
+        "invoice_number",
+        "customer_number",
+        "description",
+        "due_date",
+        "candidates"
+      ]
+    },
+    "Remittance": {
+      "additionalProperties": false,
+      "properties": {
+        "reference": {
+          "$ref": "#/$defs/Observation"
+        },
+        "model": {
+          "$ref": "#/$defs/Observation"
+        },
+        "purpose_code": {
+          "$ref": "#/$defs/Observation"
+        },
+        "reference_requirement": {
+          "enum": [
+            "required",
+            "not_stated",
+            "unknown"
+          ],
+          "title": "Reference Requirement",
+          "type": "string"
+        }
+      },
+      "title": "Remittance",
+      "type": "object",
+      "required": [
+        "reference",
+        "model",
+        "purpose_code",
+        "reference_requirement"
+      ]
+    },
+    "UKDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "uk_domestic",
+          "title": "Kind",
+          "type": "string"
+        },
+        "sort_code": {
+          "$ref": "#/$defs/Observation"
+        },
+        "account_number": {
+          "$ref": "#/$defs/Observation"
+        }
+      },
+      "title": "UKDestination",
+      "type": "object",
+      "required": [
+        "kind",
+        "sort_code",
+        "account_number"
+      ]
+    },
+    "UnresolvedDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "unresolved",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "reason"
+      ],
+      "title": "UnresolvedDestination",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "payment": {
+      "$ref": "#/$defs/PaymentFields"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "title": "Evidence",
+      "type": "array"
+    }
+  },
+  "required": [
+    "payment",
+    "evidence"
+  ],
+  "title": "VisionExtraction",
+  "type": "object"
+}

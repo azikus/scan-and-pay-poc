@@ -1,0 +1,1038 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scan and Pay v1 scan result",
+  "description": "Structural contract, not payment verification. See API_CONTRACT.md for semantic invariants.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "execution_kind": {
+      "enum": [
+        "live",
+        "synthetic_fixture"
+      ]
+    },
+    "scan_id": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "extract",
+        "compare"
+      ]
+    },
+    "state": {
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "partially_completed",
+        "failed",
+        "interrupted"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "image_id": {
+          "type": "string"
+        },
+        "original_sha256": {
+          "type": "string"
+        },
+        "canonical_sha256": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mime_type": {
+          "enum": [
+            "image/jpeg",
+            "image/png"
+          ]
+        },
+        "hints": {
+          "type": "object",
+          "properties": {
+            "language": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "issuer_country": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "language",
+            "issuer_country"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "image_id",
+        "original_sha256",
+        "canonical_sha256",
+        "width",
+        "height",
+        "mime_type",
+        "hints"
+      ],
+      "additionalProperties": false
+    },
+    "resolved_profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "excluded_profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "runs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/run"
+      }
+    },
+    "final_result_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "execution_kind",
+    "scan_id",
+    "mode",
+    "state",
+    "created_at",
+    "updated_at",
+    "input",
+    "resolved_profiles",
+    "excluded_profiles",
+    "runs",
+    "final_result_id"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "alternative": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "value",
+        "reason",
+        "evidence_ids"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "raw_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "enum": [
+            "observed",
+            "missing",
+            "unreadable",
+            "ambiguous",
+            "inferred",
+            "unsupported"
+          ]
+        },
+        "origin": {
+          "enum": [
+            "document",
+            "barcode",
+            "caller_hint",
+            "derived"
+          ]
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "normalization": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/alternative"
+          }
+        }
+      },
+      "required": [
+        "value",
+        "raw_text",
+        "state",
+        "origin",
+        "evidence_ids",
+        "normalization",
+        "alternatives"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "missing",
+                  "unreadable",
+                  "ambiguous",
+                  "unsupported"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "image_id": {
+          "type": "string"
+        },
+        "excerpt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          ]
+        },
+        "grounding": {
+          "enum": [
+            "ocr_span",
+            "barcode_payload",
+            "model_claim",
+            "synthetic_fixture"
+          ]
+        },
+        "source_stage_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "image_id",
+        "excerpt",
+        "bbox",
+        "grounding",
+        "source_stage_id"
+      ],
+      "additionalProperties": false
+    },
+    "destination": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "uk_domestic"
+            },
+            "sort_code": {
+              "$ref": "#/$defs/observation"
+            },
+            "account_number": {
+              "$ref": "#/$defs/observation"
+            }
+          },
+          "required": [
+            "kind",
+            "sort_code",
+            "account_number"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "iban"
+            },
+            "iban": {
+              "$ref": "#/$defs/observation"
+            },
+            "bic": {
+              "$ref": "#/$defs/observation"
+            }
+          },
+          "required": [
+            "kind",
+            "iban",
+            "bic"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "biller_reference"
+            },
+            "scheme": {
+              "$ref": "#/$defs/observation"
+            },
+            "biller_code": {
+              "$ref": "#/$defs/observation"
+            }
+          },
+          "required": [
+            "kind",
+            "scheme",
+            "biller_code"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "unresolved"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "candidate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "beneficiary_name": {
+          "$ref": "#/$defs/observation"
+        },
+        "account_holder_name": {
+          "$ref": "#/$defs/observation"
+        },
+        "amount": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/observation"
+            },
+            "currency": {
+              "$ref": "#/$defs/observation"
+            },
+            "role": {
+              "enum": [
+                "amount_due",
+                "invoice_total",
+                "instalment",
+                "other",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "currency",
+            "role"
+          ],
+          "additionalProperties": false
+        },
+        "destination": {
+          "$ref": "#/$defs/destination"
+        },
+        "remittance": {
+          "type": "object",
+          "properties": {
+            "reference": {
+              "$ref": "#/$defs/observation"
+            },
+            "model": {
+              "$ref": "#/$defs/observation"
+            },
+            "purpose_code": {
+              "$ref": "#/$defs/observation"
+            },
+            "reference_requirement": {
+              "enum": [
+                "required",
+                "not_stated",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "reference",
+            "model",
+            "purpose_code",
+            "reference_requirement"
+          ],
+          "additionalProperties": false
+        },
+        "account_country": {
+          "$ref": "#/$defs/observation"
+        }
+      },
+      "required": [
+        "id",
+        "beneficiary_name",
+        "account_holder_name",
+        "amount",
+        "destination",
+        "remittance",
+        "account_country"
+      ],
+      "additionalProperties": false
+    },
+    "reason": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "path",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "supplier_name": {
+          "$ref": "#/$defs/observation"
+        },
+        "invoice_number": {
+          "$ref": "#/$defs/observation"
+        },
+        "customer_number": {
+          "$ref": "#/$defs/observation"
+        },
+        "description": {
+          "$ref": "#/$defs/observation"
+        },
+        "due_date": {
+          "$ref": "#/$defs/observation"
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate"
+          }
+        },
+        "selected_candidate_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "enum": [
+                "ready_for_review",
+                "needs_review",
+                "insufficient_data"
+              ]
+            },
+            "user_confirmation_required": {
+              "const": true
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/reason"
+              }
+            }
+          },
+          "required": [
+            "state",
+            "user_confirmation_required",
+            "reasons"
+          ],
+          "additionalProperties": false
+        },
+        "document_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "language",
+            "issuer_country"
+          ],
+          "properties": {
+            "language": {
+              "$ref": "#/$defs/observation"
+            },
+            "issuer_country": {
+              "$ref": "#/$defs/observation"
+            }
+          }
+        }
+      },
+      "required": [
+        "supplier_name",
+        "invoice_number",
+        "customer_number",
+        "description",
+        "due_date",
+        "candidates",
+        "selected_candidate_id",
+        "review",
+        "document_context"
+      ],
+      "additionalProperties": false
+    },
+    "cost": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "reported",
+            "estimated",
+            "unknown",
+            "not_applicable"
+          ]
+        },
+        "amount": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+        },
+        "currency": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pricing_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "priced_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "amount",
+        "currency",
+        "pricing_source",
+        "priced_at"
+      ],
+      "additionalProperties": false
+    },
+    "stage": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "execution": {
+          "enum": [
+            "local",
+            "external"
+          ]
+        },
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endpoint_host": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "account_alias": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "configured_region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verified_processing_region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "payload_classes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "image",
+              "crop",
+              "ocr_text",
+              "layout",
+              "fields"
+            ]
+          }
+        },
+        "input_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rendition": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "image_id": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "transform": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "image_id",
+                "width",
+                "height",
+                "transform"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "request_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "duration_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "usage": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          }
+        },
+        "cost": {
+          "$ref": "#/$defs/cost"
+        }
+      },
+      "required": [
+        "id",
+        "method",
+        "execution",
+        "provider",
+        "endpoint_host",
+        "account_alias",
+        "configured_region",
+        "verified_processing_region",
+        "payload_classes",
+        "input_hash",
+        "rendition",
+        "request_id",
+        "duration_ms",
+        "usage",
+        "cost"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "object",
+      "properties": {
+        "requested_model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "returned_model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "timings_ms": {
+          "type": "object",
+          "properties": {
+            "queue": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "preprocess": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "provider": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "postprocess": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "total": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            }
+          },
+          "required": [
+            "queue",
+            "preprocess",
+            "provider",
+            "postprocess",
+            "total"
+          ],
+          "additionalProperties": false
+        },
+        "validation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "not_checked",
+                  "unknown"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "path",
+              "status",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stage"
+          }
+        },
+        "routing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applied_rule_packs",
+            "reasons"
+          ],
+          "properties": {
+            "applied_rule_packs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "requested_model",
+        "returned_model",
+        "versions",
+        "timings_ms",
+        "validation",
+        "stages",
+        "routing"
+      ],
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable",
+        "details"
+      ],
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "profile_id": {
+          "type": "string"
+        },
+        "profile_version": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "queued",
+            "running",
+            "completed",
+            "failed",
+            "interrupted"
+          ]
+        },
+        "payment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/payment"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/diagnostics"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/error"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "profile_id",
+        "profile_version",
+        "state",
+        "payment",
+        "evidence",
+        "diagnostics",
+        "error"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

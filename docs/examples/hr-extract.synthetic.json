@@ -1,0 +1,379 @@
+{
+  "schema_version": "1.0",
+  "execution_kind": "synthetic_fixture",
+  "scan_id": "scan-demo-hr",
+  "mode": "extract",
+  "state": "completed",
+  "created_at": "2026-10-01T00:00:00Z",
+  "updated_at": "2026-10-01T00:00:00Z",
+  "input": {
+    "image_id": "image-synthetic",
+    "original_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "canonical_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "width": 1200,
+    "height": 1600,
+    "mime_type": "image/png",
+    "hints": {
+      "language": null,
+      "issuer_country": null
+    }
+  },
+  "resolved_profiles": [
+    {
+      "id": "fixture-only",
+      "version": "1"
+    }
+  ],
+  "excluded_profiles": [],
+  "runs": [
+    {
+      "id": "run-demo-hr",
+      "profile_id": "fixture-only",
+      "profile_version": "1",
+      "state": "completed",
+      "payment": {
+        "supplier_name": {
+          "value": "Example Upravitelj (synthetic)",
+          "raw_text": "Example Upravitelj (synthetic)",
+          "state": "observed",
+          "origin": "document",
+          "evidence_ids": [
+            "e1"
+          ],
+          "normalization": [],
+          "alternatives": []
+        },
+        "invoice_number": {
+          "value": "DEMO-HR-42",
+          "raw_text": "DEMO-HR-42",
+          "state": "observed",
+          "origin": "document",
+          "evidence_ids": [
+            "e2"
+          ],
+          "normalization": [],
+          "alternatives": []
+        },
+        "customer_number": {
+          "value": null,
+          "raw_text": null,
+          "state": "missing",
+          "origin": "document",
+          "evidence_ids": [],
+          "normalization": [],
+          "alternatives": []
+        },
+        "description": {
+          "value": "Synthetic invoice, never use for payment",
+          "raw_text": "Synthetic invoice, never use for payment",
+          "state": "observed",
+          "origin": "document",
+          "evidence_ids": [
+            "e3"
+          ],
+          "normalization": [],
+          "alternatives": []
+        },
+        "due_date": {
+          "value": null,
+          "raw_text": null,
+          "state": "missing",
+          "origin": "document",
+          "evidence_ids": [],
+          "normalization": [],
+          "alternatives": []
+        },
+        "candidates": [
+          {
+            "id": "candidate-1",
+            "beneficiary_name": {
+              "value": "Example Suvlasnici (synthetic)",
+              "raw_text": "Example Suvlasnici (synthetic)",
+              "state": "observed",
+              "origin": "document",
+              "evidence_ids": [
+                "e4"
+              ],
+              "normalization": [],
+              "alternatives": []
+            },
+            "account_holder_name": {
+              "value": "Example Suvlasnici (synthetic)",
+              "raw_text": "Example Suvlasnici (synthetic)",
+              "state": "observed",
+              "origin": "document",
+              "evidence_ids": [
+                "e5"
+              ],
+              "normalization": [],
+              "alternatives": []
+            },
+            "amount": {
+              "value": {
+                "value": "42.70",
+                "raw_text": "42,70",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e6"
+                ],
+                "normalization": [
+                  "decimal_comma_to_dot"
+                ],
+                "alternatives": []
+              },
+              "currency": {
+                "value": "EUR",
+                "raw_text": "EUR",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e7"
+                ],
+                "normalization": [],
+                "alternatives": []
+              },
+              "role": "amount_due"
+            },
+            "destination": {
+              "kind": "iban",
+              "iban": {
+                "value": null,
+                "raw_text": "HR?? .... O/0 unreadable ....",
+                "state": "ambiguous",
+                "origin": "document",
+                "evidence_ids": [
+                  "e8"
+                ],
+                "normalization": [],
+                "alternatives": []
+              },
+              "bic": {
+                "value": null,
+                "raw_text": null,
+                "state": "missing",
+                "origin": "document",
+                "evidence_ids": [],
+                "normalization": [],
+                "alternatives": []
+              }
+            },
+            "remittance": {
+              "reference": {
+                "value": "2026-0042",
+                "raw_text": "2026-0042",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e9"
+                ],
+                "normalization": [],
+                "alternatives": []
+              },
+              "model": {
+                "value": "HR00",
+                "raw_text": "HR00",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e10"
+                ],
+                "normalization": [],
+                "alternatives": []
+              },
+              "purpose_code": {
+                "value": null,
+                "raw_text": null,
+                "state": "missing",
+                "origin": "document",
+                "evidence_ids": [],
+                "normalization": [],
+                "alternatives": []
+              },
+              "reference_requirement": "required"
+            },
+            "account_country": {
+              "value": null,
+              "raw_text": null,
+              "state": "missing",
+              "origin": "document",
+              "evidence_ids": [],
+              "normalization": [],
+              "alternatives": []
+            }
+          }
+        ],
+        "selected_candidate_id": null,
+        "review": {
+          "state": "needs_review",
+          "user_confirmation_required": true,
+          "reasons": [
+            {
+              "code": "ambiguous_field",
+              "path": "/candidates/0/destination/iban",
+              "message": "Account characters are unreadable; retain null and request review."
+            }
+          ]
+        },
+        "document_context": {
+          "language": {
+            "value": null,
+            "raw_text": null,
+            "state": "missing",
+            "origin": "document",
+            "evidence_ids": [],
+            "normalization": [],
+            "alternatives": []
+          },
+          "issuer_country": {
+            "value": null,
+            "raw_text": null,
+            "state": "missing",
+            "origin": "document",
+            "evidence_ids": [],
+            "normalization": [],
+            "alternatives": []
+          }
+        }
+      },
+      "evidence": [
+        {
+          "id": "e1",
+          "image_id": "image-synthetic",
+          "excerpt": "Example Upravitelj (synthetic)",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e2",
+          "image_id": "image-synthetic",
+          "excerpt": "DEMO-HR-42",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e3",
+          "image_id": "image-synthetic",
+          "excerpt": "Synthetic invoice, never use for payment",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e4",
+          "image_id": "image-synthetic",
+          "excerpt": "Example Suvlasnici (synthetic)",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e5",
+          "image_id": "image-synthetic",
+          "excerpt": "Example Suvlasnici (synthetic)",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e6",
+          "image_id": "image-synthetic",
+          "excerpt": "42,70",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e7",
+          "image_id": "image-synthetic",
+          "excerpt": "EUR",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e8",
+          "image_id": "image-synthetic",
+          "excerpt": "HR?? .... O/0 unreadable ....",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e9",
+          "image_id": "image-synthetic",
+          "excerpt": "2026-0042",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e10",
+          "image_id": "image-synthetic",
+          "excerpt": "HR00",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        }
+      ],
+      "diagnostics": {
+        "requested_model": null,
+        "returned_model": null,
+        "versions": {
+          "schema": "1.0",
+          "fixture": "1"
+        },
+        "timings_ms": {
+          "queue": null,
+          "preprocess": null,
+          "provider": null,
+          "postprocess": null,
+          "total": null
+        },
+        "validation": [
+          {
+            "code": "account_ownership",
+            "path": "/candidates/0/destination",
+            "status": "not_checked",
+            "message": "Synthetic examples do not identify real payment accounts."
+          }
+        ],
+        "stages": [
+          {
+            "id": "stage-synthetic",
+            "method": "synthetic_fixture",
+            "execution": "local",
+            "provider": null,
+            "endpoint_host": null,
+            "account_alias": null,
+            "configured_region": null,
+            "verified_processing_region": null,
+            "payload_classes": [],
+            "input_hash": null,
+            "rendition": null,
+            "request_id": null,
+            "duration_ms": null,
+            "usage": {},
+            "cost": {
+              "status": "unknown",
+              "amount": null,
+              "currency": null,
+              "pricing_source": null,
+              "priced_at": null
+            }
+          }
+        ],
+        "routing": {
+          "applied_rule_packs": [],
+          "reasons": [
+            "Synthetic fixture; no classifier or routing stage executed."
+          ]
+        }
+      },
+      "error": null
+    }
+  ],
+  "final_result_id": "run-demo-hr"
+}
