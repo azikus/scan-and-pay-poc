@@ -73,6 +73,10 @@ class Store:
                     id INTEGER PRIMARY KEY, run_id TEXT UNIQUE, hold_microeur INTEGER NOT NULL,
                     dispatched INTEGER NOT NULL DEFAULT 0, cost TEXT
                 );
+                CREATE TABLE IF NOT EXISTS stage_reservations (
+                    run_id TEXT NOT NULL, slot INTEGER NOT NULL, budget_key TEXT NOT NULL UNIQUE,
+                    stage_id TEXT, PRIMARY KEY(run_id, slot)
+                );
                 CREATE TABLE IF NOT EXISTS validated_profiles (
                     profile_id TEXT NOT NULL, version TEXT NOT NULL, validated_at TEXT NOT NULL,
                     PRIMARY KEY(profile_id, version)
@@ -154,9 +158,10 @@ class Store:
                 if active >= self.settings.queue_capacity + self.settings.workers:
                     raise ServiceError(429, "queue_full", "The bounded job queue is full.", True)
                 holds = [
-                    int((d.ceiling_eur * 1_000_000).to_integral_value(rounding=ROUND_CEILING))
+                    int((ceiling * 1_000_000).to_integral_value(rounding=ROUND_CEILING))
                     for d in definitions
                     if not d.synthetic
+                    for ceiling in d.reservations
                 ]
                 used, count = db.execute(
                     "SELECT COALESCE(SUM(hold_microeur),0), COUNT(*) FROM budget"
@@ -224,12 +229,20 @@ class Store:
                 )
                 for run, d in zip(runs, definitions, strict=True):
                     if not d.synthetic:
-                        hold = int(
-                            (d.ceiling_eur * 1_000_000).to_integral_value(rounding=ROUND_CEILING)
-                        )
-                        db.execute(
-                            "INSERT INTO budget(run_id,hold_microeur) VALUES(?,?)", (run.id, hold)
-                        )
+                        for slot, ceiling in enumerate(d.reservations):
+                            hold = int(
+                                (ceiling * 1_000_000).to_integral_value(rounding=ROUND_CEILING)
+                            )
+                            budget_key = f"{run.id}:{slot}" if d.stages else run.id
+                            db.execute(
+                                "INSERT INTO budget(run_id,hold_microeur) VALUES(?,?)",
+                                (budget_key, hold),
+                            )
+                            if d.stages:
+                                db.execute(
+                                    "INSERT INTO stage_reservations(run_id,slot,budget_key) VALUES(?,?,?)",
+                                    (run.id, slot, budget_key),
+                                )
                 return scan, True
         except BaseException:
             if created_dir:
@@ -260,9 +273,32 @@ class Store:
             ).fetchone()
             return json.loads(row["transforms"]), row["preprocess_ms"]
 
-    def mark_dispatched(self, run_id: str) -> None:
+    def mark_dispatched(
+        self, run_id: str, slot: int | None = None, stage_id: str | None = None
+    ) -> None:
         with self.connection() as db:
-            db.execute("UPDATE budget SET dispatched=1 WHERE run_id=?", (run_id,))
+            if slot is None:
+                db.execute("UPDATE budget SET dispatched=1 WHERE run_id=?", (run_id,))
+                return
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute(
+                "SELECT budget_key,stage_id FROM stage_reservations WHERE run_id=? AND slot=?",
+                (run_id, slot),
+            ).fetchone()
+            if row is None or row["stage_id"] is not None:
+                raise RuntimeError("Missing or already dispatched stage reservation")
+            db.execute("UPDATE budget SET dispatched=1 WHERE run_id=?", (row["budget_key"],))
+            db.execute(
+                "UPDATE stage_reservations SET stage_id=? WHERE run_id=? AND slot=?",
+                (stage_id, run_id, slot),
+            )
+
+    @staticmethod
+    def release_undispatched(db: sqlite3.Connection, run_id: str) -> None:
+        db.execute(
+            "DELETE FROM budget WHERE dispatched=0 AND (run_id=? OR run_id IN (SELECT budget_key FROM stage_reservations WHERE run_id=?))",
+            (run_id, run_id),
+        )
 
     def record_stages(self, scan: Scan, run: Run) -> None:
         with self.connection() as db:
@@ -286,6 +322,18 @@ class Store:
                 s.cost.model_dump() for s in run.diagnostics.stages if s.execution == "external"
             ]
             db.execute("UPDATE budget SET cost=? WHERE run_id=?", (json.dumps(costs), run.id))
+            slots = db.execute(
+                "SELECT budget_key,stage_id FROM stage_reservations WHERE run_id=?", (run.id,)
+            ).fetchall()
+            for slot in slots:
+                stage = next((s for s in run.diagnostics.stages if s.id == slot["stage_id"]), None)
+                if stage is not None:
+                    db.execute(
+                        "UPDATE budget SET cost=? WHERE run_id=?",
+                        (stage.cost.model_dump_json(), slot["budget_key"]),
+                    )
+            if slots:
+                self.release_undispatched(db, run.id)
             if run.state == "completed" and costs:
                 db.execute(
                     "INSERT OR REPLACE INTO validated_profiles VALUES(?,?,?)",
@@ -313,11 +361,12 @@ class Store:
                 for run in scan.runs:
                     if run.state in {"queued", "running"}:
                         run.state = "interrupted"
+                        run.outcome = "error"
                         run.error = Error(
                             code="interrupted",
                             message="Process stopped; no automatic upstream replay.",
                         )
-                        db.execute("DELETE FROM budget WHERE run_id=? AND dispatched=0", (run.id,))
+                        self.release_undispatched(db, run.id)
                 scan.updated_at = utcnow()
                 db.execute(
                     "UPDATE jobs SET state=?,body=? WHERE id=?",
@@ -341,8 +390,12 @@ class Store:
             if (self.artifacts / scan_id).exists():
                 shutil.rmtree(self.artifacts / scan_id, ignore_errors=False)
             for run in scan.runs:
-                db.execute("DELETE FROM budget WHERE run_id=? AND dispatched=0", (run.id,))
-                db.execute("UPDATE budget SET run_id=NULL WHERE run_id=?", (run.id,))
+                self.release_undispatched(db, run.id)
+                db.execute(
+                    "UPDATE budget SET run_id=NULL WHERE run_id=? OR run_id IN (SELECT budget_key FROM stage_reservations WHERE run_id=?)",
+                    (run.id, run.id),
+                )
+                db.execute("DELETE FROM stage_reservations WHERE run_id=?", (run.id,))
             db.execute("DELETE FROM jobs WHERE id=?", (scan_id,))
             db.execute("DELETE FROM stages WHERE scan_id=?", (scan_id,))
             db.execute("UPDATE idempotency SET deleted=1,scan_id=NULL WHERE scan_id=?", (scan_id,))

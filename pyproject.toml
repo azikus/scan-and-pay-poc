@@ -11,6 +11,7 @@ dependencies = [
   "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic>=2.10,<3",
   "python-multipart>=0.0.20,<1", "pillow>=11.1,<13",
   "httpx>=0.28,<1", "openai>=2,<3", "python-dotenv>=1,<2",
+  "boto3[crt]>=1.41,<2", "google-auth[requests]>=2.40,<3",
   "schwifty>=2025.1,<2027", "pycountry>=24,<27",
 ]
 
@@ -45,8 +46,12 @@ exclude = ["backend/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["backend"]
+source = ["backend", "evaluation"]
 omit = ["backend/tests/*"]
 
 [tool.coverage.report]
 show_missing = true
+
+[[tool.mypy.overrides]]
+module = ["boto3.*", "botocore.*", "google.auth.*"]
+ignore_missing_imports = true

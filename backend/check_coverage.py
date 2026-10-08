@@ -5,6 +5,7 @@ from pathlib import Path
 
 # CLI/export/this reporting script are operational entry points, reported separately.
 # All backend API, configuration, models, storage, runtime, rules and adapters count.
+# Evaluation corpus preparation, batch orchestration, replay and cost reporting also count.
 OPERATIONAL = {"backend/cli.py", "backend/export.py", "backend/check_coverage.py"}
 
 

@@ -1,5 +1,31 @@
 # Handoff verification
 
+**Current checkpoint — 8 October 2026:** Phase 2 is closed for the current PoC scope. Direct-image GPT-4.1 mini (`openai-mini-image-roles-v3@2-5094b6dc13ef5718`) is selected for mobile integration. See [Phase 2 closeout](PHASE2_CLOSEOUT.md) for the decision, limits and verification, and [fourth-chat handoff](CHAT4_HANDOFF.md) for the prepared baseline. Markus authorized commit/push and the earlier PR/merge sequence; additional handoff details are pending. No new chat or mobile code yet. Earlier status/default/approval statements below are historical snapshots superseded by this checkpoint.
+
+Latest six-provider direct-image comparison (8 October): all 102 calls are accounted for. OpenAI has 79/102 accepted readable fields and 51/63 critical matches; Gemini has 80/102 and 50/63, with eight additional matching-but-inferred values kept separate. See [direct-provider results](M3_DIRECT_PROVIDER_RESULTS.md) for every provider, failures, timing, cost and limitations. The key/prompts stayed fixed, original evidence is preserved, and no pipeline/default was selected. Ledger now 2,197 dispatched reservations / €336.05 allowance; backend stopped. PR/merge still waits for Markus’s confirmation.
+
+Recipient-role continuation (8 October): the separately versioned correction and two complete 17-image × 2-method evaluations are recorded in [recipient-role results](M3_RECIPIENT_ROLES.md). Latest direct image matches 76/102 readable fields at median 4.17 s (baseline 68/102 at 4.97 s); hybrid falls to 63/102 and retains role/option errors. Direct image now identifies the co-owners community, with a remaining name-format mismatch; no answer-key changes. Prompt mitigation is implemented, full reliability is not established, and no pipeline/default is selected. 644 offline tests pass. Ledger: 2,095 dispatched reservations / €323.30 allowance, not cash billed; prior evidence preserved. Server stopped. Markus's results-confirmation gate before PR creation/merging remains in force.
+
+Earlier verification snapshot:
+
+## Current checkpoint verification — 8 October 2026
+
+Fresh M3 evaluation and partial reviewed scoring are complete; see [results](M3_REVIEWED_RESULTS.md). 605 offline tests pass, 95.44% statement / 90.66% branch coverage; lint/format/type checks and all three unchanged contract exports pass. All 1,924 prior ledger rows and 2,094 baseline files are unchanged. New ledger: 1,992 dispatched reservations / €313.00 retained allowance; this is not cash billed. No default/credential change or public publication occurred. Server stopped. Results await Markus's confirmation before PR creation/merging and preparation of the next-chat handoff. The sections below retain earlier verification snapshots.
+
+Current implementation verification and live acceptance are in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md), [M2_OPERATIONS.md](M2_OPERATIONS.md) and [M2_INTEGRATIONS.md](M2_INTEGRATIONS.md).
+
+## M3 implementation continuation — 8 October 2026
+
+Rules 3, the versioned multilingual label dictionary and OCR → OpenAI text composition are implemented and offline-tested. See [M3 interpretation](M3_INTERPRETATION.md) for 485 tests, 95.21% statements / 89.59% branches, the complete 372-recording replay and explicit remaining work. New private evidence is `.local/m3-interpretation-2026-10-08/`; prior handover/replay evidence remains unchanged. No provider calls, dependency changes, commits or pushes occurred.
+
+## M3 chat handover — 8 October 2026
+
+The user requested a new chat to reduce context size and continue M3 interpretation. [M3_HANDOFF.md](M3_HANDOFF.md) records the current code, exact private assets, result-state semantics, remaining M3 work and later M4–M8 scope. Existing branch and all uncommitted/untracked work stay in the same checkout. No commit/push or provider calls are part of this handover.
+
+Latest implementation checks remain 406 passing offline tests; 94.93% statement / 88.57% branch coverage, lint/format/type checks and contract exports pass. This documentation-only handover does not rerun inference or claim new live validation. Latest offline replay preserved 2,041 source result/raw files and all 45 batch files, credentials, original profile versions and the ledger. At handoff there are zero active jobs and 1,924 dispatched reservations / €306.20 retained allowance; this is not actual cash spend. The inference server remains stopped.
+
+Private handover verification: `.local/m3-handoff-2026-10-08/verification.json` records maintained-file hashes and checks of source preservation and links. Historical verification below remains historical; it must not restart completed work or override current instructions.
+
 ## Main checkpoint preparation — 6 October 2026
 
 Milestone 1 is complete and the full upfront credential/resource set is supplied. The user then authorized codebase cleanup, documentation, a separate cost report, push to private `main` and creation of a new local implementation chat. ROADMAP.md defines M1–M8; CODING_HANDOFF.md starts M2 with useful M3 work alongside it.

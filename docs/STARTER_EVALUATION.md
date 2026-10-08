@@ -1,6 +1,6 @@
 # Starter evaluation pack
 
-Prepared for handoff, 1 October 2026. Private labels are assistant-drafted and awaiting Markus's check; no accuracy result exists. Source PDFs are converted outside the service; backend requests remain JPEG/PNG only.
+Prepared for handoff, 1 October 2026. Private labels are assistant-drafted and awaiting Markus's check; no accuracy result exists. Backend requests use the prepared JPEG/PNG images only.
 
 ## Concrete first inputs
 
@@ -17,7 +17,7 @@ The UK image has bank instructions but labels its payable-looking total as Gross
 
 ## Before scoring
 
-Markus checks the draft critical values and unresolved roles; record verifier/date and label version, then score only verified visible fields. A source-PDF text layer helped draft/check labels but must never be sent to an extraction profile or substituted for image OCR. User confirmation in the eventual app is a separate step; these labels do not eliminate it.
+Markus checks the draft critical values and unresolved roles; record verifier/date and label version, then score only verified visible fields. Source text helped draft/check labels but must never be sent to an extraction profile or substituted for image OCR. User confirmation in the eventual app is a separate step; these labels do not eliminate it.
 
 The first API smoke calls can run while labels remain unverified, but may claim only compatibility and captured outputs/timing, not accuracy. Real photos are not required to build the service. Request an ordinary full-page table photo of each starter invoice when beginning camera-condition tests, then targeted oblique/difficult captures. Add originals under samples/photos/ with device/export metadata. Keep variants of a document in the same development/holdout group.
 
@@ -31,8 +31,8 @@ The first API smoke calls can run while labels remain unverified, but may claim 
 - Reference-only bill; irrelevant QR URL; barcode/text disagreement; instruction-like invoice content.
 - Rotated/malformed/unsupported image; provider failure; independent partial compare; restart, idempotency races, deletion tombstone and spend reservation.
 
-Public examples under docs/examples/ illustrate shape and expected review behavior. They are not the private sample answer key. Milestone 1 implemented synthetic tests for the applicable scenarios and reports measured coverage in IMPLEMENTATION_STATUS.md. Barcode and broader-layout/method regressions remain M2/M3 work; no public example is a provider accuracy result.
+Public examples under docs/examples/ illustrate shape and expected review behavior. They are not the private sample answer key. Milestone 1 implemented synthetic tests for the applicable scenarios and reports measured coverage in IMPLEMENTATION_STATUS.md. Broader-layout/method regressions remain M2/M3 work; no public example is a provider accuracy result. The 8 October scope clarification defers barcode decoding outside this PoC.
 
 ## Evidence status
 
-The two existing documents exercised Milestone 1's first integrations, not broad reliability. All original samples and every PDF page enter the next full-corpus preparation. The upfront gate was satisfied on 6 October; the starter manifest must not be reused as the full-corpus manifest. Historical 15-test success is separate from the 183-test Milestone 1 baseline and actual starter runs. The subsequent 6 October cleanup passes 184 tests; see IMPLEMENTATION_STATUS.md. No new external inference occurred during handoff/cleanup. The separate COST_REPORT_PLAN.md uses forthcoming full-corpus evidence, not this two-image starter selection.
+The two existing documents exercised Milestone 1's first integrations, not broad reliability. Every prepared sample image belongs in the full-corpus evaluation. The upfront gate was satisfied on 6 October; the starter manifest must not be reused as the full-corpus manifest. Historical 15-test success is separate from the 183-test Milestone 1 baseline and actual starter runs. The subsequent 6 October cleanup passes 184 tests; see IMPLEMENTATION_STATUS.md. No new external inference occurred during handoff/cleanup. The separate COST_REPORT_PLAN.md uses forthcoming full-corpus evidence, not this two-image starter selection.

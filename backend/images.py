@@ -68,7 +68,7 @@ def prepare_image(data: bytes, hints: Hints) -> PreparedImage:
                     (monotonic() - start) * 1000,
                 )
     except UnidentifiedImageError as exc:
-        if data.startswith((b"%PDF", b"GIF", b"RIFF")) or data[4:8] == b"ftyp":
+        if data.startswith((b"GIF", b"RIFF")) or data[4:8] == b"ftyp":
             raise ServiceError(
                 415, "unsupported_image", "Only JPEG and PNG images are supported."
             ) from exc

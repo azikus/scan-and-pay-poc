@@ -1,8 +1,10 @@
 # Provider access checklist
 
+Implementation follow-up: the credential gate remains satisfied. New integrations consume the existing settings; current terms/resource checks and outcomes are in [M2_INTEGRATIONS.md](M2_INTEGRATIONS.md) and [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md). The twelve-dispatch account below is the preserved M1 baseline, not the current ledger total.
+
 Updated 6 October 2026. User instruction: request all credentials upfront and **do not proceed with additional implementation, refactoring or provider tests until the complete set is supplied**. Documentation and access preparation record this gate; they do not start implementation. This supersedes earlier just-in-time credential instructions. A missing commercial trial is a blocker unless Markus explicitly changes scope.
 
-**Current status: the upfront credential/resource set is complete.** All 18 required environment fields are populated. Google ADC/processors are prepared, the AWS temporary profile is authenticated as the dedicated IAM user, and Nanonets management authentication and configured workflow fields were read back successfully. Offline implementation may resume. This does not establish inference access or quality for every provider; account terms, actual processing readiness, regions, retention and current prices still need their integration checks before any sample batch.
+**Current status: the upfront credential/resource set is complete.** Required environment fields for the retained providers are populated. Google ADC/processors are prepared, the AWS temporary profile is authenticated as the dedicated IAM user. Offline implementation may resume. This does not establish inference access or quality for every provider; account terms, actual processing readiness, regions, retention and current prices still need their integration checks before any sample batch.
 
 For the new chat, use [CODING_HANDOFF.md](CODING_HANDOFF.md) and the M2 checkpoint in [ROADMAP.md](ROADMAP.md). This file records access evidence and unresolved integration checks; it is not a request to collect all keys again. Refresh only specific expired/missing access when needed.
 
@@ -10,43 +12,45 @@ For the new chat, use [CODING_HANDOFF.md](CODING_HANDOFF.md) and the M2 checkpoi
 
 ## Complete requested set
 
-Variable names below are the proposed project configuration names; only OpenAI/Mistral are currently wired into the service.
+The following configuration names are implemented. All ten retained provider families have full-corpus attempt records; see the current implementation status.
 
 | Service | Supply locally | Source / qualification |
 | --- | --- | --- |
 | OpenAI | Existing `OPENAI_API_KEY` | Already configured and used; no new key per model |
-| Mistral | Existing `MISTRAL_API_KEY` | Already configured and used; model/annotation access will be checked after the gate opens |
+| Mistral | Existing `MISTRAL_API_KEY` | Already configured and used; selected vision/OCR/annotation methods evaluated |
 | Anthropic | `ANTHROPIC_API_KEY` | [Claude API access](https://platform.claude.com/docs/en/api/overview) |
 | Gemini | `GEMINI_API_KEY` | [Gemini API keys](https://ai.google.dev/gemini-api/docs/api-key); separate from Document AI authentication |
 | xAI | `XAI_API_KEY` | [API quickstart](https://docs.x.ai/developers/quickstart) |
 | Azure Document Intelligence | `AZURE_DOCUMENT_INTELLIGENCE_KEY`, `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT` | [Key/endpoint setup](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/how-to-guides/use-sdk-rest-api?view=doc-intel-4.0.0); a usable Document Intelligence resource for Read/Invoice |
 | Google Document AI | Local ADC authentication or credential-file path, project ID, processor location, OCR processor ID and Invoice Parser processor ID | [Client setup and processor identifiers](https://docs.cloud.google.com/document-ai/docs/libraries). A Gemini key alone does not configure this service; processor-version selection belongs in profile configuration |
 | AWS Textract | Local authenticated AWS profile/mechanism, AWS region and access to the selected Textract operations | [Programmatic access](https://docs.aws.amazon.com/textract/latest/dg/program-access.html). Prefer a profile with temporary/SSO credentials; do not provide root credentials |
-| Nanonets | API key and selected model/workflow ID | [Model API integration](https://docs.nanonets.com/docs/integrate-via-api). Confirm the actual product/workflow separately; model and workflow APIs are not assumed interchangeable |
 | Mindee | `MINDEE_V2_API_KEY` and `MINDEE_MODEL_ID` for the selected invoice extraction schema | [API configuration](https://docs.mindee.com/integrations/client-libraries-sdk/configure-the-client), [model ID/settings](https://docs.mindee.com/models/model-settings) |
-| Additional hosted open-weight provider | Proposed: `TOGETHER_API_KEY`, or the user's chosen managed host and its credentials | [Together API setup](https://docs.together.ai/docs/quickstart), [hosted image input](https://docs.together.ai/docs/inference/vision/overview). Together is proposed to make this row concrete, not silently enabled; exact models/capabilities/prices still require selection |
+| Together hosted open-weight models | `TOGETHER_API_KEY` | [Together API setup](https://docs.together.ai/docs/quickstart), [hosted image input](https://docs.together.ai/docs/inference/vision/overview). The selected hosted Qwen profile has completed its compatibility batch |
 
 Record account aliases, regions, trial/credit limits and known data-use settings in private integration evidence, not environment variables. These checks remain necessary before live calls but are not extra secrets for Markus to fill in. Unknown processing residency/retention stays unknown. Do not buy subscriptions, enable auto-recharge or provision model-serving infrastructure to complete this checklist. Ask Markus about an unavailable product; do not remove it or resume automatically.
 
-Markus should reply with status only after filling the local file (for example, “all configured”), or identify missing access without sending secrets. The assistant then checks completeness without printing values. Any missing item keeps implementation paused. Credentials do not themselves establish successful model access, acceptable account terms or price; those checks precede the first inference batch after the gate is satisfied.
+The upfront collection is complete; no further setup reply is needed. For future runs, report only concrete missing/expired access without exposing secret values.
+
+## Historical access preparation
+
+The following notes describe setup before sample processing. Current outcomes are in IMPLEMENTATION_STATUS.md.
 
 Google access prepared on 6 October at Markus's request: a new dedicated project uses the existing billing account, Document AI is enabled, local ADC is configured, and EU Enterprise OCR and Invoice Parser resources are enabled. The project/location/processor IDs are saved in `.env`; the optional credential-file variable remains commented out. Management access and deployed default versions were checked, with evidence under `.local/google-documentai-setup/`. No samples were processed. Account terms, selected processor-version suitability and pricing still need their pre-inference checks; this does not waive any other provider from the upfront gate.
 
 AWS access preparation, 6 October: Markus created the account; the console shows a free plan with credit. Installed AWS CLI 2.36.46, created the dedicated `scanpay-local` IAM user and attached a validated custom policy permitting only `AnalyzeExpense` and `DetectDocumentText` in Frankfurt plus local browser sign-in. AWS's own-password-change policy is also attached. No access keys were created. The local `scanpay` profile and `.env` connection fields use `eu-central-1`, preserving unrelated settings. After the user completed password setup, signed in as the IAM user and completed `aws login --profile scanpay --region eu-central-1`. STS verified the dedicated user; SDK-managed temporary credentials stay outside `.env`. Private identity/setup evidence is in `.local/aws-textract-setup/`. No samples were processed; Textract operation execution is not yet live-validated.
 
-Remaining-account preparation, 6 October: Together, Azure Document Intelligence and Nanonets key fields are populated, alongside the earlier LLM providers and Google connection settings. Presence is not a successful access check. In the signed-in Mindee account, selecting the pre-built Invoice template created a model; its ID is saved in `.env`, and the user has supplied the API key. The account displayed a 14-day trial with 200 credits. Model settings displayed no processing-zone preference, six-hour extracted-data retention and delete-on-fetch enabled; these are observed defaults, not guarantees about all data use. Private presence inventory and resource evidence are under `.local/provider-access-2026-10-06/`. No samples, provider inference calls, subscriptions or implementation changes were made.
+Remaining-account preparation, 6 October: Together and Azure Document Intelligence key fields are populated, alongside the earlier LLM providers and Google connection settings. Presence is not a successful access check. In the signed-in Mindee account, selecting the pre-built Invoice template created a model; its ID is saved in `.env`, and the user has supplied the API key. The account displayed a 14-day trial with 200 credits. Model settings displayed no processing-zone preference, six-hour extracted-data retention and delete-on-fetch enabled; these are observed defaults, not guarantees about all data use. Private presence inventory and resource evidence are under `.local/provider-access-2026-10-06/`. No samples, provider inference calls, subscriptions or implementation changes were made.
 
-## Resume context
+## Historical setup notes
 
 AWS sign-in follow-up, 6 October: the earlier root session was explicitly signed out before the dedicated IAM login. The profile now has an authenticated `login_session`, and STS confirms `scanpay-local`. Root programmatic access was never authorized. Prior incomplete-login observations remain historical evidence only; the password was not saved in project files.
 
-Nanonets follow-up, 6 October: the user accepted its policy. The original saved key was rejected by the v4 workflow-list/type APIs. Replaced it with the existing key displayed in the signed-in workflow product; both management reads then succeeded. The onboarding URL was not in that account's workflow list. Created a new resource through the [documented workflow management API](https://docs.nanonets.com/v4/reference/workflow-management). Although `workflow_type=invoice` was requested, the response and readback returned an empty `Instant Learning Model`; do not label it a verified prebuilt Invoice product. Configured a generic 12-field invoice/payment schema and five table headers using the documented fields API, then verified every field by GET. The new workflow ID and matching key are in `.env`; the selected method is a configured custom invoice workflow, with processing readiness still to verify during integration. No training examples or sample documents were uploaded. Private request/response evidence, the preserved initial failures and `scanpay-invoice-fields@1` schema metadata are under `.local/provider-access-2026-10-06/`.
 
 The user narrowed the provider roster to the services listed above; the removed commercial comparison is no longer an access prerequisite. All required credentials/resource identifiers are now supplied. No backend implementation or provider inference occurred during this access preparation.
 
 - Read AGENTS.md, the handoff read order, IMPLEMENTATION_STATUS.md, PHASE2_ROLLOUT.md and this file.
-- Milestone 1 is complete; only Luna vision and Mistral OCR/rules are implemented/live-tested. No Phase 2 adapter has been added.
-- The user requires **all samples for every provider evaluation batch**. Prepare a private full-corpus manifest, including image renditions of PDF pages, after the credential gate. Do not revert to the two-image starter subset.
+- At the M1 checkpoint, Luna vision and Mistral OCR/rules were the two implemented profiles. M2 has since completed for the retained roster.
+- The user requires **all samples for every provider evaluation batch**. Prepare a private full-corpus manifest, including all prepared image renditions, after the credential gate. Do not revert to the two-image starter subset.
 - Main checkpoint: the user explicitly requested cleanup, documentation, commit/push to `main` and a new chat on 6 October. The target was rechecked private/empty before preparing this checkpoint. Read Git log/status and remote refs for publication state; preserve ignored private files. Do not restart account setup.
 - Twelve prior provider dispatches and €12 in conservative holds remain. Do not reset the ledger; the original twelve-call cap is exhausted.
-- No backend server is running. No mobile app, browser UI, HTML report or self-hosted inference work is authorized in this rollout.
+- At the access-preparation checkpoint, no backend server was running. Mobile, customer browser UI, final findings and self-hosted inference were outside scope. The user separately authorized a concise private HTML progress explainer on 7 October; see the current handoff.

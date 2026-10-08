@@ -4,6 +4,18 @@ Handoff baseline, 1 October 2026, implemented in Milestone 1. This remains the n
 
 Implementation note, 5 October 2026: Milestone 1 implements this contract with real UK/HR runs through both starter profiles, corrected bank normalization, successful independent comparison and preserved partial-failure evidence. [Generated result schema](../contracts/v1/scan-result.schema.json) and [OpenAPI](../contracts/v1/openapi.json) are exported from the Python models. The original examples/schema above are the preserved handoff baseline; [acceptance evidence](IMPLEMENTATION_STATUS.md) records validation and known extraction limitations.
 
+## Product outcome — 8 October 2026
+
+New terminal runs expose `outcome: success | incomplete | error`:
+
+- **success:** one complete, consistent draft is ready for review. Confirmation is still mandatory; correctness and ownership are not verified.
+- **incomplete:** some invoice/payment field data survives, but the draft needs correction or completion. Ambiguous alternatives remain data for review, never selected facts.
+- **error:** execution failed/interrupted, the response is unusable, or there are no invoice/payment field values, raw readings or alternatives. Language/country alone and unstructured OCR text do not count as populated fields.
+
+`state` continues to describe execution, and `payment.review.state` describes detailed review readiness. A valid response containing no fields can therefore have `state=completed`, `outcome=error`, an empty draft and a `no_usable_data` validation finding. Its transport `error` remains null. Clients use `outcome` for the three result labels; job completion and `final_result_id` are not usability signals. Queued/running outcomes are omitted. Historical records omit the optional field and remain unchanged; the CLI derives their outcome from the saved state/data.
+
+The versioned `field_policy=partial_v1` handles compact protocols 5/6 field by field. It preserves valid fields and candidate associations, records findings/review reasons, and retains rejected exact strings only as uncertain alternatives with evidence. Missing or contradictory fields make a draft incomplete when other data survives. Invalid JSON, duplicate keys, unknown response structures, provider identity mismatches and transport failures remain errors. No bank digits, scheme or cross-candidate pairing are guessed. Original strict profiles remain reproducible under their existing versions.
+
 ## 1. Transport and requests
 
 Bind to 127.0.0.1 by default. Bearer authentication is required except GET /health. Credentials, arbitrary URLs, local paths, raw prompts and model IDs are never accepted from scan callers. No provider calls on startup, health or profile-list requests.
@@ -24,7 +36,7 @@ Options object (reject unknown properties):
 
 Every selector resolves to immutable profile/config versions. Explicit disabled/unconfigured/incompatible profiles produce 422 before any dispatch, including in compare. all_enabled selects only implemented, enabled, configured, image-compatible profiles, sorted by ID; store selected IDs/versions and excluded IDs/reasons. If none are eligible, return 422. Live validation is tracked but not a prerequisite to a deliberately enabled smoke-test profile. Never silently downselect for spend: reject a batch whose conservative budget reservation fails. Unsupported provider language discovered during execution is a per-profile failure, not a silent switch.
 
-JPEG/PNG bytes must decode successfully; MIME/extension alone are insufficient. Apply EXIF orientation, remove unnecessary metadata from outbound renditions, preserve original/canonical hashes and transforms. Do not silently resize or send hidden PDF text. One source image per job, no pages parameter. Bespoke upload thresholds/expiry are deferred, but decoder resource safety, bounded queues and provider hard limits remain required.
+JPEG/PNG bytes must decode successfully; MIME/extension alone are insufficient. Apply EXIF orientation, remove unnecessary metadata from outbound renditions, preserve original/canonical hashes and transforms. Do not silently resize or send hidden source text. One source image per job, no pages parameter. Bespoke upload thresholds/expiry are deferred, but decoder resource safety, bounded queues and provider hard limits remain required.
 
 ## 2. Idempotency, jobs and failure behavior
 
@@ -64,8 +76,10 @@ Candidates represent linked payment options: amount, currency, beneficiary, rout
 Every payment.review has user_confirmation_required=true. There is no confirmed or executable-payment flag in v1. Later UI corrections remain separate from the immutable extraction.
 
 - ready_for_review: one justified selected candidate, observed payee, positive amount explicitly marked amount_due, observed unambiguous currency, complete UK/IBAN destination, required reference/model where explicitly stated, and no blocking conflict/format/checksum issue. Critical fields need document evidence; model_claim evidence may qualify but must remain labelled unverified. This is completeness/consistency, not factual verification or bank ownership.
-- needs_review: useful draft with conflicting/missing/unreadable critical values, inferred currency, unresolved beneficiary association, invoice_total without an explicitly justified due amount, uncertain reference requirement, multiple destinations, or nonpositive/credit amount. Do not convert an invoice total into amount_due.
+- needs_review: useful draft with conflicting/missing/unreadable critical values, inferred currency, unresolved beneficiary association, invoice_total under the historical strict policy, uncertain reference requirement, multiple destinations, or nonpositive/credit amount. Do not convert an invoice total into amount_due.
 - insufficient_data: no meaningful payment option can be assembled (for example unrelated image or reference-only bill without routing). Retain successfully extracted observations. Malformed bytes instead fail input validation; unsupported_input is not a payment-review state.
+
+Opt-in `payment-draft@1` accepts `invoice_total` while preserving its role, and can fill a missing beneficiary from supported candidate-linked account-holder or supplier evidence without overriding an explicit recipient. It records the fallback in normalization. It can set `selected_candidate_id` to the preferred bank-transfer option while keeping multiple candidates and `needs_review`; the existing single-candidate `ready_for_review` invariant remains unchanged. Selection never authorizes payment. See [versioned policy](M3_DRAFT_POLICY.md).
 
 Review reasons are stable {code,path,message} objects; paths are JSON Pointers relative to payment. Initial codes: missing_required_field, ambiguous_field, conflicting_candidates, unsupported_payment_route, invalid_account_format, failed_iban_checksum, currency_inferred, amount_role_unresolved, nonpositive_amount, beneficiary_unresolved and reference_requirement_unknown.
 
@@ -76,6 +90,8 @@ Apply deterministic normalization, candidate association, evidence-based UK/HR i
 Each run includes profile_id/version, state, payment (nullable before completion/on failure), evidence, diagnostics and error (nullable). Diagnostics records requested/returned model/processor, prompt/schema/adapter/rules versions, timings_ms (queue/preprocess/provider/postprocess/total), validation findings, routing (applied_rule_packs and reasons), and stage records. Route only on observations available to that profile; generic, UK and HR rule/prompt variants are separately versioned. Do not make a paid language classifier compulsory. Durations use a monotonic clock; timestamps are UTC ISO 8601. Unknown duration/usage/cost is null, not zero.
 
 Each stage records id/method, local or external execution, provider, endpoint_host, account_alias (never credentials), configured_region, verified_processing_region (nullable), payload_classes, input image/text hashes and rendition, request_id, timing, usage and cost. Payload classes include image, crop, ocr_text, layout and fields. A cloud-OCR→LLM profile records both recipients. A regional endpoint alone is not verified data residency. Routine GET output exposes safe metadata, not raw provider bodies or local filesystem paths; raw responses stay in ignored private storage.
+
+Stages optionally include `requested_model`, `returned_model` and `source_stage_ids`; source links must reference earlier stages in the same run. Historical stages may omit them. A two-call hybrid reserves both calls atomically before acceptance, records each actual dispatch separately, and releases only undispatched stage allowances on failure/restart. Required-stage failure keeps earlier private artifacts and diagnostics but returns a failed run, without an implicit payment fallback.
 
 Cost object: status=reported|estimated|unknown|not_applicable, amount decimal string or null, currency or null, pricing_source or null, priced_at or null. Locally computed rules may have zero external fee but are not free infrastructure. Keep per-currency totals separate unless an explicit dated FX conversion exists. Synthetic fixtures carry unknown costs/null usage; their timings are not measurements.
 

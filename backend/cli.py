@@ -12,6 +12,7 @@ from uuid import uuid4
 import httpx
 from dotenv import load_dotenv
 
+from backend.models import Run
 from backend.store import private_write
 
 
@@ -36,6 +37,7 @@ def summary(result: dict[str, Any]) -> dict[str, Any]:
             {
                 "profile_id": run["profile_id"],
                 "state": run["state"],
+                "outcome": Run.model_validate(run).result_outcome,
                 "review_state": run["payment"]["review"]["state"] if run["payment"] else None,
                 "error_code": run["error"]["code"] if run["error"] else None,
             }

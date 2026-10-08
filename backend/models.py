@@ -207,6 +207,9 @@ class Stage(Model):
     )
     input_hash: Text | None = None
     rendition: Rendition | None = None
+    requested_model: Text | None = Field(default=None, exclude_if=lambda v: v is None)
+    returned_model: Text | None = Field(default=None, exclude_if=lambda v: v is None)
+    source_stage_ids: list[Text] = Field(default_factory=list, exclude_if=lambda v: not v)
     request_id: Text | None = None
     duration_ms: Milliseconds | None = None
     usage: dict[str, Milliseconds | None] = Field(default_factory=dict)
@@ -260,9 +263,34 @@ class Run(Model):
     evidence: list[Evidence] = Field(default_factory=list)
     diagnostics: Diagnostics = Field(default_factory=Diagnostics)
     error: Error | None = None
+    # Optional for historical records; new terminal runs populate this product outcome.
+    outcome: Literal["success", "incomplete", "error"] | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+
+    @property
+    def result_outcome(self) -> Literal["success", "incomplete", "error"] | None:
+        if self.state in {"failed", "interrupted"}:
+            return "error"
+        if self.state == "completed" and self.payment is not None:
+            # Language/country alone is not extracted invoice/payment data.
+            fields = [
+                getattr(self.payment, name)
+                for name in PaymentFields.model_fields
+                if name != "document_context"
+            ]
+            if not any(
+                obs.value is not None or obs.alternatives or (obs.raw_text or "").strip()
+                for obs in observations(fields)
+            ):
+                return "error"
+            return "success" if self.payment.review.state == "ready_for_review" else "incomplete"
+        return None
 
     @model_validator(mode="after")
     def completed_payment(self) -> Self:
+        if self.outcome is not None and self.outcome != self.result_outcome:
+            raise ValueError("Outcome disagrees with execution/review state")
         if (self.state == "completed") != (self.payment is not None):
             raise ValueError("Only completed runs carry payment drafts")
         if self.state == "completed" and self.error is not None:
@@ -271,6 +299,11 @@ class Run(Model):
         stages = [s.id for s in self.diagnostics.stages]
         if len(ids) != len(set(ids)) or len(stages) != len(set(stages)):
             raise ValueError("Duplicate evidence/stage ID")
+        previous: set[str] = set()
+        for stage in self.diagnostics.stages:
+            if not set(stage.source_stage_ids).issubset(previous):
+                raise ValueError("Stage source must reference an earlier stage")
+            previous.add(stage.id)
         if any(e.source_stage_id not in stages for e in self.evidence):
             raise ValueError("Unknown evidence stage")
         for obs in observations(self.payment):
