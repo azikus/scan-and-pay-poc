@@ -1,7 +1,7 @@
 """Bounded workers and adapter boundary. There is no automatic retry path."""
 
 import asyncio
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from time import monotonic
 from typing import Any, Protocol
 from uuid import uuid4
@@ -15,6 +15,7 @@ from backend.models import (
     Evidence,
     Finding,
     Payment,
+    Reason,
     Rendition,
     Routing,
     Run,
@@ -31,11 +32,46 @@ class Extraction:
     payment: Payment
     evidence: list[Evidence]
     routing: Routing
+    findings: list[Finding] = field(default_factory=list)
+
+
+def review_extraction(result: Extraction, interpretation_policy: str = "strict") -> Payment:
+    if interpretation_policy in {"draft_v1", "draft_v2", "draft_v3", "draft_v4"}:
+        from backend.draft_policy import VERSION, review_draft
+
+        payment = review_draft(result.payment, result.evidence)
+        if VERSION not in result.routing.applied_rule_packs:
+            result.routing.applied_rule_packs.append(VERSION)
+        if interpretation_policy == "draft_v2":
+            from backend.recipient_roles import VERSION as ROLE_VERSION
+
+            if ROLE_VERSION not in result.routing.applied_rule_packs:
+                result.routing.applied_rule_packs.append(ROLE_VERSION)
+        elif interpretation_policy == "draft_v3":
+            if "payment-party-roles@2" not in result.routing.applied_rule_packs:
+                result.routing.applied_rule_packs.append("payment-party-roles@2")
+        elif interpretation_policy == "draft_v4":
+            if "payment-party-roles@3" not in result.routing.applied_rule_packs:
+                result.routing.applied_rule_packs.append("payment-party-roles@3")
+    elif interpretation_policy == "strict":
+        payment = review_payment(result.payment, result.evidence)
+    else:
+        raise ValueError("Unknown interpretation policy")
+    if result.findings:
+        payment.review.reasons.extend(
+            Reason(code=f.code, path=f.path, message=f.message) for f in result.findings
+        )
+        if payment.review.state == "ready_for_review":
+            payment.review.state = "needs_review"
+    return payment
 
 
 class Context:
-    def __init__(self, store: Store, scan: Scan, run: Run, definition: Definition):
+    def __init__(
+        self, store: Store, scan: Scan, run: Run, definition: Definition, slot: int | None = None
+    ):
         self.store, self.scan, self.run, self.definition = store, scan, run, definition
+        self.slot = slot
         self.transforms, self.preprocess_ms = store.preprocessing(scan.scan_id)
 
     def stage(
@@ -53,6 +89,9 @@ class Context:
             verified_processing_region=config.verified_processing_region
             if external and config
             else None,
+            requested_model=(self.definition.metadata.model or self.definition.metadata.processor)
+            if external
+            else None,
             payload_classes=payloads,
             input_hash=input_hash or self.scan.input.canonical_sha256,
             rendition=Rendition(
@@ -68,7 +107,7 @@ class Context:
         self.store.record_stages(self.scan, self.run)
         self.store.save(self.scan)
         if external:
-            self.store.mark_dispatched(self.run.id)
+            self.store.mark_dispatched(self.run.id, self.slot, stage.id)
         return stage
 
     def raw(self, data: Any) -> None:
@@ -137,10 +176,17 @@ class Runtime:
             try:
                 if remaining <= 0:
                     raise ProviderError("provider_timeout")
-                async with asyncio.timeout(min(remaining, self.settings.stage_timeout_seconds)):
+                async with asyncio.timeout(
+                    min(
+                        remaining,
+                        self.settings.stage_timeout_seconds * max(1, len(definition.stages)),
+                    )
+                ):
                     result = await self.adapters[definition.adapter].extract(context)
                 postprocess = monotonic()
-                payment = review_payment(result.payment, result.evidence)
+                payment = review_extraction(
+                    result, str(definition.parameters.get("interpretation_policy", "strict"))
+                )
                 # Validate adapter links before publishing any payment.
                 checked = Run.model_validate(
                     {
@@ -165,7 +211,7 @@ class Runtime:
                         status="not_checked",
                         message="Format and completeness do not verify account ownership.",
                     )
-                ]
+                ] + result.findings
                 run.state = "completed"
                 run.diagnostics.timings_ms.postprocess = (monotonic() - postprocess) * 1000
             except (TimeoutError, ProviderError, ValidationError) as exc:
@@ -191,6 +237,16 @@ class Runtime:
                 run.error = Error(
                     code="internal_error",
                     message="Profile execution failed; diagnostic contents are private.",
+                )
+            run.outcome = run.result_outcome
+            if run.outcome == "error" and run.state == "completed":
+                run.diagnostics.validation.append(
+                    Finding(
+                        path="/payment",
+                        code="no_usable_data",
+                        message="Response processed but no usable invoice/payment fields were extracted.",
+                        status="fail",
+                    )
                 )
             if not definition.synthetic:
                 t = run.diagnostics.timings_ms

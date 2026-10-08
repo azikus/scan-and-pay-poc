@@ -52,6 +52,17 @@ def test_api_completed_persists_and_deletion_tombstone(settings, definitions, ad
         assert not (settings.data_dir / "jobs" / result["scan_id"]).exists()
 
 
+def test_saved_result_survives_profile_removal(settings, definitions, adapters, png):
+    with client_for(settings, definitions, adapters) as client:
+        submitted = upload(client, png)
+        result = finish(client, submitted)
+        assert result["state"] == "completed"
+    with client_for(settings, {}, {}) as client:
+        assert client.get(submitted.headers["location"]).json() == result
+        assert upload(client, png, key="new-request").status_code == 422
+        assert adapters["success"].calls == 1
+
+
 def test_partial_compare_snapshot_and_same_key(settings, definitions, adapters, png):
     with client_for(settings, definitions, adapters) as client:
         response = upload(client, png, mode="compare", profiles="all_enabled")
@@ -79,7 +90,7 @@ def test_concurrent_retry_creates_one_job(settings, definitions, adapters, png):
 
 
 @pytest.mark.parametrize(
-    "body,status", [(b"garbage", 400), (b"%PDF example", 415), (b"GIF89a", 415)]
+    "body,status", [(b"garbage", 400), (b"\x00\x00\x00\x18ftypheic", 415), (b"GIF89a", 415)]
 )
 def test_bad_bytes(settings, definitions, adapters, body, status):
     with client_for(settings, definitions, adapters) as client:

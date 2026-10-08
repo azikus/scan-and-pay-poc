@@ -1,14 +1,18 @@
 # Phase 2 rollout: provider breadth and extraction quality
 
-Priority recorded 5 October 2026 from the user's follow-up: add the other LLMs, managed OCR services and document APIs as soon as possible, alongside improving OCR interpretation. Do not finish tuning the first two providers before integrating the rest. This is the next implementation plan; the new integrations below are not implemented or live-tested yet.
+**Current checkpoint — 8 October 2026:** Phase 2 is closed for the current PoC scope. Direct-image GPT-4.1 mini (`openai-mini-image-roles-v3@2-5094b6dc13ef5718`) is selected for mobile integration. See [Phase 2 closeout](PHASE2_CLOSEOUT.md) for the decision, limits and verification, and [fourth-chat handoff](CHAT4_HANDOFF.md) for the prepared baseline. Markus authorized commit/push and the earlier PR/merge sequence; additional handoff details are pending. No new chat or mobile code yet. Earlier status/default/approval statements below are historical snapshots superseded by this checkpoint.
+
+Implementation update, 7 October: M2 adapters, full-corpus tooling and attempt records are complete for the ten retained provider families. See [M2 operations](M2_OPERATIONS.md), [integration checks](M2_INTEGRATIONS.md) and [current acceptance status](IMPLEMENTATION_STATUS.md). The readiness/workstream descriptions below preserve the pre-implementation plan; they are not current live-validation claims.
+
+Priority recorded 5 October 2026 from the user's follow-up: add the other LLMs, managed OCR services and document APIs as soon as possible, alongside improving OCR interpretation. Do not finish tuning the first two providers before integrating the rest. The historical work order and queue below describe the original plan; current results take precedence.
 
 Milestone 1 remains complete. Its two profiles, historical results and cost ledger remain the baseline. The [provider shortlist](PROVIDERS_AND_BUDGET.md) supplies candidate versions and pricing references; recheck them at integration time rather than treating this plan as current account-access evidence.
 
 **Latest user instructions, 5 October:** collect all credentials upfront and pause Phase 2 implementation/refactoring/provider tests until the complete set is supplied. [PHASE2_ACCESS.md](PHASE2_ACCESS.md) is the request checklist. Every provider evaluation batch must use the full sample corpus. These instructions supersede the earlier per-provider credential timing and two-image smoke subsets.
 
-**Access checkpoint, 6 October:** the full requested credential/resource set is supplied and the upfront gate is satisfied. AWS temporary IAM authentication and Nanonets management/schema readback completed without processing samples. Resume with offline adapter/registry tests; per-provider terms, pricing, region and processing readiness remain pre-inference checks.
+**Access checkpoint, 6 October:** the full requested credential/resource set is supplied and the upfront gate is satisfied. AWS temporary IAM authentication completed without processing samples. Resume with offline adapter/registry tests; per-provider terms, pricing, region and processing readiness remain pre-inference checks.
 
-[ROADMAP.md](ROADMAP.md) maps this phase to M2 provider coverage/tooling, M3 extraction improvements/hybrids and M4 reviewed comparison/pipeline selection. M2 is the next chat's main outcome, with useful M3 work alongside it. [CODING_HANDOFF.md](CODING_HANDOFF.md) supplies the current read order and kickoff prompt; mobile and final presentation work remain deferred.
+[ROADMAP.md](ROADMAP.md) maps this phase to M2 provider coverage/tooling, M3 extraction improvements/hybrids and M4 reviewed comparison/pipeline selection. M2 is complete; M3 interpretation/hybrids and M4 reviewed comparisons remain. [CODING_HANDOFF.md](CODING_HANDOFF.md) supplies the current read order and kickoff prompt; mobile and final presentation work remain deferred.
 
 ## Work order
 
@@ -18,7 +22,7 @@ Milestone 1 remains complete. Its two profiles, historical results and cost ledg
 4. Finish the private full-corpus manifest/renditions and API batch tooling begun in step 1; run every sample for every profile under test, including the initial live compatibility batch. Record a bounded batch and call cap before dispatch; the original twelve-call cap is exhausted. A failure or stop leaves explicit incomplete coverage; it does not turn a partial run into a full-corpus result.
 5. Use reviewed labels and held-out document/layout groups for quality comparisons. Prioritize further model variants, hybrid methods and targeted rereads using observed failures, latency and cost. The objective is broad method coverage before extensive tuning of individual models.
 
-## Integration queue
+## Original integration queue
 
 Rows are workstreams, not a requirement to finish one row before starting the next after the upfront credential gate. All shortlist families remain in scope. A missing credential blocks Phase 2 under the user's latest instruction; only the user can explicitly waive a provider.
 
@@ -33,7 +37,6 @@ Rows are workstreams, not a requirement to finish one row before starting the ne
 | Azure Document Intelligence | Read-to-rules; unaugmented Invoice mapping; separately labelled augmentation | Resource endpoint, region, credentials and tier/pricing | Planned |
 | Google Document AI | Enterprise OCR-to-rules; unaugmented Invoice Parser; separately labelled augmentation | Project/location, processor IDs/versions, local authentication and billing | Dedicated project, EU OCR/Invoice resources, local ADC and management reads verified; adapter/inference validation pending |
 | AWS Textract | AnalyzeExpense mapping; OCR baseline if useful to isolate recognition | Local credential mechanism, region, permissions and pricing | Temporary IAM profile/STS identity verified; policy restricts the two operations to Frankfurt; no Textract processing yet |
-| Nanonets, Mindee | Separate documented extraction/payment-product comparisons | Appropriate trial/API access; exact selected product and cost | Nanonets v4 custom invoice fields configured/read back after its template mismatch; Mindee Invoice model/key saved. Both await implementation and processing checks; no automatic subscription |
 | Other hosted open-weight models | Suitable image/text models at a concrete managed endpoint; verify each model rather than assume every family is available | Together key supplied; exact model/version, modality, terms and price checks remain | Host credentials configured; adapter and concrete model selection next |
 
 The entire credential/resource set is recorded through [PHASE2_ACCESS.md](PHASE2_ACCESS.md), using local configuration. Do not assume keys for one Google product configure another, or cloud credentials establish the required processor/resource. Preserve unknown region/retention/cost fields. Hosted open-weight inference is allowed; self-hosted inference remains excluded.
@@ -54,7 +57,7 @@ Reuse common schema, normalization and review code. Keep recognition, semantic e
 
 Today `providers.py` contains both vendor adapters, the vision prompt/schema and provider-specific cost calculations. `MistralAdapter` runs OCR followed by `ocr_rules.py`; it retains the full raw response but passes only Markdown into those rules. `profiles.py` registers two fixed profiles. Both adapters return `Extraction`, and `runtime.py` applies the same `review.py` checks before persistence. There is no OCR-to-LLM or document-API adapter yet. This is a working first slice, not already a general composition framework.
 
-Planned M2 boundaries (credential gate satisfied; implementation not yet started):
+M2 boundaries (implemented status and remaining live blockers are tracked separately):
 
 | Code area | Responsibility |
 | --- | --- |
@@ -73,7 +76,7 @@ The current context attributes external stages to one profile config, saves raw 
 
 ## Full-corpus testing policy
 
-Inventory on 5 October found seven PDFs and four JPEG/PNG files, plus a provenance JSON file. This is a file count, not a count of independent invoices or pages. After access is ready, manifest every source/page/variant, render PDF pages into private image fixtures, preserve originals and group duplicate/related renderings. The API remains single JPEG/PNG; no PDF text layer or cross-page evidence is sent to an image-only method.
+The prepared corpus contains 31 images and retains original source/page/variant grouping. Preserve the originals and duplicate relationships. The API accepts a single JPEG/PNG, and image-only methods receive only that image.
 
 - Every provider evaluation, smoke batch and repeat covers the full prepared sample manifest for each profile being tested. Do not silently pick the two starter images or omit barcode-only, paid, difficult or incomplete documents. Missing bank details can be a legitimate expected outcome.
 - Decoder/provider incompatibility and failed attempts remain explicit per-input results. Auth/quota/budget failure can stop dispatch safely; mark the remaining inputs not run and the batch incomplete. Do not shrink the corpus to make a run fit or look successful.
@@ -83,7 +86,7 @@ Inventory on 5 October found seven PDFs and four JPEG/PNG files, plus a provenan
 
 ## Generalizing the observed OCR failures
 
-The current 184 tests pass after the 6 October cleanup; they do not establish invoice accuracy and missed important layout cases. Add failing synthetic regressions before changing the rules. Do not alter expected payment values or force `ready_for_review` to make the suite green.
+The M1 cleanup baseline had 184 passing tests; current M2 checks are recorded in IMPLEMENTATION_STATUS.md. These tests do not establish invoice accuracy and missed important layout cases. Add failing synthetic regressions before changing the rules. Do not alter expected payment values or force `ready_for_review` to make the suite green.
 
 - Bank details split by blank lines: associate within a justified payment section, with explicit boundaries for another account, scheme, currency or payment option. Include counterexamples where nearby sort codes and account numbers must remain separate.
 - Multi-column totals: identify label/value/currency cells and distinguish amount due from invoice total, subtotal and tax. Blank cells and reordered columns must not change that meaning.
@@ -94,21 +97,23 @@ The current 184 tests pass after the 6 October cleanup; they do not establish in
 
 ## Acceptance and evidence
 
+Updated against M2 implementation on 6 October. Checked coverage-accounting items include precise early-stop blockers and do not make those profiles full-corpus complete. The separate M2 completion gate in ROADMAP.md still applies.
+
 - [x] User's breadth priority and distinct extraction paths recorded; all shortlisted families represented in the queue.
 - [x] Upfront access gate, complete credential request and full-corpus policy recorded.
 - [x] Google access preparation: dedicated project, existing billing, local ADC and two enabled EU processors; private management evidence retained, no documents processed.
-- [x] Full credential/resource set supplied, with explicit scope change recorded; upfront gate satisfied on 6 October. AWS STS and Nanonets management/schema checks are access evidence, not extraction evidence.
-- [ ] Registry supports independent model/method configuration with immutable snapshots and no implicit enablement.
-- [ ] Each new adapter passes meaningful offline mapping, malformed-output, refusal/auth/quota/timeout, provenance and cost tests; applicable polling is bounded.
-- [ ] Separate cost-report inputs and preliminary rows account for each selected option, stage, retry, unknown charge and incomplete corpus run; see COST_REPORT_PLAN.md.
-- [ ] OCR regressions cover the observed failure classes and counterexamples; private offline replay is preserved separately.
-- [ ] Each configured profile has a bounded full-corpus API evaluation with coverage accounting, or a precise blocker/incomplete status. Planned and fixture-tested are not live-validated.
-- [ ] Comparison preserves partial success and independently measured fields, unresolved reasons, stages, requested/returned versions, usage and recipients.
+- [x] Full credential/resource set supplied, with explicit scope change recorded; upfront gate satisfied on 6 October. AWS STS is access evidence, not extraction evidence.
+- [x] Registry supports independent model/method configuration with immutable snapshots and no implicit enablement.
+- [x] Each new adapter passes meaningful offline mapping, malformed-output, refusal/auth/quota/timeout, provenance and cost tests; applicable polling is bounded.
+- [x] Separate cost-report inputs and preliminary rows account for each selected option, stage, retry, unknown charge and incomplete corpus run; see COST_REPORT_PLAN.md.
+- [x] OCR regressions cover the observed failure classes and counterexamples; private offline replay is preserved separately.
+- [x] Each configured profile has a bounded full-corpus API evaluation with coverage accounting, or a precise blocker/incomplete status. Planned and fixture-tested are not live-validated.
+- [x] Comparison preserves partial success and independently measured fields, unresolved reasons, stages, requested/returned versions, usage and recipients.
 - [ ] Representative source-document groups and checked labels support the first scored comparison; unverified entries remain unscored.
-- [ ] Domain/orchestration coverage remains at least 90% statements and 85% branches, with all critical scenarios passing.
+- [x] Domain/orchestration coverage remains at least 90% statements and 85% branches, with all critical scenarios passing.
 
 The [separate cost report](COST_REPORT_PLAN.md) is a required evaluation output, begun during M2 and completed for M4 independently of the later HTML findings. Record each exact option, coverage, stage/retry costs, tariff provenance and unknown charges.
 
-The existing €500 total and included €30 first tranche remain unchanged. Twelve earlier dispatches retain €12 in holds; neither the recorded USD estimates nor prepaid credit release those reservations. New bounded batches must use the same ledger and record any applicable cap/tranche transition. Do not run every model × document × variant × repeat automatically. No mobile app, browser customer UI or HTML report is part of this rollout.
+The existing €500 total and included €30 first tranche remain unchanged. Twelve earlier dispatches retain €12 in holds; neither the recorded USD estimates nor prepaid credit release those reservations. New bounded batches must use the same ledger and record any applicable cap/tranche transition. Do not run every model × document × variant × repeat automatically. No mobile app, browser customer UI or final HTML findings are part of this rollout. The private progress explainer requested on 7 October is a separate, current deliverable.
 
-This remains the broader-provider rollout plan: no new provider adapter or paid call is claimed by it. The small 6 October readiness/packaging cleanup is recorded separately in IMPLEMENTATION_STATUS.md. The complete access set is supplied; offline implementation may resume. Append implementation and measured acceptance evidence to [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) as work lands.
+This document retains the original rollout work order. Completed implementation and measured acceptance evidence are maintained in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).

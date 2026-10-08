@@ -1,44 +1,23 @@
-# Separate cost comparison report
+# Cost tracking
 
-Required by Markus on 6 October 2026. Produce a standalone cost report for **each evaluated option**, separate from the extraction/findings report and its later HTML presentation. This document specifies the deliverable; it is not a completed comparison or a fresh pricing check.
+Latest full six-provider direct comparison: `.local/m3-direct-six-2026-10-08/COSTS.md` and `cost-audit.json`. 102 new dispatched calls, €12.75 retained allowance; current ledger 2,197 / €336.05. Use provider-reported xAI cost ticks where present; original runtime estimates omitted separate reasoning output. Unknown failed-call charges stay unknown. Detailed real-data/stage reports remain private; no new inference is needed to correct cost reporting.
 
-## Scope and timing
+8 October recipient-role follow-up: stage-level reports for both complete 17-image × 2-method matrices are in `.local/m3-recipient-roles-2026-10-08/revision-{2,3}/report.json`. Successful-call list estimates total $0.3045640; the initial schema-rejected request charge remains unknown. Ledger 2,095 dispatched reservations / €323.30 allowance is not billed spend. See [recipient-role evidence](M3_RECIPIENT_ROLES.md); old reports remain unchanged.
 
-- M2: capture usage, tariff provenance and costs for every attempted provider/model/method; start the private report as full-corpus batches become available. Include planned, blocked and untested options explicitly, without inventing measurements.
-- M3: add stage-by-stage and total costs for OCR → rules, OCR → LLM, annotations, document augmentation and bounded fallback policies.
-- M4: deliver the versioned cost report alongside the reviewed quality comparison and provisional pipeline choice. Cost reporting can proceed before labels are verified; cost per correct result cannot.
-- M8: refresh the separate report using the final configuration and link it from the HTML findings. Do not wait for HTML work to make costs reviewable.
+Latest fresh M3 evidence (8 October): all 17 masked images per method completed. Published-price corpus estimates are $0.068 OCR/rules, $0.0330516 direct image and $0.1104708 hybrid (both stages included). Compact private table: `.local/m3-scored-2026-10-08/costs.md`. Exact stage/model/usage records are in `.local/m3-draft-policy-2026-10-08/fresh/report-r1.json`; reviewed scoring and caveats are in [M3 reviewed results](M3_REVIEWED_RESULTS.md). Cash/FX/tax remain unknown. The user prioritizes correctness and speed regardless of price; cost is informational, with the existing €500 experiment cap retained. No cost-per-correct-invoice claim is justified by partial field labels.
 
-Keep generated reports private under `reports/cost-comparison/`, with a dated Markdown report and matching JSON/CSV tables. Record corpus, run-set, profile/configuration and tariff versions so the figures can be reproduced. This directory is ignored by Git. Publish only separately approved, sanitised material.
+Updated 7 October 2026 after Markus clarified the intended scope: keep track of how expensive each option is. Cost tracking supports the extraction work; it is not a separate implementation workstream or a reason to delay it.
 
-## One row per actual option
+Keep a compact private table under `reports/cost-comparison/` with one row per tested provider/model/method:
 
-An option is an exact provider + model/processor/workflow + versioned extraction profile. Different models, detail/resolution settings, custom workflows and composed methods are separate rows when compared. Cover direct-image LLMs, managed OCR/rules, prebuilt document APIs, custom document extraction and hybrids. Later device OCR gets a separately measured row when implemented. Do not collapse all models into a provider average or describe the configured Nanonets workflow as a prebuilt product.
+- Exact option and test date.
+- Number of attempted images, including failed attempts.
+- Estimated or reported cost per image and for the batch, in the original currency.
+- Unknown charges and any material free-tier allowance or billing minimum.
+- A tariff source/date so estimates can be checked.
 
-Each row must show:
+Existing detailed stage records remain available for debugging and reproducibility. Do not expand this into financial forecasting, ownership-cost analysis or repeated budget-plan prose unless requested. Multi-service methods record each external call and add their costs; reusing saved OCR output must not count the original charge twice.
 
-| Area | Required information |
-| --- | --- |
-| Identity and coverage | Exact option/version, account pricing conditions without secrets, test date, source/page/variant counts, attempted/succeeded/failed/not-run inputs and any early stop |
-| Tariff | Official source URL and checked date; region/product/tier, currency, billing unit, document/page minimums and any volume tiers or fixed minimum commitment |
-| Observed usage | Provider-reported input/image/output/reasoning/cache units as applicable; page/document/workflow units; individual stages, retries, fallback and failed/uncertain dispatches |
-| Cost evidence | Reported charge, dated usage-based estimate, unknown or not applicable; explain missing telemetry and distinguish estimates from reconciled billing |
-| Comparable totals | Cost per attempt, per source document and full-corpus batch, with denominator and completeness; distribution/sample count where supported |
-| Quality-linked cost | Cost per correct complete result only for reviewed labels and a declared scored population; include failed attempts in its cost numerator and keep unscored costs visible separately |
-| Scale scenarios | Clearly labelled estimates for illustrative monthly volumes, such as 1,000 and 10,000 documents, with measured workload assumptions and applicable minimums/tiers |
+Internal spending allowances protect the €500 limit. They are bookkeeping limits, not money charged or held by a provider. Preserve the existing ledger and unresolved charges; do not reset it or buy subscriptions automatically.
 
-## Accounting rules
-
-Report gross usage cost separately from trial credits/prepaid credit and cash billed. Credits are not a durable unit price. Keep currencies separate unless a dated FX rate/source is provided; state whether tax is known/included. Do not assume pricing scales linearly across minimums, subscriptions or volume tiers, and do not buy a subscription to complete a table.
-
-Retain uncertain charges after failures/timeouts. A reservation ceiling is a budget hold, not measured spend: the existing twelve dispatches retain €12 in holds until reconciliation permits release. Use the same ledger; never reset it for this report. The €500 total and included ≤€30 initial tranche remain unchanged.
-
-For reused OCR/cache stages, show actual batch charges once and the estimated standalone pipeline cost separately. Saved-response replay adds no new recognition charge but must identify the original paid work; it is not a fresh zero-cost OCR run. Include all pipeline recipients/stages without double counting.
-
-Local rules may have zero external API fees; hardware, hosting, development and maintenance costs remain separate estimates or unknowns. Do not present API tariffs as total ownership cost. Exclude payment execution fees and unrelated products unless they become explicit scope.
-
-## Acceptance
-
-Every selected option has a row or an explicit unavailable/untested record. Totals reconcile to recorded stages and the same run set used for evaluation; unknown amounts stay unknown. Differences in corpus coverage, document minimums, trial terms and extraction completeness are visible before comparing prices. Recommendations cite both measured quality and cost evidence; no unsupported savings or accuracy ranking.
-
-Related: [evaluation plan](EVALUATION_PLAN.md), [providers and budget](PROVIDERS_AND_BUDGET.md), [roadmap](ROADMAP.md), [wire cost semantics](API_CONTRACT.md).
+Refresh the compact table when new evaluation results are available. Accuracy and cost per correct result require checked answers; until then, show expense without an accuracy ranking.

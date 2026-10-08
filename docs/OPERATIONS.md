@@ -1,5 +1,9 @@
 # Local backend operations
 
+**Current checkpoint — 8 October 2026:** Phase 2 is closed for the current PoC scope. Direct-image GPT-4.1 mini (`openai-mini-image-roles-v3@2-5094b6dc13ef5718`) is selected for mobile integration. See [Phase 2 closeout](PHASE2_CLOSEOUT.md) for the decision, limits and verification, and [fourth-chat handoff](CHAT4_HANDOFF.md) for the prepared baseline. Markus authorized commit/push and the earlier PR/merge sequence; additional handoff details are pending. No new chat or mobile code yet. Earlier status/default/approval statements below are historical snapshots superseded by this checkpoint.
+
+Current provider options, cumulative budget plans, corpus execution, recovery and replay are documented in [M2_OPERATIONS.md](M2_OPERATIONS.md). The M1 setup/history below remains applicable where not superseded.
+
 Implemented 2 October 2026. Run one process; no Redis, hosted file store or paid startup probes. The schema contract is [API_CONTRACT.md](API_CONTRACT.md).
 
 ## Setup and configuration

@@ -1,10 +1,20 @@
 # Product context and requirements
 
+**Current checkpoint — 8 October 2026:** Phase 2 is closed for the current PoC scope. Direct-image GPT-4.1 mini (`openai-mini-image-roles-v3@2-5094b6dc13ef5718`) is selected for mobile integration. See [Phase 2 closeout](PHASE2_CLOSEOUT.md) for the decision, limits and verification, and [fourth-chat handoff](CHAT4_HANDOFF.md) for the prepared baseline. Markus authorized commit/push and the earlier PR/merge sequence; additional handoff details are pending. No new chat or mobile code yet. Earlier status/default/approval statements below are historical snapshots superseded by this checkpoint.
+
+## Agreed next sequence — 8 October 2026
+
+Finish the bounded fresh 17-image comparison first, then import the usable human review and score correctness (step 5). Unresolved, disputed and unreadable labels stay unscored. Present the concrete results for Markus's confirmation. Only after that confirmation, create the project PR and merge pending PRs in `azikus/scan-and-pay-poc` after review/required checks, then prepare the next-chat handoff. Do not create or merge PRs before that confirmation.
+
+Choose the pipeline with Markus for correctness and total latency, regardless of cost. Continue recording expense and respecting the existing €500 experiment cap. The next implementation focus is the iOS app in another chat, after pipeline selection and agreement on capture/review screens: capture/import an image, send JPEG/PNG to the existing Mac backend, poll and display an editable draft with incomplete/error states. A physical phone needs the Mac's reachable LAN URL, not the phone's `localhost`; make the endpoint configurable. Provider credentials stay on the backend. No mobile implementation or future-chat creation in this chat. Android follows later; barcode decoding remains outside this PoC. See [roadmap](ROADMAP.md).
+
+Current implementation follow-up: M2 adapters, full-corpus tooling and general OCR rules v2 are implemented, with live evaluation recorded in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md). Historical baseline descriptions below keep their original context; [M2_OPERATIONS.md](M2_OPERATIONS.md) owns current evaluation operations.
+
 Reconciled for coding handoff, 1 October 2026; current implementation/access state refreshed 6 October. Planning record reconstructed from visible user requests, the blueprint and workspace inspection; not a verbatim transcript. Latest user instructions take precedence over historical references. See ROADMAP.md for the phase/milestone map and CODING_HANDOFF.md for the next chat.
 
 ## 1. What we are making
 
-A reusable Scan and Pay capability: photograph a bill, invoice or other payment document and receive an editable payment draft. The user must review and confirm the extracted details. They should not need to know whether the system used a barcode, OCR, document API or language model; all methods feed the same review journey.
+A reusable Scan and Pay capability: photograph a bill, invoice or other payment document and receive an editable payment draft. The user must review and confirm the extracted details. They should not need to know whether the system used OCR, a document API or a language model; all methods feed the same review journey.
 
 The initial eight examples are a starting point, not the product's boundary. A document with a payee, amount and payment identifiers is a candidate. It may still lack a complete payment route: a customer number is not a beneficiary bank account, and some biller references need an integration.
 
@@ -27,9 +37,9 @@ No Aircash service or credentials are required to run the standalone PoC. Histor
 ## 3. Confirmed delivery direction
 
 1. Independent project and monorepo, outside the client repository.
-2. Localhost backend first, accepting one JPEG or PNG still image. No PDF, page-selection, HEIC or multipage API.
+2. Localhost backend first, accepting one JPEG or PNG still image. No page-selection, HEIC or multipage API.
 3. Agree mobile designs before writing the apps. iOS first, then Android; do not wait for every optional provider experiment.
-4. Hybrid direction: local rules, barcode parsing, OCR, document services and selectable LLM/vision models. The original LLM idea remains a baseline, not a restriction.
+4. Hybrid direction: local rules, OCR, document services and selectable LLM/vision models. Payment-barcode/QR decoding is a future improvement outside this PoC, per the 8 October user clarification. The original LLM idea remains a baseline, not a restriction.
 5. Freely select models per provider, including smaller models and selected stronger controls; no mandated pairing. Provider-hosted proprietary and open-weight models are allowed; self-hosted inference locally or on project-operated cloud/GPU servers is excluded.
 6. Compare mode independently runs selected or all enabled compatible profiles. Extract mode selects one potentially composed pipeline.
 7. Ordinary phone photographs suffice for initial backend tests. Explore on-device OCR/ML during mobile work, possibly supplying image-linked text, boxes and quality observations.
@@ -52,7 +62,7 @@ Third-party SDKs may be used. Check licences and write high-value unit/contract 
 
 The discussion started with broadening a barcode-driven mobile feature using several LLMs, comparing extraction, time and cost. It expanded into a client-owned hybrid stack that can incorporate OCR, document APIs, deterministic rules and mobile ML.
 
-The commercial proposition is to demonstrate and offer an integrated capability that clients can operate and adapt. It is not a claim to invent invoice photo-payment. Nanonets and document APIs are commercial building blocks; Docling/PaddleOCR were researched but running their model pipelines ourselves is out of scope; a suitable provider-operated API is eligible for evaluation. Deterministic libraries such as invoice2data may still be evaluated against image-derived managed OCR text without running model inference locally.
+The commercial proposition is to demonstrate and offer an integrated capability that clients can operate and adapt. It is not a claim to invent invoice photo-payment. Document APIs are commercial building blocks; Docling/PaddleOCR were researched but running their model pipelines ourselves is out of scope; a suitable provider-operated API is eligible for evaluation. Deterministic libraries such as invoice2data may still be evaluated against image-derived managed OCR text without running model inference locally.
 
 The existing business blueprint remains a reference. Detailed engineering plans now describe a separate backend, rather than modifications to the client app.
 
@@ -77,13 +87,13 @@ Still unproved: verified sample answer keys, broader-provider inference compatib
 
 ## 8. Samples and provenance
 
-The shared folder contains eight original PDF/image files, a five-page UK print pack and the added barcode-free Croatian invoice PNG. The UK pack represents five invoices: Continental Landscapes, Active8 Managed Technologies, Pestcotek, Lasercut Works and CAPALC. Verify the logical grouping of the original files; do not count photographs or every source page as independent layouts.
+The shared folder contains eight original source files, a five-page UK print pack and the added barcode-free Croatian invoice PNG. The UK pack represents five invoices: Continental Landscapes, Active8 Managed Technologies, Pestcotek, Lasercut Works and CAPALC. Verify the logical grouping of the original files; do not count photographs or every source page as independent layouts.
 
-Original files: WATERBOARD_40_6598_2026_1.PDF; QR code.pdf; Paid utility bill from Nestor.pdf; FATTURA_2025_41_RZ02779403.pdf; 20210430330872169039909.pdf; 525517680719_2025_s.pdf; PROTERGIA BILL.jpeg; image-1.png.
+Exact original filenames, hashes and preparation history are recorded in the private corpus manifest.
 
-Existing PDFs are historical source assets. One-off rasterisation outside the backend can prepare image fixtures, but PDF ingestion is not a planned feature. Keep real data private and preserve provenance in the private manifest.
+Use the prepared image fixtures. Keep real data private and preserve source relationships in the private manifest.
 
-Račun-12793-26.pdf was subsequently supplied from Desktop on 1 October. The first page contains the payment details and a separate 2D-barcode image object; the second is a supporting breakdown. Removed only the barcode object and rendered page one as samples/racun-12793-26-no-barcode.png (300 DPI, 2481 × 3508). Verification: all PDF text unchanged, all rendered pixels outside the barcode identical, removed region white, original PDF unchanged. A private provenance sidecar records source/output hashes and the transformation. Only the verified image and sidecar entered the project; page two remains in the original source and is not an independent sample. The Aircash screenshot is still missing and has not been inspected.
+A Croatian invoice was supplied on 1 October. Its payment page was prepared as samples/racun-12793-26-no-barcode.png (300 DPI, 2481 × 3508), with the barcode removed and surrounding pixels verified unchanged. A private provenance sidecar records source/output hashes and the transformation. The original source is preserved externally. The Aircash screenshot is still missing and has not been inspected.
 
 ## 9. Report, companion and event
 

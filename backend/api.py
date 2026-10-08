@@ -35,11 +35,15 @@ def create_app(
         active_settings = settings or Settings.from_env()
         active_definitions = definitions if definitions is not None else registry(active_settings)
         if adapters is None:
+            from backend.adapters.extended import ExtendedAdapter
+            from backend.adapters.hybrid import HybridAdapter
             from backend.providers import MistralAdapter, OpenAIAdapter
 
             active_adapters: dict[str, Adapter] = {
                 "openai": OpenAIAdapter(active_settings),
                 "mistral": MistralAdapter(active_settings),
+                "extended": ExtendedAdapter(active_settings),
+                "hybrid": HybridAdapter(active_settings),
             }
         else:
             active_adapters = adapters

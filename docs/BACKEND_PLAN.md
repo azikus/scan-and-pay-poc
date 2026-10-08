@@ -1,5 +1,13 @@
 # Detailed backend-first implementation plan
 
+**Current checkpoint — 8 October 2026:** Phase 2 is closed for the current PoC scope. Direct-image GPT-4.1 mini (`openai-mini-image-roles-v3@2-5094b6dc13ef5718`) is selected for mobile integration. See [Phase 2 closeout](PHASE2_CLOSEOUT.md) for the decision, limits and verification, and [fourth-chat handoff](CHAT4_HANDOFF.md) for the prepared baseline. Markus authorized commit/push and the earlier PR/merge sequence; additional handoff details are pending. No new chat or mobile code yet. Earlier status/default/approval statements below are historical snapshots superseded by this checkpoint.
+
+## Agreed next sequence — 8 October 2026
+
+Finish the bounded fresh 17-image comparison first, then import the usable human review and score correctness (step 5). Unresolved, disputed and unreadable labels stay unscored. Present the concrete results for Markus's confirmation. Only after that confirmation, create the project PR and merge pending PRs in `azikus/scan-and-pay-poc` after review/required checks, then prepare the next-chat handoff. Do not create or merge PRs before that confirmation.
+
+Choose the pipeline with Markus for correctness and total latency, regardless of cost. Continue recording expense and respecting the existing €500 experiment cap. The next implementation focus is the iOS app in another chat, after pipeline selection and agreement on capture/review screens: capture/import an image, send JPEG/PNG to the existing Mac backend, poll and display an editable draft with incomplete/error states. A physical phone needs the Mac's reachable LAN URL, not the phone's `localhost`; make the endpoint configurable. Provider credentials stay on the backend. No mobile implementation or future-chat creation in this chat. Android follows later; barcode decoding remains outside this PoC. See [roadmap](ROADMAP.md).
+
 Handoff baseline, reconciled 1 October 2026; implementation started 2 October. Current handoff update, 6 October: **Milestone 1 complete**, with real UK/HR runs through both starter profiles, corrected shared bank normalization, and a successful independent comparison. Mistral API billing activation was explicitly approved; training remains off. Twelve dispatches retain €12 in conservative holds. The initial OCR rules miss table/prose fields and split a bank block across blank lines; preserve these baseline limitations before later versioned comparisons. The upfront access set is now complete. [Current evidence](IMPLEMENTATION_STATUS.md), [roadmap/milestones](ROADMAP.md) and [next-chat handoff](CODING_HANDOFF.md) describe the next work. API_CONTRACT.md owns wire semantics and ARCHITECTURE.md shows boundaries.
 
 ## 1. The first thing we should be able to do
@@ -67,7 +75,7 @@ Official framework capabilities: [FastAPI](https://fastapi.tiangolo.com/features
 
 ## 3. Input contract and preprocessing
 
-Public input: **one JPEG or PNG still image per scan**. Photographs and screenshots are supported. No PDF upload, page-selection, HEIC or multipage API is required. Existing source PDFs remain private historical assets; one-off conversion to prepare a PNG fixture is not a backend feature. Phone capture should upload a documented JPEG/PNG encoding.
+Public input: **one JPEG or PNG still image per scan**. Photographs and screenshots are supported. No page-selection, HEIC or multipage API is required. Phone capture should upload a documented JPEG/PNG encoding.
 
 Defer bespoke upload-limit and artifact-expiry work. Do not add the previous 20 MiB/50 MP thresholds or seven-day expiry. Keep safe decoding, bounded processing and actual provider input constraints. If an adapter needs a different rendition, record its dimensions and transformation rather than claiming identical bytes.
 
@@ -179,9 +187,9 @@ All components receive a versioned input descriptor and return observations, err
 3. **OCR plus LLM:** OCR text/layout to semantic fields. Compare with direct vision to identify whether OCR helps or loses layout information. Text-only models can participate here even if they cannot accept images.
 4. **Document API:** prebuilt invoice extraction mapped into the contract, with unsupported/missing fields explicit.
 5. **Document API plus rules/LLM:** a separate hybrid profile for filling gaps from returned OCR/layout. Never attribute its performance or cost to the unaugmented API.
-6. **Barcode path:** decode and classify locally on the backend initially; parse only explicitly supported payloads into the same candidate model. Unknown codes/URLs do not block document extraction and are not automatically followed. Conflicting text/code data triggers review.
+**Future improvement outside this PoC:** payment-barcode/QR decoding and supported-payload mapping. The user explicitly deferred this on 8 October; it is not part of any PoC milestone or acceptance criterion. Record it in the eventual findings; no implementation or barcode-specific test suite is required now.
 
-Local rules in step 2 and barcode processing in step 6 run on the backend machine. Managed OCR sends the image externally. No mobile processing is implemented yet.
+Local rules in step 2 run on the backend machine. Managed OCR sends the image externally. No mobile processing is implemented yet.
 
 ### Registry and profile composition
 
@@ -195,7 +203,7 @@ Compare runs profiles independently and never turns agreement into payment truth
 
 First live adapter: a small vision model, initially GPT-6 Luna subject to account access. Milestone 1 then adds Mistral OCR 4.1 → local UK/HR rules, with independent compare results. Phase 2 expands managed methods: Azure Read/Invoice, Google OCR/Invoice Parser, Mistral annotations and Textract; selected smaller/stronger OpenAI, Anthropic, Gemini and hosted Mistral models; composable OCR-plus-LLM profiles.
 
-Provider-hosted open-weight models are eligible alongside proprietary models; self-hosted inference is excluded. Together, xAI, Nanonets and Mindee are included in the requested adapter roster. A deterministic invoice2data template comparison may consume managed OCR text without model-weight dependencies. A documented provider is not an implemented adapter. The full upfront credential/resource set was supplied on 6 October; concrete processing/access limitations still require explicit reporting and cannot silently remove a provider.
+Provider-hosted open-weight models are eligible alongside proprietary models; self-hosted inference is excluded. Together, xAI and Mindee are included in the requested adapter roster. A deterministic invoice2data template comparison may consume managed OCR text without model-weight dependencies. A documented provider is not an implemented adapter. The full upfront credential/resource set was supplied on 6 October; concrete processing/access limitations still require explicit reporting and cannot silently remove a provider.
 
 See [provider shortlist and budget](PROVIDERS_AND_BUDGET.md) for current exact model candidates and €500 allocation. Self-hosted inference, weight downloads and project-operated cloud/GPU model servers are out of scope.
 
@@ -244,10 +252,9 @@ User priority: broaden provider coverage alongside improving OCR interpretation.
 1. Catalogue/group original documents and prepare labels, image variants and split assignments alongside integration work; unverified labels block scoring, not adapter development.
 2. After the full access gate, add comparison adapters across the shortlisted LLM, managed OCR and document-service families with offline adapter fixture tests and full-corpus live evaluations, including compatibility batches. Account for all samples and explicit failures; do not return to a two-image subset.
 3. Extend managed OCR/rules with structural/association regressions while adding OCR-plus-LLM, document annotations and document-API augmentation as separate profiles. Preserve the unaugmented baselines and shared v1 validation.
-4. Implement supported barcode parsing with synthetic payload fixtures; unsupported types fall through to document extraction.
-5. Run the controlled evaluation from EVALUATION_PLAN.md; retain per-document failures, not just average scores.
-6. Select a provisional extraction pipeline based on correctness, missing-field behaviour, latency and cost. Test a bounded fallback against the baseline; retain it only if the observed trade-off is useful.
-7. Save machine-readable measurements, a concise Markdown experiment log and a separate per-option cost report under [COST_REPORT_PLAN.md](COST_REPORT_PLAN.md); tag a profile/configuration for mobile integration. Cost reporting begins with M2 and is an M4 acceptance deliverable. Defer the polished HTML findings to Phase 4.
+4. Run the controlled evaluation from EVALUATION_PLAN.md; retain per-document failures, not just average scores.
+5. Select a provisional extraction pipeline based on correctness, missing-field behaviour, latency and cost. Test a bounded fallback against the baseline; retain it only if the observed trade-off is useful.
+6. Save machine-readable measurements, a concise Markdown experiment log and a separate per-option cost report under [COST_REPORT_PLAN.md](COST_REPORT_PLAN.md); tag a profile/configuration for mobile integration. Cost reporting begins with M2 and is an M4 acceptance deliverable. Defer the polished HTML findings to Phase 4.
 
 Completion evidence: comparable independent results for the approved full-corpus matrix; reproducible runs; UK and client breakdowns; no unlabelled hidden augmentation; selected pipeline rationale and known limitations. Only the user may waive an unavailable provider from the upfront access gate.
 
@@ -261,7 +268,7 @@ Later scope, with M5 design agreement before M6 iOS and M7 Android. Phase 1 alre
 4. Explore Apple Vision/VisionKit OCR, capture quality and document detection during iOS work; evaluate ML Kit or relevant native components later on Android. The image request may include optional device observations: image hash, text/boxes, coordinate space, orientation/crop transforms, language hypotheses, engine/OS/device version and processing time. Validate their association and shape on the backend; treat them as untrusted observations, not truth. Image-only requests must continue to work. Measure image-only, image+device-OCR and text-only where suitable; OCR can help, but can also lose layout or propagate character errors.
 5. Measure end-to-end capture-to-review latency, battery/thermal impact if relevant, image size and retake/correction behaviour. Only then decide whether on-device results replace or supplement backend steps.
 
-Completion evidence: both native apps photograph a document and populate the same review contract; correct leading-zero display/editing; partial results and errors are usable; barcode and non-barcode documents share the journey. Mobile UX approval is separate from this backend plan.
+Completion evidence: both native apps photograph a document and populate the same review contract; correct leading-zero display/editing; partial results and errors are usable. Dedicated barcode decoding remains outside the PoC. Mobile UX approval is separate from this backend plan.
 
 ### Phase 4 — Stabilise the demonstration and package the findings
 
@@ -280,7 +287,7 @@ Completion evidence: dependable native end-to-end demonstration, a recoverable b
 
 Core: image upload, small vision and managed OCR/rules profiles, correct common contract, UK/client fixtures, measured hybrid comparison, both native apps, honest review/error behaviour.
 
-Do not make these prerequisites for the first backend: a browser dashboard, every model family, Nanonets commercial access, local GPU inference, fine-tuning, generic multi-page document splitting, all payment barcode schemes, or full payment execution integration.
+Do not make these prerequisites for the first backend: a browser dashboard, every model family, local GPU inference, fine-tuning, generic multi-page document splitting, all payment barcode schemes, or full payment execution integration.
 
 Markus and the assistant are doing the work; no engineer-availability or code-freeze questionnaire is required. Sequence by demonstrable outcomes: working backend, meaningful comparisons, agreed designs, iOS, Android and the companion. Phase 2 access collection is complete; offline implementation is next. Self-hosted inference setup is excluded.
 

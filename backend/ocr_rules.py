@@ -49,6 +49,7 @@ class Span:
     id: str
     block: int
     text: str
+    matching_text: str | None = None
 
 
 def spans_from_markdown(markdown: str) -> tuple[Span, ...]:
@@ -82,7 +83,9 @@ def labelled(spans: tuple[Span, ...], name: str) -> Observation:
     matches: list[tuple[str, str]] = []
     for span in spans:
         match = re.fullmatch(
-            r"\s*(?:" + LABELS[name] + r")\s*[:：]\s*(.*?)\s*", clean_line(span.text), re.I
+            r"\s*(?:" + LABELS[name] + r")\s*[:：]\s*(.*?)\s*",
+            clean_line(span.matching_text or span.text),
+            re.I,
         )
         if match:
             matches.append((match.group(1).strip(), span.id))
@@ -147,9 +150,9 @@ def amount_observation(raw: Observation) -> tuple[Observation, Observation]:
 
 
 def extract_rules(
-    markdown: str, image_id: str, stage_id: str
+    markdown: str, image_id: str, stage_id: str, *, prepared_spans: tuple[Span, ...] | None = None
 ) -> tuple[Payment, list[Evidence], Routing]:
-    spans = spans_from_markdown(markdown)
+    spans = spans_from_markdown(markdown) if prepared_spans is None else prepared_spans
     payment = Payment()
     for name in ("supplier_name", "invoice_number", "customer_number", "due_date", "description"):
         setattr(payment, name, labelled(spans, name))

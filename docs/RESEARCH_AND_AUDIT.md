@@ -10,11 +10,11 @@ Inspected `reference/phase1/scan_pay_benchmark.py` (1,551 lines), schema, exampl
 
 Implemented adapter functions exist for OpenAI Responses, Anthropic Messages, Gemini generateContent, OpenAI-compatible chat completions, Mistral OCR/document annotations, Azure Document Intelligence, Google Document AI and AWS Bedrock Converse. The example configuration includes several model/provider profiles, all disabled by default. The presence of an adapter is not proof that its API/model settings work against today's service.
 
-There is no dedicated AWS Textract, Nanonets, local OCR or Docling adapter in the inspected adapter registry. Bedrock is not Textract. There is no job API, persistent service queue, UK sort-code field or native app in the reference project.
+There is no dedicated AWS Textract, local OCR or Docling adapter in the inspected adapter registry. Bedrock is not Textract. There is no job API, persistent service queue, UK sort-code field or native app in the reference project.
 
 ### Reuse candidates
 
-- Input hashing and image-preparation ideas. The new API is JPEG/PNG-only; historical PDF preparation is not a required backend feature.
+- Input hashing and image-preparation ideas. The new API is JPEG/PNG-only; historical source preparation is not a backend feature.
 - Provider request/response mapping scaffolding, after checking current capabilities and writing response-fixture tests.
 - Per-run JSONL output, repeated runs, error isolation and CLI reporting concepts.
 - Token/page/document usage capture and configurable cost calculation, with more complete accounting.
@@ -67,9 +67,6 @@ AnalyzeExpense exposes summary fields and line-item groups for invoices/receipts
 
 Document annotations accept a supplied schema and combine OCR output with a model-based extraction step. This is particularly relevant to the proposed hybrid comparisons. Label OCR-only and OCR-plus-annotations separately; they are not the same method or necessarily the same charge. The historical benchmark already has an annotation adapter to reassess. [Annotations](https://docs.mistral.ai/studio/document-processing/annotations), [OCR API](https://docs.mistral.ai/api/endpoint/ocr).
 
-### Nanonets
-
-Keep Nanonets as a commercial comparison candidate, subject to current evaluation access, suitable product scope, sample permissions and pricing. Its inclusion is not a claim of a tested result or a commitment to build around it. Obtain current API documentation from the granted product account before implementation.
 
 A fresh provider/model roster, public tariffs and €500 allocation are in [PROVIDERS_AND_BUDGET.md](PROVIDERS_AND_BUDGET.md). OCR/document APIs are core comparison families, not just optional LLM fallbacks.
 
@@ -113,17 +110,17 @@ Earlier research did not identify a universally adopted UK domestic GBP invoice 
 
 ## 8. Research still needed at implementation time
 
-Actual account/model access and tenant prices/regions; exact SDK licences; account data-use/retention settings; a checked payment-field answer key; supported barcode schemes. Sample-provider testing and the €500 budget are authorised; no separate review team or staffing questionnaire is required. These are explicit checks, not reasons to restart the entire market-research conversation.
+Actual account/model access and tenant prices/regions; exact SDK licences; account data-use/retention settings; a checked payment-field answer key. Supported barcode schemes are a future research item outside this PoC, per the 8 October scope clarification. Sample-provider testing and the €500 budget are authorised; no separate review team or staffing questionnaire is required. These are explicit checks, not reasons to restart the entire market-research conversation.
 
 Public pricing was refreshed on 1 October and is documented in PROVIDERS_AND_BUDGET.md with billing qualifications. No model accuracy, latency or cost-per-correct-result ranking can be inferred from documentation alone.
 
 ## 9. Country-aware interpretation and Croatia
 
-The HUB payment-barcode specification distinguishes recipient IBAN, model, reference, purpose code and description. These are useful semantic fields even for a barcode-free invoice; do not blindly impose the barcode's field-length limits on every invoice. [HUB specification](https://hub.hr/sites/default/files/inline-files/2DBK_EUR_Uputa_1.pdf).
+The HUB payment-barcode specification distinguishes recipient IBAN, model, reference, purpose code and description. These are useful semantic fields even for a barcode-free invoice; do not blindly impose the barcode's field-length limits on every invoice. HUB payment-barcode specification (source reference retained in the private research archive).
 
 Language/address can help, but an issuer/customer address is not the bank's country. Model language, issuer country, account country and scheme separately. Prefer explicit sort-code/account labels, recognised IBAN structure and Croatian model/poziv na broj labels; keep unknown or conflicting routes open. A valid checksum does not validate ownership or justify silently changing O to 0.
 
-The invoice was subsequently supplied from Desktop on 1 October. Inspected both pages; removed only the first page's separate barcode image object, verified that PDF text and all pixels elsewhere were unchanged, and added its 300-DPI PNG payment page plus a private provenance sidecar. The source PDF stays outside the project. The screenshot remains unavailable and uninspected.
+The invoice was subsequently supplied from Desktop on 1 October. Inspected both pages; removed only the first page's separate barcode image object, verified that source text and all pixels elsewhere were unchanged, and added its 300-DPI PNG payment page plus a private provenance sidecar. The original source stays outside the project. The screenshot remains unavailable and uninspected.
 
 ## 10. Frameworks and device processing
 

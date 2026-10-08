@@ -1,5 +1,7 @@
 # Milestone 1 provider checks
 
+Current M2 transport/account checks are in [M2_INTEGRATIONS.md](M2_INTEGRATIONS.md); full-corpus outcomes are in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md). Everything below is the dated M1 baseline, not a statement that only two providers exist today.
+
 Handoff note, 6 October: this file preserves the two implemented providers' measured integration baseline. Broader-provider credential/resource preparation is in [PHASE2_ACCESS.md](PHASE2_ACCESS.md), and the next implementation tasks are in [CODING_HANDOFF.md](CODING_HANDOFF.md). Access preparation does not add live-validated profiles or replace the historical runs below.
 
 Public documentation rechecked 5 October 2026. Both locally configured keys authenticated and the exact requested models were available. Milestone 1 now has real UK/HR runs through both profiles and a successful two-provider comparison. [Implementation status](IMPLEMENTATION_STATUS.md) records all twelve dispatches, including failures. The Mistral billing/privacy checks below were verified separately in the signed-in Admin UI; access checks alone do not establish those settings. Processing residency, retention and negotiated billing remain unknown.

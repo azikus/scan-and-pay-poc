@@ -1,8 +1,10 @@
 # Architecture and data destinations
 
-Handoff design from 1 October 2026, updated 5 October for the hosting clarification and 6 October for the checkpoint/cost-report references. Milestone 1 is implemented; see IMPLEMENTATION_STATUS.md for measured evidence. This diagram describes service boundaries and later consumers, not a production platform or the final HTML report.
+Current extraction path: one direct-image OpenAI GPT-4.1 mini call, compact field recovery and shared review. See [selection](PHASE2_CLOSEOUT.md). OCR/hybrid methods remain implemented comparison options; the hybrid has since been freshly evaluated and is not selected. Historical planned/unvalidated descriptions below retain their original context.
 
-The current two-adapter implementation and proposed Phase 2 module boundaries are described in [PHASE2_ROLLOUT.md](PHASE2_ROLLOUT.md). Multi-provider pipelines require stage-specific recipient/raw-artifact/dispatch accounting before use. This refactor has not started; the upfront access set was completed on 6 October, so it is now M2 work under [ROADMAP.md](ROADMAP.md). [PHASE2_ACCESS.md](PHASE2_ACCESS.md) separates completed resource preparation from pending inference checks.
+Updated 7 October 2026. The implemented backend accepts one image and returns separate, reviewable payment drafts. See [implementation status](IMPLEMENTATION_STATUS.md) for measured provider results.
+
+Adapters in `backend/adapters/` handle provider requests and responses. `backend/document_observations.py` retains normalized OCR/document observations; local rules and mapping produce the common payment contract. `backend/review.py` applies shared consistency checks. `evaluation/` provides full-corpus execution, saved-response replay and expense summaries. OCR → OpenAI text composition is now offline-tested with separate reservations and recipients; see [M3 interpretation](M3_INTERPRETATION.md). Fresh validation remains M3 work.
 
 ```mermaid
 flowchart LR
@@ -20,7 +22,7 @@ flowchart LR
     V -->|"Field claims"| R
     W -->|"Image"| O
     O -->|"Text / layout / fields"| R
-    O -.->|"OCR-to-LLM: separate profile"| V
+    O -.->|"OCR-to-LLM: explicit profile"| V
 ```
 
 Inference runs through provider-operated APIs. Self-hosted model servers and weight downloads are excluded. The unused original handoff PNG is preserved privately under `.local/archive/pre-main-*/docs/assets/`; the editable diagram above is the current architecture reference.
@@ -29,7 +31,7 @@ Inference runs through provider-operated APIs. Self-hosted model servers and wei
 
 1. An API/command-line client uploads a JPEG/PNG now. Later the native iOS and Android apps call the same service. A developer's API client is not the customer-facing conference UX.
 2. FastAPI validates/authenticates input, prepares a canonical oriented image and persists an idempotent job/profile snapshot in SQLite. A bounded worker dispatches approved stages with a spend reservation. Start with one process, not a distributed queue.
-3. Extract chooses one pipeline. Compare runs selected profiles independently; it does not merge their votes. Vision receives an image; managed OCR/document services receive an image; OCR→LLM additionally sends extracted text/layout to a second recipient. Only configured stages execute.
+3. Extract chooses one pipeline. Compare runs selected profiles independently; it does not merge their votes. Vision receives an image; managed OCR/document services receive an image; An explicitly enabled OCR→LLM profile sends whitelisted text/line layout to a second recipient; the current composition is offline-tested and awaits fresh validation. Only configured stages execute.
 4. Local adapters map observations; UK/HR rules preserve route/amount/reference association, normalize safely and compute review reasons. Language/address are supporting hints, not sufficient account-country evidence. A model claim is not bank verification.
 5. Private results, stage events, timings, usage and destination records persist locally. Polling returns the common contract. Every draft requires review/confirmation. No user corrections are counted as raw extraction accuracy.
 
@@ -40,8 +42,8 @@ Inference runs through provider-operated APIs. Self-hosted model servers and wei
 | Direct vision | Canonical/provider rendition plus task/schema | Selected OpenAI, Anthropic, Google, Mistral or other enabled provider-operated endpoint, using proprietary or open-weight models | Input hashes, normalized draft, diagnostics, raw response if retained |
 | Managed OCR → local rules | Image to OCR; rules send nothing | Selected Mistral/Azure/Google OCR endpoint | Returned text/layout, UK/HR logic, validation |
 | Prebuilt document API | Image | Azure Invoice, Google Invoice Parser, Textract or configured commercial API | Raw mapping, missing-field handling, validators |
-| OCR → LLM, later | Image to OCR, then text/layout (and image only in an explicitly named variant) to model | Two separately recorded services | Stage association and total/individual costs |
-| Barcode/local rules, later | Nothing by themselves; unknown codes do not trigger URL fetches | None for the local stage | Decoded payload and mapped fields |
+| OCR → LLM, offline-tested | Image to OCR, then text/layout (and image only in an explicitly named variant) to model | Two separately recorded services | Stage association and total/individual costs |
+| Local rules | Nothing by themselves | None for the local stage | Mapped fields from OCR observations |
 | Native OCR, mobile phase | Depending on agreed profile, image plus image-linked observations to this backend | Backend, then only configured provider stages | Device work is measured separately |
 
 Every external stage records actual service/host, account alias, configured region, known/unknown processing residency, payload classes, hashes/renditions and request ID. A local server is not local-only processing; text can contain the same sensitive details as the original image. No model/SDK may introduce an undisclosed remote fallback. Account retention/training settings are verified at integration, not assumed from provider branding.
@@ -59,3 +61,5 @@ Every external stage records actual service/host, account alias, configured regi
 Native mobile capture/review is designed before implementation, iOS first. The attendee companion later reads safe job/stage events and masks private fields; it is separate from the customer flow. Final HTML findings use measured evaluation outputs and clearly labelled limitations. Neither is needed to get this backend working.
 
 The current diagram is editable documentation. Final findings and the [separate cost report](COST_REPORT_PLAN.md) are distinct deliverables.
+
+The user-requested private progress explainer is `reports/overview-2026-10-07/index.html`. It summarizes implementation and processing outcomes; the final findings report and attendee companion remain later deliverables.

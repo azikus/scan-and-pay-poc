@@ -1,0 +1,162 @@
+{
+  "options": {
+    "mistral-ocr-rules-v2": {
+      "provider": "mistral",
+      "model": "mistral-ocr-4-1",
+      "operation": "ocr",
+      "config": {
+        "endpoint_host": "api.mistral.ai",
+        "enabled": false
+      }
+    },
+    "openai-mini-compact-v5": {
+      "provider": "openai",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.openai.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000
+    },
+    "google-ocr-rules": {
+      "provider": "google_documentai",
+      "model": "pretrained-ocr-v2.1-2024-08-07",
+      "operation": "ocr",
+      "config": {
+        "endpoint_host": "unconfigured.invalid",
+        "enabled": false
+      }
+    },
+    "gemini-flash-lite-native-v6": {
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "generativelanguage.googleapis.com",
+        "enabled": false
+      },
+      "protocol_version": "6",
+      "schema_mode": "native",
+      "max_output_tokens": 8000
+    },
+    "mistral-small-compact-v5": {
+      "provider": "mistral",
+      "model": "mistral-small-2603",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.mistral.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000
+    },
+    "mistral-annotations-compact-v5": {
+      "provider": "mistral",
+      "model": "mistral-ocr-4-1",
+      "operation": "annotations",
+      "config": {
+        "endpoint_host": "api.mistral.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000
+    },
+    "xai-grok-compact-v5": {
+      "provider": "xai",
+      "model": "grok-4.7",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.x.ai",
+        "enabled": false
+      },
+      "reasoning": "low",
+      "protocol_version": "5",
+      "max_output_tokens": 8000
+    },
+    "azure-read-rules-paced": {
+      "provider": "azure",
+      "model": "prebuilt-read",
+      "operation": "ocr",
+      "config": {
+        "endpoint_host": "unconfigured.invalid",
+        "enabled": false
+      },
+      "protocol_version": "2",
+      "poll_interval_seconds": 5
+    },
+    "azure-invoice-paced": {
+      "provider": "azure",
+      "model": "prebuilt-invoice",
+      "operation": "invoice",
+      "config": {
+        "endpoint_host": "unconfigured.invalid",
+        "enabled": false
+      },
+      "protocol_version": "2",
+      "poll_interval_seconds": 5
+    },
+    "google-invoice-mapping-v2": {
+      "provider": "google_documentai",
+      "model": "pretrained-invoice-v2.0-2023-12-06",
+      "operation": "invoice",
+      "config": {
+        "endpoint_host": "unconfigured.invalid",
+        "enabled": false
+      },
+      "mapping_version": "2"
+    },
+    "aws-text-rules": {
+      "provider": "aws",
+      "model": "DetectDocumentText",
+      "operation": "ocr",
+      "config": {
+        "endpoint_host": "unconfigured.invalid",
+        "enabled": false
+      }
+    },
+    "aws-expense": {
+      "provider": "aws",
+      "model": "AnalyzeExpense",
+      "operation": "invoice",
+      "config": {
+        "endpoint_host": "unconfigured.invalid",
+        "enabled": false
+      }
+    },
+    "mindee-invoice": {
+      "provider": "mindee",
+      "model": "invoice-custom-20261006",
+      "operation": "invoice",
+      "config": {
+        "endpoint_host": "api-v2.mindee.net",
+        "enabled": false
+      }
+    },
+    "anthropic-haiku-compact-v5": {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.anthropic.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "schema_mode": "prompt_json",
+      "max_output_tokens": 8000
+    },
+    "together-qwen-compact-v5": {
+      "provider": "together",
+      "model": "Qwen/Qwen3.5-9B",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.together.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "reasoning": "none"
+    }
+  }
+}
