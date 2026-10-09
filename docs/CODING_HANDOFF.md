@@ -1,48 +1,36 @@
 # Coding handoff — continue here
 
-Phase 2 is closed for the current PoC scope. Read [Phase 2 closeout](PHASE2_CLOSEOUT.md) first: it owns the selected pipeline, measured tradeoff, remaining limitations and preserved evidence. The [fourth-chat handoff](CHAT4_HANDOFF.md) is a prepared technical baseline; Markus will provide its remaining brief later. Do not create that chat or begin mobile implementation during closeout.
+## Current state and authority — 9 October 2026
 
-## Current decision and scope
+Read [mobile checkpoint](MOBILE_CHECKPOINT.md) first. Native iOS and the admin inspector are implemented, and Markus confirmed his real-invoice device testing is complete. The current mobile/admin changes are authorized for review, checks, commit/push, PR and merge. A second, separate chat is explicitly authorized to reorganize the repository, verify it, update status/documentation, and create/merge its own PR. Routine decisions are autonomous; do not repeat confirmation gates from historical handoffs.
 
-Select direct-image `gpt-4.1-mini-2025-04-14`, profile `openai-mini-image-roles-v3@2-5094b6dc13ef5718`, using the current role prompt, partial-field recovery and shared review contract. The active private `.local/providers.json` now selects it; its predecessor is preserved in `.local/phase2-closeout-2026-10-08/providers-before-selection.json`. No hybrid or fallback runs automatically. Compare mode remains an explicit evaluation tool.
+After those two steps, **the presentation must be created together with Markus when he returns**. Then improve the mobile client, work on the backend, and implement Android last. Do not start later features or paid experiments during repository cleanup. Keep experimental method switching for the client demonstration.
 
-Latest measured accepted field scores: OpenAI 79/102 readable and 51/63 critical at median 4.02 seconds; Gemini 80/102 and 50/63 at 3.31 seconds. The best reviewed hybrid has 71/102 and 44/63 at 6.58 seconds, counting both calls. These are partial development-corpus scores, not verified-invoice rates or universal provider rankings. Cost is recorded but did not determine selection.
+## Immediate continuation
 
-Markus's request to wrap the phase, select a pipeline and commit/push confirms this checkpoint and permits the previously requested PR/merge sequence after checks. There were no pending project PRs at closeout inspection. Preserve the active `codex/m2-provider-coverage` branch; inspect current Git/remote state for the completed merge before starting new implementation. No force push or public publication.
+1. Review/check/merge the current mobile/admin checkpoint, including status/docs. Use the actual Git/PR state to establish completion; never infer a merge from a planned task.
+2. Start the explicitly requested separate local chat from the merged checkpoint. Its scope is [repository reorganization](REPOSITORY_REORGANIZATION_HANDOFF.md): root `backend/`, `frontend/`, `ios/`, `android/`, with backend/frontend allowed to remain one deployment. Android gets documentation only, not implementation.
+3. Verify builds, tests, packaging, paths, private-state preservation and the local inspector; then create and merge the refactor PR after checks. Update the status/handoff with concrete results and PR links. No force push or branch-protection bypass.
+4. Leave the project ready for the joint presentation. Networking reliability, paper detection, native OCR and new backend functionality are later improvements.
 
-## Next work
+## Runtime, data and operational facts
 
-1. Add Markus's remaining brief to CHAT4_HANDOFF.md when supplied; do not invent requirements or start another chat yet.
-2. In the next chat, agree M5 capture/import, processing, editable draft, missing-field/retake, error and confirmation designs before mobile code.
-3. Implement M6 iOS against the existing Mac backend with a configurable reachable URL. A physical device cannot use its own localhost for the Mac. Keep provider credentials server-side and test image orientation, polling, idempotent recovery and partial fields.
-4. Android follows as M7. Native OCR is an optional later experiment; barcode decoding is outside this PoC. M8 final HTML findings and the attendee display remain deferred.
+- Repository: `/Users/markusi/Developer/Azikus/scan-and-pay`; private remote `git@github.com:azikus/scan-and-pay-poc.git`. Preserve existing files and inspect active branches before edits.
+- Current iOS code is `apps/ios/`; current frontend assets are `backend/admin_assets/`. The upcoming refactor changes these paths. The exact app bundle ID is `com.azikus.scanpay.poc`; preserve it and on-device data. Xcode signing is supplied locally, not committed.
+- The one-process FastAPI backend and inspector run on the Mac with SQLite/private artifacts in `.local/backend/`. Private launcher/PID/log paths are `.local/mobile-live-2026-10-09/serve.py`, `server.pid`, and `server.log`. Do not start a second owner or stop an active job. If moves require a restart, first verify zero queued/running jobs and retain the same settings/data directory.
+- Current selected profile is persisted separately in SQLite. At this checkpoint it is `mistral-small-image-roles-v3@2-b292ba761e512607`; do not reset it to the historical OpenAI baseline. Seven exact tested profiles are available via the admin's Next scan form. Pending scans retain their original choice.
+- Ledger: **2,201 dispatches / €336.45 held** at checkpoint; unchanged cumulative mobile caps 2,217 / €338.05. No paid calls during PR preparation or refactor. Never rerun completed provider evaluations or reset the ledger.
+- Reconnect tries saved USB then Wi-Fi addresses. Latest phone result: USB failed, Wi-Fi connected. Hotspot testing/automatic discovery remain open. Physical-device localhost is not the Mac.
+- Root `.env` owns existing credentials and connection settings. Provider keys stay on the Mac, the local client token stays in Keychain, and all source invoices/labels/raw responses/results remain ignored. Preserve SDK-managed cloud authentication stores.
 
-Every draft needs confirmation. `success` means complete enough for review, not objectively correct. Preserve invoice totals, supported supplier/account-holder fallback, bank-transfer preference and explicit recipient distinctions. Missing/conflicting amounts are null with a warning; a wrong observed amount may evade detection. Never hide all fields because one is incomplete, invent bank digits, infer currency from an address, or use answer-key values in extraction.
+## Verification and limits
 
-## Workspace, operation and evidence
+Final checkpoint checks: 672 offline backend/evaluation tests; 95.92% statement / 91.20% branch domain/orchestration coverage; Ruff lint/format, strict mypy, contract generation and JS syntax pass. All 16 native unit/recovery and 2 simulator UI tests pass; signed device build succeeds. The user completed real-invoice testing, but no new whole-invoice accuracy or camera-to-review timing claim is made.
 
-Use `/Users/markusi/Developer/Azikus/scan-and-pay`, remote `git@github.com:azikus/scan-and-pay-poc.git`. Inspect status and retain all existing private files. No paid calls during handoff. Latest ledger: **2,197 dispatches / €336.05 retained allowance**; the selected configuration has no additional call allowance. A new bounded mobile-test plan must precede future inference under the same €500 cap. Never reset the ledger or rerun completed evaluation batches to verify a handoff.
+Every draft still requires review. Pay only records a simulated confirmation and resets the capture flow. Original extraction JSON is immutable; confirmed mobile values are separate. Preserve amount/reference/destination associations, exact digits, nulls, warnings and outcome semantics. Provider/scan text remains untrusted. No public publication, subscriptions or live payment integration.
 
-- Latest six-direct comparison: `.local/m3-direct-six-2026-10-08/`.
-- Original fresh baseline: `.local/m3-draft-policy-2026-10-08/fresh/`; recipient-role revisions: `.local/m3-recipient-roles-2026-10-08/`.
-- Current reviewed key and consistent rescoring: `.local/m3-name-review-2026-10-08/`. Only explicitly approved name aliases count; unresolved labels remain unscored.
-- Active 17 masked-image corpus: `.local/evaluation/m3-no2d-2026-10-08/manifest.json`; original samples and historical selections stay unchanged.
-- Closeout profile backup and verification: `.local/phase2-closeout-2026-10-08/`.
-- All original jobs, stage artifacts and ledger: `.local/backend/`.
-- Historical M2 evidence: `.local/m2-2026-10-06/`, `.local/m2-compat-2026-10-07/`, `.local/m2-repeatability-2026-10-07/`. The old 31-input runs establish integration/repeatability, not current masked-corpus accuracy.
-- Credentials and connection settings remain in root `.env`; SDK-managed cloud credentials stay in their existing stores. No secrets, real banking data or sample labels enter Git.
+## Read order and ownership
 
-The backend is stopped. Startup/health/profile inspection does not call providers. README and OPERATIONS.md document offline verification and local startup. Latest checks: 651 tests; 95.57% statement / 90.85% branch coverage. Keep these gates for domain/orchestration/evaluation and use synthetic offline fixtures.
+Read AGENTS.md, this file, MOBILE_CHECKPOINT.md, REPOSITORY_REORGANIZATION_HANDOFF.md, README.md, ROADMAP.md, IMPLEMENTATION_STATUS.md, MOBILE_IMPLEMENTATION.md and MOBILE_LIVE_TESTING.md. Then consult API_CONTRACT.md, ARCHITECTURE.md, OPERATIONS.md and the iOS README for the files affected by the refactor.
 
-## Read order and authority
-
-Read AGENTS.md, PHASE2_CLOSEOUT.md, CHAT4_HANDOFF.md, README.md and this file. Then read:
-
-1. ROADMAP.md, IMPLEMENTATION_STATUS.md, PHASE2_ACCESS.md and PHASE2_ROLLOUT.md.
-2. DECISIONS.md, CONTEXT.md, API_CONTRACT.md and docs/examples/README.md.
-3. ARCHITECTURE.md and BACKEND_PLAN.md.
-4. EVALUATION_PLAN.md, COST_REPORT_PLAN.md, STARTER_EVALUATION.md, PROVIDERS_AND_BUDGET.md and RESEARCH_AND_AUDIT.md.
-5. OPERATIONS.md, INTEGRATIONS.md, M2_OPERATIONS.md, M2_INTEGRATIONS.md and HANDOFF_VERIFICATION.md.
-6. M3_DIRECT_PROVIDER_RESULTS.md and M3_RECIPIENT_ROLES.md when inspecting experimental evidence. M3_HANDOFF.md preserves the earlier continuation baseline and must not restart completed work.
-
-Latest user instructions win. API_CONTRACT.md owns wire semantics; this file owns continuation scope; ROADMAP.md owns milestones. Historical status and earlier approval gates do not override the current closeout. Keep existing Python/FastAPI/Pydantic/SQLite architecture, image-only API, provider-hosted inference, bounded workers and immutable evidence.
+API_CONTRACT.md owns wire semantics; this handoff owns current continuation scope; ROADMAP.md owns milestone names and current sequence. PHASE2_CLOSEOUT.md and CHAT4_HANDOFF.md preserve prior checkpoints; their older no-mobile, no-PR, default-profile and budget gates are historical. Existing Python/FastAPI/Pydantic/SQLite architecture, provider-hosted inference and immutable evidence remain settled.

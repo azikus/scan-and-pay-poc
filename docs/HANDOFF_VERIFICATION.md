@@ -1,6 +1,18 @@
 # Handoff verification
 
-**Current checkpoint — 8 October 2026:** Phase 2 is closed for the current PoC scope. Direct-image GPT-4.1 mini (`openai-mini-image-roles-v3@2-5094b6dc13ef5718`) is selected for mobile integration. See [Phase 2 closeout](PHASE2_CLOSEOUT.md) for the decision, limits and verification, and [fourth-chat handoff](CHAT4_HANDOFF.md) for the prepared baseline. Markus authorized commit/push and the earlier PR/merge sequence; additional handoff details are pending. No new chat or mobile code yet. Earlier status/default/approval statements below are historical snapshots superseded by this checkpoint.
+## Current checkpoint — 9 October 2026
+
+Native iOS and the authenticated admin inspector are implemented, and Markus confirmed his real-invoice testing is complete. Current acceptance, scope and limitations are recorded in [mobile checkpoint](MOBILE_CHECKPOINT.md). Final checks: **672 offline backend/evaluation tests; 95.92% statement / 91.20% branch coverage; 16 native unit/recovery and 2 simulator UI tests**, with lint/format/types/contracts/JS checks passing. Signed device build and installation are complete.
+
+The current ledger is **2,201 dispatches / €336.45 held** under the unchanged 2,217 / €338.05 mobile caps. Persisted admin selection is Mistral Small. The latest hardware reconnect tried USB first, then connected over Wi-Fi; hotspot discovery remains unverified. No paid calls are part of this checkpoint or refactor.
+
+Authorized next steps: create/merge the checked current-changes PR with docs/status updated, then a separate [repository-reorganization chat](REPOSITORY_REORGANIZATION_HANDOFF.md) with its own checks/docs/status and PR/merge. After cleanup: **presentation together with Markus → mobile improvements → backend work → Android last**. See [coding handoff](CODING_HANDOFF.md).
+
+## Historical checkpoints
+
+**Current continuation (9 October):** see [coding handoff](CODING_HANDOFF.md) and [mobile checkpoint](MOBILE_CHECKPOINT.md). The dated Phase 2 text below is historical; its old implementation/approval gates do not govern the current work.
+
+**Historical Phase 2 checkpoint — 8 October 2026:** Phase 2 is closed for the current PoC scope. Direct-image GPT-4.1 mini (`openai-mini-image-roles-v3@2-5094b6dc13ef5718`) is selected for mobile integration. See [Phase 2 closeout](PHASE2_CLOSEOUT.md) for the decision, limits and verification, and [fourth-chat handoff](CHAT4_HANDOFF.md) for the prepared baseline. Markus authorized commit/push and the earlier PR/merge sequence; the supplied mobile brief is in MOBILE_UX_BRIEF.md and the new-chat prompt is in CHAT4_PROMPT.md. No new chat or mobile code yet. Earlier status/default/approval statements below are historical snapshots superseded by this checkpoint.
 
 Latest six-provider direct-image comparison (8 October): all 102 calls are accounted for. OpenAI has 79/102 accepted readable fields and 51/63 critical matches; Gemini has 80/102 and 50/63, with eight additional matching-but-inferred values kept separate. See [direct-provider results](M3_DIRECT_PROVIDER_RESULTS.md) for every provider, failures, timing, cost and limitations. The key/prompts stayed fixed, original evidence is preserved, and no pipeline/default was selected. Ledger now 2,197 dispatched reservations / €336.05 allowance; backend stopped. PR/merge still waits for Markus’s confirmation.
 

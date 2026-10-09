@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Scan & Pay · Inspector</title><link rel="stylesheet" href="/admin/assets/admin.css"><script src="/admin/assets/admin.js" defer></script></head>
+<body>
+<header><div class="brand"><img src="/admin/assets/logo.svg" alt="Azikus"><span>Scan & Pay <small>Inspector</small></span></div><div class="connection"><span id="connection">Disconnected</span><button id="disconnect" hidden>Disconnect</button></div></header>
+<main>
+<section id="login"><h1>Scan &amp; Pay</h1><p>Review extracted data and mobile edits.</p><form id="login-form"><label for="token">Access token</label><div class="login-row"><input id="token" type="password" autocomplete="off" required placeholder="Enter access token"><button type="submit" class="primary">Connect</button></div></form></section>
+<p id="error" role="alert" hidden></p>
+<section id="workspace" hidden>
+<section class="extraction-selector" aria-label="Extraction method">
+<div class="selector-heading"><h2>Next scan</h2><p id="current-selection" class="muted">Loading current selection…</p></div>
+<form id="method-form">
+<div class="selector-fields"><div><label for="extraction-method">Method</label><select id="extraction-method" disabled></select></div><div><label for="extraction-profile">Model / provider</label><select id="extraction-profile" disabled></select></div></div>
+<p id="method-description" class="muted"></p>
+<div class="selector-action"><button id="apply-method" class="primary" type="submit" disabled>Selected</button><span>Applies to your next new scan.</span></div>
+<p id="methods-error" role="status" aria-live="polite"></p>
+</form>
+</section>
+<div class="workspace-title"><h1>Scans</h1><div class="list-actions"><label for="source">Source</label><select id="source"><option value="">All scans</option><option value="mobile">Mobile</option><option value="automated">Automated</option></select><button id="refresh">Refresh</button></div></div>
+<div class="columns"><aside><div class="list-heading"><h2>Recent scans</h2><span id="scan-count"></span></div><div id="scans" aria-label="Recent scans"></div><button id="more" hidden>Load earlier scans</button></aside>
+<article id="detail"><div id="empty"><h2>Select a scan</h2><p>Its provider output, backend JSON and mobile edits appear here.</p></div><div id="selected" hidden>
+<div class="detail-heading"><div><span id="kind" class="badge"></span><h2 id="scan-title"></h2><p id="scan-meta" class="muted"></p></div><button id="copy">Copy JSON</button></div>
+<div id="scan-method" class="scan-method"></div>
+<div class="tabs" role="tablist" aria-label="Output"><button role="tab" aria-selected="true" aria-controls="output" id="original-tab">Original JSON</button><button role="tab" aria-selected="false" aria-controls="output" id="provider-tab">Provider output</button><button role="tab" aria-selected="false" aria-controls="output" id="image-tab" hidden>Sent image</button><button role="tab" aria-selected="false" aria-controls="output" id="reviews-tab">Mobile edits <span id="review-count">0</span></button></div>
+<section id="output" role="tabpanel" aria-labelledby="original-tab"><div id="review-controls" hidden><label for="review-choice">Confirmation received</label><select id="review-choice"></select><div class="table-scroll"><table><thead><tr><th>Field</th><th>Extracted</th><th>Confirmed on phone</th></tr></thead><tbody id="changes"></tbody></table></div></div><div id="provider-controls" hidden><label for="provider-choice">Stage / output</label><select id="provider-choice"></select></div><p id="output-note" class="muted" role="status"></p><figure id="sent-image" hidden><img id="uploaded-image" alt="Original image uploaded from the mobile app"><figcaption>The image received from your phone.</figcaption></figure><pre id="json" aria-label="Formatted JSON"></pre></section>
+</div></article></div>
+</section>
+</main>
+</body></html>

@@ -1,5 +1,15 @@
 # API contract v1
 
+## Admin method selection — 9 October 2026
+
+Authenticated `GET /v1/profiles` advertises `default_extract_profile_id` and the additive nullable `default_extract_profile_version`. A persisted admin selection takes precedence over the configured baseline default; changed/disabled/missing selected versions remain explicit and never silently fall back. A new mobile Send fetches this pair, verifies the matching enabled/configured profile, and freezes its ID/version alongside the upload options and idempotency key. Recovery of an existing upload verifies its frozen selection, independent of a newer default.
+
+The additive `server_id` identifies the backend data store with a persisted random UUID. It survives server restarts and is returned only behind existing authentication; it grants no access itself. The mobile app records it alongside new pending uploads so Reconnect can switch USB/Wi-Fi addresses only when they lead to the same backend. This identity is independent of extraction profiles and makes no provider call.
+
+Authenticated `PUT /v1/admin/selection` accepts `{ "id": "<profile-id>", "version": "<exact-version>" }` and returns the same reference. Unknown/disabled/unconfigured profiles return 422; stale versions return 409. The singleton selection persists in SQLite separately from extraction records. Selecting makes no inference call or reservation and never rewrites a scan. Scans still pass an explicit single profile ID in `options.profiles`; existing submit semantics are unchanged.
+
+Authenticated `GET /v1/admin/methods` provides the read-only method guide and sanitized aggregate benchmark snapshot dated 8 October. Those historical results are not a live readiness claim. Runtime availability comes from `/v1/profiles`; timings are backend elapsed time, not mobile capture-to-review time.
+
 Handoff baseline, 1 October 2026, implemented in Milestone 1. This remains the normative v1 wire specification as providers expand. Wire names are snake_case; schema_version is "1.0". See the preserved [handoff result schema](examples/scan-result.schema.json) and [synthetic responses](examples/README.md). Export current Pydantic/OpenAPI contracts from the typed source and keep agreement tests; do not hand-maintain incompatible contracts. The 6 October handoff refresh changes no wire semantics.
 
 Implementation note, 5 October 2026: Milestone 1 implements this contract with real UK/HR runs through both starter profiles, corrected bank normalization, successful independent comparison and preserved partial-failure evidence. [Generated result schema](../contracts/v1/scan-result.schema.json) and [OpenAPI](../contracts/v1/openapi.json) are exported from the Python models. The original examples/schema above are the preserved handoff baseline; [acceptance evidence](IMPLEMENTATION_STATUS.md) records validation and known extraction limitations.
@@ -100,3 +110,25 @@ Shared prerequisites are off by default for v1 comparisons so results have indep
 ## 7. Contract tests required during coding
 
 Generate API models and schemas from one typed source. Validate the two synthetic examples, plus negative and boundary fixtures; test unknown fields, enums, decimal strings, evidence IDs/coordinates, missing states, candidate IDs, cross-pair prevention, review rules, extract/compare semantics, idempotency races, restart and deletion tombstones. The supplied JSON Schema validates structural shape; business invariants above require code tests and must not be delegated to an LLM.
+
+## Private mobile review inspector (additive, 9 October 2026)
+
+The original `GET /v1/scans/{scan_id}` response remains unchanged: all nullable observation values remain explicit `null`, and original candidates, warnings, evidence and decimal/digit strings are preserved. Mobile and admin pretty-print this response without stripping nulls. Null result rows can be omitted in the mobile presentation without changing the JSON.
+
+`GET /admin` serves a private inspector shell with no scan data. Its data requests require the same bearer token as the scan API. The page keeps that token in memory only, uses no-store responses and self-only assets, and never sends extraction requests. It is intended for the trusted local setup, not public hosting.
+
+- `GET /v1/admin/scans?limit=50&offset=0&source=mobile`: scan metadata, outcome list, resolved profile IDs, source and confirmation counts. The optional `source` filter is `mobile` or `automated` and is applied before pagination. `limit` is 1–100, `offset` is nonnegative, and `next_offset` is nullable. The list contains no invoice field values.
+- `GET /v1/admin/scans/{scan_id}/artifacts`: retained provider responses grouped by recorded run and stage, plus saved OCR text/layout and the OCR input passed to a hybrid LLM. Each output has `kind`, its original JSON `value`, and a nullable read `error`. Polling/error responses are preserved in arrival order. Historical run-level responses are assigned to a stage only when there is exactly one external stage; otherwise they remain unassigned run output. Missing outputs are explicit and never regenerated. This is separate from the normalized original scan result.
+- `GET /v1/admin/scans/{scan_id}/image`: original JPEG/PNG upload bytes, verified against `input.original_sha256`, with their image MIME type. Only scans recorded as mobile are eligible; missing/nonmobile/deleted images return 404, and a saved hash mismatch returns 503. The provider's canonical rendition is not substituted. Both new reads require the same bearer token and return `Cache-Control: no-store`; the image is fetched with Authorization and displayed through a temporary blob URL, never a token-bearing URL.
+- `GET /v1/scans/{scan_id}/reviews`: `{ "reviews": [...] }`, containing separate mobile-confirmed snapshots, in received order.
+- `PUT /v1/scans/{scan_id}/reviews/{review_id}`: save one snapshot with a client-generated UUID. Include `schema_version: "1.0"`, the original `run_id`, `selected_candidate_id`, `event: "review_confirmed"`, `simulated: true`, and `values`.
+
+`values` maps JSON pointers to original **Observation nodes** in that run's payment to edited strings or explicit nulls. It must include every document/document-context observation and every observation of exactly the selected candidate at its original array index. For example, `/candidates/0/amount/value` maps to `"123.45"`, `/candidates/0/destination/account_number` to `"00000000"`, and `/due_date` to `null`. These scalars do not replace original observations, confidence, evidence or evaluation labels. No numeric conversion, inferred payment ownership or actual payment occurs.
+
+The saved response adds `id`, `scan_id` and server `received_at`. Identical UUID/body retries return the same record and timestamp. A different body for an existing UUID is 409; active scans are 409; an unknown scan is 404; a non-reviewable run, foreign candidate, missing/extra field or invalid payload is 422. Blank strings must be represented as null. This endpoint records review activity and does not validate a real payment or change provider/budget state. Deleting a scan through the existing deletion endpoint also deletes its associated mobile snapshots.
+
+New submissions accept `X-Scanpay-Client: mobile|automated` (default `automated`). Source is saved separately at first acceptance and cannot be changed by an idempotent replay. Historical evaluation records without source metadata display as automated. This is client-declared UI provenance, not authentication or a payment-verification claim.
+
+The app submits edits only after Pay opens a summary and the user presses Confirm. Keystrokes are not logged. The inspector shows original JSON and mobile-confirmed values separately and highlights differences.
+
+The PoC confirmation accepts a checked, selected, reviewable candidate even when payment fields are incomplete. Missing/invalid fields remain visible in the confirmation summary. This records `review_confirmed` with `simulated=true`; it does not change backend review state or make the candidate executable. Empty/error results and unselected candidates cannot be confirmed.

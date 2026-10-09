@@ -5,21 +5,26 @@ import logging
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Annotated, Any
+from pathlib import Path
+from typing import Annotated, Any, Literal
+from uuid import UUID
 
-from fastapi import Depends, FastAPI, File, Form, Header, Request, Response, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, Query, Request, Response, UploadFile
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException
 
+from backend.client_reviews import ClientReview, ClientReviews, SavedClientReview, ScanList
 from backend.config import Settings
 from backend.errors import ServiceError
+from backend.extraction_catalog import ExtractionCatalog, catalog
 from backend.images import prepare_image
-from backend.models import Accepted, Error, ErrorResponse, Options, Scan
+from backend.models import Accepted, Error, ErrorResponse, Options, ProfileRef, Scan
 from backend.profiles import Definition, ProfilesResponse, registry, resolve, validate_limits
 from backend.runtime import Adapter, Runtime
+from backend.scan_artifacts import ScanArtifacts
 from backend.store import Store, request_digest
 
 
@@ -59,7 +64,7 @@ def create_app(
             await runtime.stop()
             store.close()
 
-    # Deliberately no browser UI or unauthenticated docs/OpenAPI route.
+    # Admin shell contains no data; every data endpoint requires the local bearer token.
     app = FastAPI(
         title="Scan and Pay",
         version="1.0",
@@ -141,15 +146,117 @@ def create_app(
             value = definition.metadata.model_copy(deep=True)
             value.live_validated = store.is_validated(value.id, value.version)
             values.append(value)
-        return ProfilesResponse(
-            profiles=values,
-            default_extract_profile_id=request.app.state.settings.providers.default_extract_profile_id,
+        selected = store.mobile_selection()
+        default_id = (
+            selected.id
+            if selected
+            else request.app.state.settings.providers.default_extract_profile_id
         )
+        default_version = (
+            selected.version
+            if selected
+            else next((value.version for value in values if value.id == default_id), None)
+        )
+        return ProfilesResponse(
+            server_id=store.backend_id,
+            profiles=values,
+            default_extract_profile_id=default_id,
+            default_extract_profile_version=default_version,
+        )
+
+    @app.put("/v1/admin/selection", response_model=ProfileRef, dependencies=[Depends(auth)])
+    async def select_mobile_profile(selection: ProfileRef, request: Request) -> ProfileRef:
+        definitions = request.app.state.definitions
+        chosen, _ = resolve(
+            Options(mode="extract", profiles=[selection.id]), "image/png", definitions
+        )
+        if chosen[0].metadata.version != selection.version:
+            raise ServiceError(
+                409, "profile_changed", "This profile changed. Refresh before selecting it."
+            )
+        request.app.state.store.select_mobile_profile(selection)
+        return selection
 
     error_models: dict[int | str, dict[str, Any]] = {
         code: {"model": ErrorResponse}
         for code in (400, 401, 404, 409, 410, 413, 415, 422, 429, 503)
     }
+
+    @app.middleware("http")
+    async def private_responses(request: Request, call_next: Any) -> Response:
+        response: Response = await call_next(request)
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        if request.url.path.startswith("/admin"):
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'none'; script-src 'self'; style-src 'self'; "
+                "font-src 'self'; img-src 'self' blob:; connect-src 'self'; "
+                "frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+            )
+        return response
+
+    @app.get("/admin", include_in_schema=False)
+    async def admin_shell() -> FileResponse:
+        return FileResponse(Path(__file__).parent / "admin_assets" / "index.html")
+
+    @app.get("/admin/assets/{name}", include_in_schema=False)
+    async def admin_asset(name: str) -> FileResponse:
+        if name not in {
+            "admin.css",
+            "admin.js",
+            "HankenGrotesk-Regular.ttf",
+            "HankenGrotesk-Semibold.ttf",
+            "logo.svg",
+        }:
+            raise ServiceError(404, "not_found", "Asset not found.")
+        return FileResponse(Path(__file__).parent / "admin_assets" / name)
+
+    @app.get("/v1/admin/methods", response_model=ExtractionCatalog, dependencies=[Depends(auth)])
+    async def extraction_methods() -> ExtractionCatalog:
+        return catalog()
+
+    @app.get("/v1/admin/scans", response_model=ScanList, dependencies=[Depends(auth)])
+    async def list_scans(
+        request: Request,
+        limit: Annotated[int, Query(ge=1, le=100)] = 50,
+        offset: Annotated[int, Query(ge=0)] = 0,
+        source: Literal["mobile", "automated"] | None = None,
+    ) -> ScanList:
+        return await asyncio.to_thread(request.app.state.store.list_scans, limit, offset, source)
+
+    @app.get(
+        "/v1/admin/scans/{scan_id}/artifacts",
+        response_model=ScanArtifacts,
+        dependencies=[Depends(auth)],
+    )
+    async def scan_artifacts(request: Request, scan_id: str) -> ScanArtifacts:
+        return await asyncio.to_thread(request.app.state.store.scan_artifacts, scan_id)
+
+    @app.get(
+        "/v1/admin/scans/{scan_id}/image", dependencies=[Depends(auth)], response_class=Response
+    )
+    async def mobile_image(request: Request, scan_id: str) -> Response:
+        data, mime = await asyncio.to_thread(request.app.state.store.mobile_image, scan_id)
+        return Response(data, media_type=mime)
+
+    @app.get(
+        "/v1/scans/{scan_id}/reviews", response_model=ClientReviews, dependencies=[Depends(auth)]
+    )
+    async def list_reviews(request: Request, scan_id: str) -> ClientReviews:
+        return await asyncio.to_thread(request.app.state.store.client_reviews, scan_id)
+
+    @app.put(
+        "/v1/scans/{scan_id}/reviews/{review_id}",
+        response_model=SavedClientReview,
+        dependencies=[Depends(auth)],
+    )
+    async def save_review(
+        request: Request, scan_id: str, review_id: UUID, body: ClientReview
+    ) -> SavedClientReview:
+        return await asyncio.to_thread(
+            request.app.state.store.save_client_review, scan_id, str(review_id), body
+        )
 
     @app.post(
         "/v1/scans",
@@ -164,6 +271,7 @@ def create_app(
         image: Annotated[UploadFile, File()],
         options: Annotated[str, Form()],
         idempotency_key: Annotated[str, Header(min_length=1)],
+        x_scanpay_client: Annotated[Literal["mobile", "automated"], Header()] = "automated",
     ) -> Accepted:
         form = await request.form()
         if (
@@ -202,7 +310,13 @@ def create_app(
                 validate_limits(prepared, resolved)
                 # Atomic acceptance happens before dispatch; no await between these steps.
                 scan, created = store.accept(
-                    idempotency_key, digest, prepared, selected, resolved, excluded
+                    idempotency_key,
+                    digest,
+                    prepared,
+                    selected,
+                    resolved,
+                    excluded,
+                    x_scanpay_client,
                 )
                 if created:
                     runtime.submit(scan.scan_id, resolved)

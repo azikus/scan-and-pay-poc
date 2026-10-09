@@ -1,0 +1,373 @@
+{
+  "schema_version": "1.0",
+  "execution_kind": "synthetic_fixture",
+  "scan_id": "scan-demo-uk",
+  "mode": "extract",
+  "state": "completed",
+  "created_at": "2026-10-01T00:00:00Z",
+  "updated_at": "2026-10-01T00:00:00Z",
+  "input": {
+    "image_id": "image-synthetic",
+    "original_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "canonical_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "width": 1200,
+    "height": 1600,
+    "mime_type": "image/png",
+    "hints": {
+      "language": null,
+      "issuer_country": null
+    }
+  },
+  "resolved_profiles": [
+    {
+      "id": "fixture-only",
+      "version": "1"
+    }
+  ],
+  "excluded_profiles": [],
+  "runs": [
+    {
+      "id": "run-demo-uk",
+      "profile_id": "fixture-only",
+      "profile_version": "1",
+      "state": "completed",
+      "payment": {
+        "supplier_name": {
+          "value": "Example Utilities Ltd (synthetic)",
+          "raw_text": "Example Utilities Ltd (synthetic)",
+          "state": "observed",
+          "origin": "document",
+          "evidence_ids": [
+            "e1"
+          ],
+          "normalization": [],
+          "alternatives": []
+        },
+        "invoice_number": {
+          "value": "DEMO-UK-42",
+          "raw_text": "DEMO-UK-42",
+          "state": "observed",
+          "origin": "document",
+          "evidence_ids": [
+            "e2"
+          ],
+          "normalization": [],
+          "alternatives": []
+        },
+        "customer_number": {
+          "value": null,
+          "raw_text": null,
+          "state": "missing",
+          "origin": "document",
+          "evidence_ids": [],
+          "normalization": [],
+          "alternatives": []
+        },
+        "description": {
+          "value": "Synthetic invoice, never use for payment",
+          "raw_text": "Synthetic invoice, never use for payment",
+          "state": "observed",
+          "origin": "document",
+          "evidence_ids": [
+            "e3"
+          ],
+          "normalization": [],
+          "alternatives": []
+        },
+        "due_date": {
+          "value": null,
+          "raw_text": null,
+          "state": "missing",
+          "origin": "document",
+          "evidence_ids": [],
+          "normalization": [],
+          "alternatives": []
+        },
+        "candidates": [
+          {
+            "id": "candidate-1",
+            "beneficiary_name": {
+              "value": "Example Utilities Ltd (synthetic)",
+              "raw_text": "Example Utilities Ltd (synthetic)",
+              "state": "observed",
+              "origin": "document",
+              "evidence_ids": [
+                "e4"
+              ],
+              "normalization": [],
+              "alternatives": []
+            },
+            "account_holder_name": {
+              "value": "Example Utilities Ltd (synthetic)",
+              "raw_text": "Example Utilities Ltd (synthetic)",
+              "state": "observed",
+              "origin": "document",
+              "evidence_ids": [
+                "e5"
+              ],
+              "normalization": [],
+              "alternatives": []
+            },
+            "amount": {
+              "value": {
+                "value": "123.45",
+                "raw_text": "123.45",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e6"
+                ],
+                "normalization": [],
+                "alternatives": []
+              },
+              "currency": {
+                "value": "GBP",
+                "raw_text": "GBP",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e7"
+                ],
+                "normalization": [],
+                "alternatives": []
+              },
+              "role": "amount_due"
+            },
+            "destination": {
+              "kind": "uk_domestic",
+              "sort_code": {
+                "value": "000000",
+                "raw_text": "00-00-00",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e8"
+                ],
+                "normalization": [
+                  "remove_sort_code_hyphens"
+                ],
+                "alternatives": []
+              },
+              "account_number": {
+                "value": "00000000",
+                "raw_text": "00000000",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e9"
+                ],
+                "normalization": [],
+                "alternatives": []
+              }
+            },
+            "remittance": {
+              "reference": {
+                "value": "DEMO-42",
+                "raw_text": "DEMO-42",
+                "state": "observed",
+                "origin": "document",
+                "evidence_ids": [
+                  "e10"
+                ],
+                "normalization": [],
+                "alternatives": []
+              },
+              "model": {
+                "value": null,
+                "raw_text": null,
+                "state": "missing",
+                "origin": "document",
+                "evidence_ids": [],
+                "normalization": [],
+                "alternatives": []
+              },
+              "purpose_code": {
+                "value": null,
+                "raw_text": null,
+                "state": "missing",
+                "origin": "document",
+                "evidence_ids": [],
+                "normalization": [],
+                "alternatives": []
+              },
+              "reference_requirement": "required"
+            },
+            "account_country": {
+              "value": null,
+              "raw_text": null,
+              "state": "missing",
+              "origin": "document",
+              "evidence_ids": [],
+              "normalization": [],
+              "alternatives": []
+            }
+          }
+        ],
+        "selected_candidate_id": "candidate-1",
+        "review": {
+          "state": "ready_for_review",
+          "user_confirmation_required": true,
+          "reasons": []
+        },
+        "document_context": {
+          "language": {
+            "value": null,
+            "raw_text": null,
+            "state": "missing",
+            "origin": "document",
+            "evidence_ids": [],
+            "normalization": [],
+            "alternatives": []
+          },
+          "issuer_country": {
+            "value": null,
+            "raw_text": null,
+            "state": "missing",
+            "origin": "document",
+            "evidence_ids": [],
+            "normalization": [],
+            "alternatives": []
+          }
+        }
+      },
+      "evidence": [
+        {
+          "id": "e1",
+          "image_id": "image-synthetic",
+          "excerpt": "Example Utilities Ltd (synthetic)",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e2",
+          "image_id": "image-synthetic",
+          "excerpt": "DEMO-UK-42",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e3",
+          "image_id": "image-synthetic",
+          "excerpt": "Synthetic invoice, never use for payment",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e4",
+          "image_id": "image-synthetic",
+          "excerpt": "Example Utilities Ltd (synthetic)",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e5",
+          "image_id": "image-synthetic",
+          "excerpt": "Example Utilities Ltd (synthetic)",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e6",
+          "image_id": "image-synthetic",
+          "excerpt": "123.45",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e7",
+          "image_id": "image-synthetic",
+          "excerpt": "GBP",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e8",
+          "image_id": "image-synthetic",
+          "excerpt": "00-00-00",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e9",
+          "image_id": "image-synthetic",
+          "excerpt": "00000000",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        },
+        {
+          "id": "e10",
+          "image_id": "image-synthetic",
+          "excerpt": "DEMO-42",
+          "bbox": null,
+          "grounding": "synthetic_fixture",
+          "source_stage_id": "stage-synthetic"
+        }
+      ],
+      "diagnostics": {
+        "requested_model": null,
+        "returned_model": null,
+        "versions": {
+          "schema": "1.0",
+          "fixture": "1"
+        },
+        "timings_ms": {
+          "queue": null,
+          "preprocess": null,
+          "provider": null,
+          "postprocess": null,
+          "total": null
+        },
+        "validation": [
+          {
+            "code": "account_ownership",
+            "path": "/candidates/0/destination",
+            "status": "not_checked",
+            "message": "Synthetic examples do not identify real payment accounts."
+          }
+        ],
+        "stages": [
+          {
+            "id": "stage-synthetic",
+            "method": "synthetic_fixture",
+            "execution": "local",
+            "provider": null,
+            "endpoint_host": null,
+            "account_alias": null,
+            "configured_region": null,
+            "verified_processing_region": null,
+            "payload_classes": [],
+            "input_hash": null,
+            "rendition": null,
+            "request_id": null,
+            "duration_ms": null,
+            "usage": {},
+            "cost": {
+              "status": "unknown",
+              "amount": null,
+              "currency": null,
+              "pricing_source": null,
+              "priced_at": null
+            }
+          }
+        ],
+        "routing": {
+          "applied_rule_packs": [],
+          "reasons": [
+            "Synthetic fixture; no classifier or routing stage executed."
+          ]
+        }
+      },
+      "error": null
+    }
+  ],
+  "final_result_id": "run-demo-uk"
+}

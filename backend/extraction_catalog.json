@@ -1,0 +1,154 @@
+{
+  "measured_on": "2026-10-08",
+  "measurement_note": "Backend elapsed time across 17 images per option, including failed attempts. Excludes phone capture, upload and rendering. Scores cover a reviewed subset of a development corpus, not whole-invoice accuracy. Matching values marked inferred remain separate under the frozen scoring policy.",
+  "methods": [
+    {
+      "id": "direct_vision",
+      "title": "Image → LLM",
+      "description": "A vision model reads the image and returns payment fields in one call.",
+      "options": [
+        "OpenAI GPT-4.1 mini",
+        "Google Gemini 3.5 Flash-Lite",
+        "Mistral Small 2603",
+        "Anthropic Claude Haiku 4.5",
+        "Together Qwen 3.5 9B",
+        "xAI Grok 4.7",
+        "OpenAI GPT-6 Luna (earlier baseline)"
+      ]
+    },
+    {
+      "id": "managed_ocr_rules",
+      "title": "Image → OCR → rules",
+      "description": "An OCR service reads text and layout; local rules identify payment fields. No separate LLM interpretation call.",
+      "options": [
+        "Mistral OCR 4.1",
+        "Azure Document Intelligence Read",
+        "Google Document AI OCR",
+        "AWS Textract DetectDocumentText"
+      ]
+    },
+    {
+      "id": "managed_ocr_llm",
+      "title": "Image → OCR → LLM",
+      "description": "An OCR service reads the image, then a separate model interprets its text and layout. Two external calls per scan.",
+      "options": [
+        "Mistral OCR 4.1 → OpenAI GPT-4.1 mini (tested pairing)"
+      ]
+    },
+    {
+      "id": "prebuilt_document_mapping",
+      "title": "Image → document extraction",
+      "description": "A document service returns invoice fields; the backend maps those fields into the payment draft.",
+      "options": [
+        "Azure Document Intelligence Invoice",
+        "Google Document AI Invoice",
+        "AWS Textract AnalyzeExpense",
+        "Mindee Invoice (configured custom schema)"
+      ]
+    },
+    {
+      "id": "document_annotations",
+      "title": "Image → OCR with structured annotations",
+      "description": "Mistral’s document service returns OCR plus fields requested by our schema. Its internal annotation model is not separately pinned.",
+      "options": [
+        "Mistral OCR 4.1 with document annotations"
+      ]
+    }
+  ],
+  "benchmarks": [
+    {
+      "profile": "mistral-small-image-roles-v3",
+      "profile_version": "2-b292ba761e512607",
+      "provider": "mistral",
+      "model": "mistral-small-2603",
+      "median_seconds": 2.98675658297725,
+      "p95_seconds": 5.783063750073779,
+      "timing_n": 17,
+      "timeouts": 0,
+      "error": 0,
+      "accepted_readable": 71,
+      "readable_total": 102,
+      "critical_matches": 43,
+      "critical_total": 63
+    },
+    {
+      "profile": "gemini-flash-lite-image-roles-v3",
+      "profile_version": "2-85773fe34609a2ff",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "median_seconds": 3.310654207947664,
+      "p95_seconds": 4.995179915975314,
+      "timing_n": 17,
+      "timeouts": 0,
+      "error": 0,
+      "accepted_readable": 80,
+      "readable_total": 102,
+      "critical_matches": 50,
+      "critical_total": 63
+    },
+    {
+      "profile": "openai-mini-image-roles-v3",
+      "profile_version": "2-5094b6dc13ef5718",
+      "provider": "openai",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "median_seconds": 4.020372167986352,
+      "p95_seconds": 9.42881212499924,
+      "timing_n": 17,
+      "timeouts": 0,
+      "error": 0,
+      "accepted_readable": 79,
+      "readable_total": 102,
+      "critical_matches": 51,
+      "critical_total": 63
+    },
+    {
+      "profile": "anthropic-haiku-image-roles-v3",
+      "profile_version": "2-0f5fcc04894fbfce",
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "median_seconds": 5.635192123998422,
+      "p95_seconds": 11.136634583002888,
+      "timing_n": 17,
+      "timeouts": 0,
+      "error": 0,
+      "accepted_readable": 65,
+      "readable_total": 102,
+      "critical_matches": 42,
+      "critical_total": 63
+    },
+    {
+      "profile": "together-qwen-image-roles-v3",
+      "profile_version": "2-73383341c969570b",
+      "provider": "together",
+      "model": "Qwen/Qwen3.5-9B",
+      "median_seconds": 9.40968891698867,
+      "p95_seconds": 22.670420915994328,
+      "timing_n": 17,
+      "timeouts": 0,
+      "error": 0,
+      "accepted_readable": 69,
+      "readable_total": 102,
+      "critical_matches": 47,
+      "critical_total": 63
+    },
+    {
+      "profile": "xai-grok-image-roles-v3",
+      "profile_version": "2-f050fb0fd013c9f1",
+      "provider": "xai",
+      "model": "grok-4.7",
+      "median_seconds": 90.05532679095631,
+      "p95_seconds": 90.1340555420029,
+      "timing_n": 17,
+      "timeouts": 14,
+      "error": 15,
+      "accepted_readable": 16,
+      "readable_total": 102,
+      "critical_matches": 10,
+      "critical_total": 63
+    }
+  ],
+  "deferred": [
+    "On-device OCR: not implemented",
+    "Barcode / QR decoding: outside this PoC"
+  ]
+}

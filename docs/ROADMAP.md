@@ -1,15 +1,15 @@
 # Delivery roadmap
 
-Phase 2 is closed for the current PoC scope as of 8 October 2026. Markus authorized selecting the best tested pipeline, commit/push and the previously requested checked PR/merge sequence. Direct-image GPT-4.1 mini is selected provisionally for correctness and speed; see [closeout](PHASE2_CLOSEOUT.md). Remaining extraction and label limitations are documented follow-ups, not a production-readiness claim.
-
-The [fourth-chat handoff](CHAT4_HANDOFF.md) awaits additional details from Markus. Do not create that chat or start mobile code yet. M5 design agreement precedes M6 iOS, connecting to the existing Mac backend; Android and M8 findings follow later. Cost remains tracked under the €500 experiment cap and does not determine the pipeline choice.
+**Current direction — 9 October 2026:** Phase 2 remains closed for the current PoC scope. M5 is agreed; M6's iOS implementation is complete for this checkpoint and Markus confirmed his real-invoice device testing is done. No universal accuracy or camera-to-review timing claim follows from that acceptance. The inspector supports selectable extraction methods, saved provider outputs/mobile images and separate confirmed edits. See [mobile checkpoint](MOBILE_CHECKPOINT.md).
 
 | Phase | Milestones | Current status |
 | --- | --- | --- |
-| 1 — Backend foundation and first comparison | M1: service, v1 contract, vision and managed OCR/rules | Complete; measured evidence retained |
-| 2 — Provider breadth, extraction quality and evaluation | M2: provider coverage/tooling; M3: better interpretation/hybrids; M4: reviewed comparisons/pipeline selection | M2–M4 closed for current scope; direct-image GPT-4.1 mini selected provisionally |
-| 3 — Mobile designs and implementation | M5: agreed designs; M6: iOS; M7: Android | iOS is the next implementation focus in another chat after selection/design; Android follows later |
-| 4 — Demonstration and findings | M8: stable demo, attendee companion and final report | Deferred; private progress explainer authorized separately |
+| 1 — Backend foundation | M1: service and v1 contract | Complete |
+| 2 — Extraction and evaluation | M2–M4: providers, interpretation, reviewed comparisons | Closed for current scope; original evidence retained |
+| 3 — Mobile | M5: design; M6: iOS; M7: Android | M5/M6 accepted for this PoC checkpoint; improvements follow presentation; Android last |
+| 4 — Demonstration and findings | M8: presentation, dependable demo, companion and report | Presentation is the next joint task after repository cleanup; final deliverables remain open |
+
+Milestone numbers retain their historical definitions; they do not override Markus's newly agreed execution order. Current work is two checked PRs: mobile/admin checkpoint, then a separate repository-reorganization chat with status/documentation updates. Next: presentation together → mobile-client improvements → backend improvements → Android. Keep experimental method switching for the client demonstration; do not silently freeze or replace the current selection.
 
 Backend managed OCR already shipped in M1. M2 broadens OCR/document providers; M3 improves how their observations become payment candidates. Native platform OCR belongs to mobile work. These are separate capabilities, not conflicting milestone assignments.
 
@@ -50,15 +50,17 @@ Acceptance: reproducible measurements, a Markdown experiment record and the sepa
 
 ## M5 — Agree the mobile experience
 
-Later scope: capture/import, actual processing, editable review, missing-field/retake, provider failure and explicit demo confirmation. Use the same payment contract, preserve leading zeroes and distinguish review from executing a payment. Minor approved name variations are nonblocking. An unresolved amount stays empty with a needs-input warning, while other extracted fields remain visible; do not blank all amounts merely because a draft is incomplete. Apply Azikus styling to designed artifacts, never invoice originals.
+Agreed scope: modern camera UI → manual capture/import → crop/adjust → explicit Send → processing → editable review → simulated payment/reset. Use field shimmer and the selected image-led expandable bottom sheet. Pay dismisses the sheet, clears the mobile draft and re-enables capture, with no payment execution. Cover missing-field/retake and provider failure states. See MOBILE_UX_BRIEF.md. Use the same payment contract, preserve leading zeroes and distinguish review from executing a payment. Minor approved name variations are nonblocking. An unresolved amount stays empty with a needs-input warning, while other extracted fields remain visible; do not blank all amounts merely because a draft is incomplete. Apply Azikus styling to designed artifacts, never invoice originals.
 
 Acceptance: Markus agrees the screens/states and API mapping before mobile code. Phase 3 may begin after that explicit scope/design agreement and a stable backend; it need not wait for every optional model comparison in Phase 2.
 
 ## M6 — iOS mobile app
 
-In another chat, implement capture/import → JPEG/PNG upload → processing → editable review using the existing backend: `POST /v1/scans`, then poll `GET /v1/scans/{scan_id}`. Connect to a configurable backend URL on Markus's Mac. A physical iPhone's `localhost` is the phone itself, so use the Mac's reachable LAN address with deliberate development network configuration; simulator loopback can reach the host setup. Keep provider credentials on the backend and the client API token in secure device storage. Do not expose the backend publicly as part of this work.
+Implemented and accepted for this PoC checkpoint (Markus confirmed real-invoice testing on 9 October): capture/import → JPEG/PNG upload → processing → editable review using the existing backend: `POST /v1/scans`, then poll `GET /v1/scans/{scan_id}`. Connect to a configurable backend URL on Markus's Mac. A physical iPhone's `localhost` is the phone itself, so use the Mac's reachable LAN address with deliberate development network configuration; simulator loopback can reach the host setup. Keep provider credentials on the backend and the client API token in secure device storage. Do not expose the backend publicly as part of this work.
 
-Test on Markus's device: orientation/compression, upload, polling, edits, incomplete/error states, cancellation/interruption and network recovery. Measure actual capture-to-review latency. Native OCR/quality signals are optional later experiments, not a dependency of this first image-upload flow. Every payment draft requires explicit review/confirmation; the app does not execute payments.
+The first slice has a capture button and manual crop; no paper detection dependency. TODO for 9 October 2026 morning, once invoices are available: test paper-edge detection and a stable live outline, retaining manual fallback. This is a deferred task, not a scheduled automation.
+
+Test on Markus's device: orientation/cropping/compression, upload, polling, edits, incomplete/error states, duplicate taps, late-result isolation, Pay/reset, interruption and network recovery. Measure actual capture-to-review latency. Native OCR/quality signals are optional later experiments, not a dependency of this first image-upload flow. Every payment draft requires explicit review/confirmation; the app does not execute payments.
 
 Acceptance: a real photograph produces a reviewable draft on-device; missing/ambiguous data and errors are usable; device observations carry provenance and are independently evaluated. Native OCR does not silently replace backend evidence.
 
@@ -76,9 +78,9 @@ Acceptance: dependable end-to-end demonstration, reproducible evidence, visible 
 
 ## Sequence and authority
 
-Fresh evaluation, reviewed-subset scoring and provisional selection are complete. Commit/push and checked PR merge close this checkpoint. Finalize the fourth-chat brief when Markus supplies it, agree mobile screens, then implement iOS in that chat. Pending labels limit correctness claims but do not block mobile design. No additional inference or new chat is authorized by handoff preparation.
+Markus authorized review/checks/commit/push/PR/merge for the current changes, followed by a separate chat to reorganize into `backend/`, `frontend/`, `ios/` and `android/` and create/merge its checked PR. Update status and documentation in both steps. Routine implementation choices and checks are autonomous; no new paid calls, completed evaluation reruns, private-data publication or force push. Preserve the current ledger, selected profile, drafts and credentials. The refactor can keep backend and frontend in one deployment; `android/` is a documented placeholder until Android is explicitly started.
 
-Detailed execution: [coding handoff](CODING_HANDOFF.md), [Phase 2 rollout](PHASE2_ROLLOUT.md), [evaluation plan](EVALUATION_PLAN.md) and [backend plan](BACKEND_PLAN.md). Latest user instructions override this proposed breakdown. The €500 total, included ≤€30 first tranche, mandatory review, full-corpus batches and hosting/privacy boundaries apply throughout.
+After cleanup, wait for Markus to collaborate on the presentation. Further mobile and backend work follows, with Android at the end. Do not start the presentation, new mobile/backend features, Android, automatic discovery or paper detection during this cleanup authorization. Read [coding handoff](CODING_HANDOFF.md) for concrete continuation and [mobile checkpoint](MOBILE_CHECKPOINT.md) for current evidence and known limits.
 
 ## Future improvement outside the PoC
 

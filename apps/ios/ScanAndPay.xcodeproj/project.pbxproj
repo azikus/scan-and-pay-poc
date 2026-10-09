@@ -1,0 +1,551 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		18020B3B77D359C03AD78A3F /* ScanModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A695FA9B66AD18869A97F03C /* ScanModels.swift */; };
+		4484F2C600539783F0C6B7C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 68CEEEE6BE96B9B68F2E3FCE /* Assets.xcassets */; };
+		455A757EC996C748FC4059A0 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1EFF2FDECECC6C52D3EF809D /* OFL.txt */; };
+		4E027F4D668DAD7515875D00 /* BackendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C726310296005C2C03ACF /* BackendClient.swift */; };
+		50A6AE7728FB2DFB96880B98 /* PaymentConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1932AB52EBCE7E967D9BFFA7 /* PaymentConfirmation.swift */; };
+		58AEC58A6376DD4CDA0F9244 /* ScanSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB88D794FA463D9618D6E3E /* ScanSession.swift */; };
+		6FF06872DF29C5A0E1952E87 /* HankenGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2CB149A431BD12B3185AE73E /* HankenGrotesk-Regular.ttf */; };
+		7BD7C644D5CE28EC6F557C53 /* DevelopmentConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C16FE67D865258E6B0C4FE /* DevelopmentConnection.swift */; };
+		93C0FF52D470B1C8141C4C5B /* ScanAndPayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7802D4328E871B743E43D62E /* ScanAndPayApp.swift */; };
+		94E0DE848735B83746839DFC /* ScanAndPayUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04824EE7499435E34A7298F /* ScanAndPayUITests.swift */; };
+		9D64DD26FAA74C3F61C148CB /* ScanAndPayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801A225424A6A56BC82176D9 /* ScanAndPayTests.swift */; };
+		BD931FB15434E7B39910DAA1 /* HankenGrotesk-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 17B6F2CBF1C423870EEE3672 /* HankenGrotesk-Semibold.ttf */; };
+		CB3A0C98468067076C3FCD42 /* RecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE3025FDA9A3ADB26D49F3CF /* RecoveryTests.swift */; };
+		DD8ABBCDB34D98060BB1DB6A /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80001D8EFFC66EE0F2BBC7A /* Camera.swift */; };
+		DEEC1A700B38991FA40D9F3B /* uk-extract.synthetic.json in Resources */ = {isa = PBXBuildFile; fileRef = 9333323A02DC56A742B7492D /* uk-extract.synthetic.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		43858367588AD0D3BA7D202C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2D9AC09737DF2C104C99DE36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C74EAC5783382D309DFB26BE;
+			remoteInfo = ScanAndPay;
+		};
+		95F7FDAFDF560D7B2A937579 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2D9AC09737DF2C104C99DE36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C74EAC5783382D309DFB26BE;
+			remoteInfo = ScanAndPay;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1163B624916DA6B8C9998FF8 /* ScanAndPay.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ScanAndPay.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		17B6F2CBF1C423870EEE3672 /* HankenGrotesk-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-Semibold.ttf"; sourceTree = "<group>"; };
+		1932AB52EBCE7E967D9BFFA7 /* PaymentConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentConfirmation.swift; sourceTree = "<group>"; };
+		1EFF2FDECECC6C52D3EF809D /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		2CB149A431BD12B3185AE73E /* HankenGrotesk-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-Regular.ttf"; sourceTree = "<group>"; };
+		40C16FE67D865258E6B0C4FE /* DevelopmentConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevelopmentConnection.swift; sourceTree = "<group>"; };
+		525C726310296005C2C03ACF /* BackendClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendClient.swift; sourceTree = "<group>"; };
+		68CEEEE6BE96B9B68F2E3FCE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7802D4328E871B743E43D62E /* ScanAndPayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanAndPayApp.swift; sourceTree = "<group>"; };
+		785E594F7A036BF483097BF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		801A225424A6A56BC82176D9 /* ScanAndPayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanAndPayTests.swift; sourceTree = "<group>"; };
+		9333323A02DC56A742B7492D /* uk-extract.synthetic.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "uk-extract.synthetic.json"; sourceTree = "<group>"; };
+		9EB88D794FA463D9618D6E3E /* ScanSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanSession.swift; sourceTree = "<group>"; };
+		A06518FE50DAE2A006FFB41D /* ScanAndPayTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ScanAndPayTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A695FA9B66AD18869A97F03C /* ScanModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanModels.swift; sourceTree = "<group>"; };
+		AE3025FDA9A3ADB26D49F3CF /* RecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryTests.swift; sourceTree = "<group>"; };
+		B80001D8EFFC66EE0F2BBC7A /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		D04824EE7499435E34A7298F /* ScanAndPayUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanAndPayUITests.swift; sourceTree = "<group>"; };
+		EB37487D78D213138A9570FA /* ScanAndPayUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ScanAndPayUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0A852218BE1CCDF608A74F22 /* ScanAndPayUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D04824EE7499435E34A7298F /* ScanAndPayUITests.swift */,
+			);
+			path = ScanAndPayUITests;
+			sourceTree = "<group>";
+		};
+		74AB699F482119BCCF345375 = {
+			isa = PBXGroup;
+			children = (
+				FB9E126F11E9063DA38A8123 /* ScanAndPay */,
+				A85353EC7C1D7C2E461DCD6F /* ScanAndPayTests */,
+				0A852218BE1CCDF608A74F22 /* ScanAndPayUITests */,
+				FDD1BB285223163B4B50EC1C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A85353EC7C1D7C2E461DCD6F /* ScanAndPayTests */ = {
+			isa = PBXGroup;
+			children = (
+				AE3025FDA9A3ADB26D49F3CF /* RecoveryTests.swift */,
+				801A225424A6A56BC82176D9 /* ScanAndPayTests.swift */,
+			);
+			path = ScanAndPayTests;
+			sourceTree = "<group>";
+		};
+		B1AC13D160BC2BAC88AEA50F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2CB149A431BD12B3185AE73E /* HankenGrotesk-Regular.ttf */,
+				17B6F2CBF1C423870EEE3672 /* HankenGrotesk-Semibold.ttf */,
+				1EFF2FDECECC6C52D3EF809D /* OFL.txt */,
+				9333323A02DC56A742B7492D /* uk-extract.synthetic.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		FB9E126F11E9063DA38A8123 /* ScanAndPay */ = {
+			isa = PBXGroup;
+			children = (
+				68CEEEE6BE96B9B68F2E3FCE /* Assets.xcassets */,
+				525C726310296005C2C03ACF /* BackendClient.swift */,
+				B80001D8EFFC66EE0F2BBC7A /* Camera.swift */,
+				40C16FE67D865258E6B0C4FE /* DevelopmentConnection.swift */,
+				785E594F7A036BF483097BF7 /* Info.plist */,
+				1932AB52EBCE7E967D9BFFA7 /* PaymentConfirmation.swift */,
+				7802D4328E871B743E43D62E /* ScanAndPayApp.swift */,
+				A695FA9B66AD18869A97F03C /* ScanModels.swift */,
+				9EB88D794FA463D9618D6E3E /* ScanSession.swift */,
+				B1AC13D160BC2BAC88AEA50F /* Resources */,
+			);
+			path = ScanAndPay;
+			sourceTree = "<group>";
+		};
+		FDD1BB285223163B4B50EC1C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1163B624916DA6B8C9998FF8 /* ScanAndPay.app */,
+				A06518FE50DAE2A006FFB41D /* ScanAndPayTests.xctest */,
+				EB37487D78D213138A9570FA /* ScanAndPayUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C74EAC5783382D309DFB26BE /* ScanAndPay */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 82ED093AD229DD5343AB91B9 /* Build configuration list for PBXNativeTarget "ScanAndPay" */;
+			buildPhases = (
+				2F71EF3C4758054A88FEADDD /* Sources */,
+				5128141F7F9A0A970FA33431 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScanAndPay;
+			productName = ScanAndPay;
+			productReference = 1163B624916DA6B8C9998FF8 /* ScanAndPay.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F211A862585A1C60E9537F4E /* ScanAndPayTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1B9B0504320BED8D17F4855 /* Build configuration list for PBXNativeTarget "ScanAndPayTests" */;
+			buildPhases = (
+				37F30BA9C0A01CF2F0C94801 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				45E10CFDA43B21D1BF85C41C /* PBXTargetDependency */,
+			);
+			name = ScanAndPayTests;
+			productName = ScanAndPayTests;
+			productReference = A06518FE50DAE2A006FFB41D /* ScanAndPayTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F43E65DF2642ABFC10831B44 /* ScanAndPayUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 96FCD52EC580245E9FB5955C /* Build configuration list for PBXNativeTarget "ScanAndPayUITests" */;
+			buildPhases = (
+				9B18D5B84E4242698F9EADBE /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A636892B3A193800BE4049CC /* PBXTargetDependency */,
+			);
+			name = ScanAndPayUITests;
+			productName = ScanAndPayUITests;
+			productReference = EB37487D78D213138A9570FA /* ScanAndPayUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2D9AC09737DF2C104C99DE36 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					C74EAC5783382D309DFB26BE = {
+						ProvisioningStyle = Automatic;
+					};
+					F211A862585A1C60E9537F4E = {
+						ProvisioningStyle = Automatic;
+					};
+					F43E65DF2642ABFC10831B44 = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = C74EAC5783382D309DFB26BE;
+					};
+				};
+			};
+			buildConfigurationList = EA91BB0738EADB5DB28167EF /* Build configuration list for PBXProject "ScanAndPay" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 74AB699F482119BCCF345375;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C74EAC5783382D309DFB26BE /* ScanAndPay */,
+				F211A862585A1C60E9537F4E /* ScanAndPayTests */,
+				F43E65DF2642ABFC10831B44 /* ScanAndPayUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5128141F7F9A0A970FA33431 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4484F2C600539783F0C6B7C2 /* Assets.xcassets in Resources */,
+				6FF06872DF29C5A0E1952E87 /* HankenGrotesk-Regular.ttf in Resources */,
+				BD931FB15434E7B39910DAA1 /* HankenGrotesk-Semibold.ttf in Resources */,
+				455A757EC996C748FC4059A0 /* OFL.txt in Resources */,
+				DEEC1A700B38991FA40D9F3B /* uk-extract.synthetic.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2F71EF3C4758054A88FEADDD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E027F4D668DAD7515875D00 /* BackendClient.swift in Sources */,
+				DD8ABBCDB34D98060BB1DB6A /* Camera.swift in Sources */,
+				7BD7C644D5CE28EC6F557C53 /* DevelopmentConnection.swift in Sources */,
+				50A6AE7728FB2DFB96880B98 /* PaymentConfirmation.swift in Sources */,
+				93C0FF52D470B1C8141C4C5B /* ScanAndPayApp.swift in Sources */,
+				18020B3B77D359C03AD78A3F /* ScanModels.swift in Sources */,
+				58AEC58A6376DD4CDA0F9244 /* ScanSession.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37F30BA9C0A01CF2F0C94801 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CB3A0C98468067076C3FCD42 /* RecoveryTests.swift in Sources */,
+				9D64DD26FAA74C3F61C148CB /* ScanAndPayTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B18D5B84E4242698F9EADBE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94E0DE848735B83746839DFC /* ScanAndPayUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		45E10CFDA43B21D1BF85C41C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C74EAC5783382D309DFB26BE /* ScanAndPay */;
+			targetProxy = 95F7FDAFDF560D7B2A937579 /* PBXContainerItemProxy */;
+		};
+		A636892B3A193800BE4049CC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C74EAC5783382D309DFB26BE /* ScanAndPay */;
+			targetProxy = 43858367588AD0D3BA7D202C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		04DA33E6736349D4B9043A77 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.azikus.scanpay.ScanAndPayTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScanAndPay.app/ScanAndPay";
+			};
+			name = Release;
+		};
+		0BD3FAF464AB857081CCCDE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		1CFF0243F003EE8F79AA1B52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = ScanAndPay/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.azikus.scanpay.poc;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		2DF9EB1E2D293A598C9D98C7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.azikus.scanpay.ScanAndPayUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ScanAndPay;
+			};
+			name = Debug;
+		};
+		577D937B1F19D8B4A7E59A48 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.azikus.scanpay.ScanAndPayTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScanAndPay.app/ScanAndPay";
+			};
+			name = Debug;
+		};
+		5983043917A7A0DDAFC04763 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = ScanAndPay/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.azikus.scanpay.poc;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		72D0C41B6118EF76FBDC626C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.azikus.scanpay.ScanAndPayUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ScanAndPay;
+			};
+			name = Release;
+		};
+		E15419CD724F89ABE67C4A52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		82ED093AD229DD5343AB91B9 /* Build configuration list for PBXNativeTarget "ScanAndPay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1CFF0243F003EE8F79AA1B52 /* Debug */,
+				5983043917A7A0DDAFC04763 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		96FCD52EC580245E9FB5955C /* Build configuration list for PBXNativeTarget "ScanAndPayUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2DF9EB1E2D293A598C9D98C7 /* Debug */,
+				72D0C41B6118EF76FBDC626C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D1B9B0504320BED8D17F4855 /* Build configuration list for PBXNativeTarget "ScanAndPayTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				577D937B1F19D8B4A7E59A48 /* Debug */,
+				04DA33E6736349D4B9043A77 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EA91BB0738EADB5DB28167EF /* Build configuration list for PBXProject "ScanAndPay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0BD3FAF464AB857081CCCDE2 /* Debug */,
+				E15419CD724F89ABE67C4A52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2D9AC09737DF2C104C99DE36 /* Project object */;
+}

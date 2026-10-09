@@ -11,14 +11,23 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from decimal import ROUND_CEILING
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from uuid import uuid4
 
+from backend.client_reviews import (
+    ClientReview,
+    ClientReviews,
+    SavedClientReview,
+    ScanList,
+    ScanSummary,
+    validate_review,
+)
 from backend.config import Settings
 from backend.errors import ServiceError
 from backend.images import PreparedImage, sha256
 from backend.models import Diagnostics, Error, ExcludedProfile, Options, ProfileRef, Run, Scan
 from backend.profiles import Definition
+from backend.scan_artifacts import ScanArtifacts, read_artifacts, safe_file, scan_directory
 
 
 def utcnow() -> str:
@@ -85,7 +94,25 @@ class Store:
                     id TEXT PRIMARY KEY, scan_id TEXT NOT NULL, run_id TEXT NOT NULL,
                     started_at TEXT NOT NULL, finished_at TEXT, body TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS scan_sources (
+                    scan_id TEXT PRIMARY KEY, source TEXT NOT NULL CHECK(source IN ('mobile','automated'))
+                );
+                CREATE TABLE IF NOT EXISTS client_reviews (
+                    scan_id TEXT NOT NULL, id TEXT NOT NULL, body TEXT NOT NULL,
+                    PRIMARY KEY(scan_id, id)
+                );
+                CREATE TABLE IF NOT EXISTS mobile_selection (
+                    singleton INTEGER PRIMARY KEY CHECK(singleton=1),
+                    profile_id TEXT NOT NULL, version TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS backend_identity (
+                    singleton INTEGER PRIMARY KEY CHECK(singleton=1), id TEXT NOT NULL
+                );
             """)
+            db.execute("INSERT OR IGNORE INTO backend_identity VALUES(1,?)", (str(uuid4()),))
+            self.backend_id: str = db.execute(
+                "SELECT id FROM backend_identity WHERE singleton=1"
+            ).fetchone()[0]
         self.db_path.chmod(0o600)
 
     @contextmanager
@@ -103,6 +130,21 @@ class Store:
 
     def close(self) -> None:
         self._lock_file.close()
+
+    def mobile_selection(self) -> ProfileRef | None:
+        with self.connection() as db:
+            row = db.execute(
+                "SELECT profile_id,version FROM mobile_selection WHERE singleton=1"
+            ).fetchone()
+        return ProfileRef(id=row["profile_id"], version=row["version"]) if row else None
+
+    def select_mobile_profile(self, selection: ProfileRef) -> None:
+        with self.connection() as db:
+            db.execute(
+                "INSERT INTO mobile_selection VALUES(1,?,?) "
+                "ON CONFLICT(singleton) DO UPDATE SET profile_id=excluded.profile_id,version=excluded.version",
+                (selection.id, selection.version),
+            )
 
     def ready(self) -> bool:
         with self.connection() as db:
@@ -143,6 +185,7 @@ class Store:
         options: Options,
         definitions: list[Definition],
         excluded: list[ExcludedProfile],
+        source: Literal["mobile", "automated"] = "automated",
     ) -> tuple[Scan, bool]:
         scan_id = "scan-" + uuid4().hex
         created_dir = False
@@ -227,6 +270,7 @@ class Store:
                     "INSERT INTO idempotency(key_hash,digest,scan_id) VALUES(?,?,?)",
                     (sha256(key.encode()), digest, scan_id),
                 )
+                db.execute("INSERT INTO scan_sources VALUES(?,?)", (scan_id, source))
                 for run, d in zip(runs, definitions, strict=True):
                     if not d.synthetic:
                         for slot, ceiling in enumerate(d.reservations):
@@ -265,6 +309,78 @@ class Store:
                 "UPDATE jobs SET state=?,body=? WHERE id=?",
                 (checked.state, checked.model_dump_json(), checked.scan_id),
             )
+
+    def list_scans(
+        self, limit: int, offset: int, source: Literal["mobile", "automated"] | None = None
+    ) -> ScanList:
+        with self.connection() as db:
+            rows = db.execute(
+                "SELECT body, COALESCE(s.source, 'automated') AS source, "
+                "(SELECT COUNT(*) FROM client_reviews r WHERE r.scan_id=j.id) AS reviews "
+                "FROM jobs j LEFT JOIN scan_sources s ON s.scan_id=j.id "
+                "WHERE (? IS NULL OR COALESCE(s.source, 'automated')=?) "
+                "ORDER BY json_extract(body, '$.created_at') DESC, j.id DESC LIMIT ? OFFSET ?",
+                (source, source, limit + 1, offset),
+            ).fetchall()
+        summaries = []
+        for row in rows[:limit]:
+            scan = Scan.model_validate_json(row["body"])
+            summaries.append(
+                ScanSummary(
+                    scan_id=scan.scan_id,
+                    created_at=scan.created_at,
+                    state=scan.state,
+                    execution_kind=scan.execution_kind,
+                    source=row["source"],
+                    outcomes=[r.result_outcome for r in scan.runs],
+                    profiles=[p.id for p in scan.resolved_profiles],
+                    client_review_count=row["reviews"],
+                )
+            )
+        return ScanList(scans=summaries, next_offset=offset + limit if len(rows) > limit else None)
+
+    def client_reviews(self, scan_id: str) -> ClientReviews:
+        with self.connection() as db:
+            if db.execute("SELECT 1 FROM jobs WHERE id=?", (scan_id,)).fetchone() is None:
+                raise ServiceError(404, "not_found", "Scan not found.")
+            rows = db.execute(
+                "SELECT body FROM client_reviews WHERE scan_id=? ORDER BY rowid", (scan_id,)
+            ).fetchall()
+        return ClientReviews(reviews=[SavedClientReview.model_validate_json(r[0]) for r in rows])
+
+    def save_client_review(
+        self, scan_id: str, review_id: str, review: ClientReview
+    ) -> SavedClientReview:
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT body FROM jobs WHERE id=?", (scan_id,)).fetchone()
+            if row is None:
+                raise ServiceError(404, "not_found", "Scan not found.")
+            scan = Scan.model_validate_json(row[0])
+            validate_review(scan, review)
+            existing = db.execute(
+                "SELECT body FROM client_reviews WHERE scan_id=? AND id=?", (scan_id, review_id)
+            ).fetchone()
+            if existing:
+                saved = SavedClientReview.model_validate_json(existing[0])
+                if (
+                    ClientReview.model_validate(
+                        saved.model_dump(include=set(ClientReview.model_fields))
+                    )
+                    != review
+                ):
+                    raise ServiceError(
+                        409, "review_conflict", "This review ID has different values."
+                    )
+                return saved
+            saved = SavedClientReview(
+                **review.model_dump(), id=review_id, scan_id=scan_id, received_at=utcnow()
+            )
+            db.execute(
+                "INSERT INTO client_reviews VALUES(?,?,?)",
+                (scan_id, review_id, saved.model_dump_json()),
+            )
+            return saved
 
     def preprocessing(self, scan_id: str) -> tuple[list[str], float]:
         with self.connection() as db:
@@ -398,6 +514,8 @@ class Store:
                 db.execute("DELETE FROM stage_reservations WHERE run_id=?", (run.id,))
             db.execute("DELETE FROM jobs WHERE id=?", (scan_id,))
             db.execute("DELETE FROM stages WHERE scan_id=?", (scan_id,))
+            db.execute("DELETE FROM client_reviews WHERE scan_id=?", (scan_id,))
+            db.execute("DELETE FROM scan_sources WHERE scan_id=?", (scan_id,))
             db.execute("UPDATE idempotency SET deleted=1,scan_id=NULL WHERE scan_id=?", (scan_id,))
 
     def save_raw(self, scan_id: str, run_id: str, value: Any) -> None:
@@ -405,3 +523,29 @@ class Store:
             self.artifacts / scan_id / (run_id + ".raw.json"),
             json.dumps(value, ensure_ascii=False).encode(),
         )
+
+    def scan_source(self, scan_id: str) -> Literal["mobile", "automated"]:
+        with self.connection() as db:
+            row = db.execute(
+                "SELECT source FROM scan_sources WHERE scan_id=?", (scan_id,)
+            ).fetchone()
+            return "mobile" if row and row[0] == "mobile" else "automated"
+
+    def scan_artifacts(self, scan_id: str) -> ScanArtifacts:
+        with self.connection():
+            scan = self.get(scan_id)
+            return read_artifacts(self.artifacts, scan, self.scan_source(scan_id))
+
+    def mobile_image(self, scan_id: str) -> tuple[bytes, str]:
+        with self.connection():
+            scan = self.get(scan_id)
+            directory = scan_directory(self.artifacts, scan)
+            original = directory / "original"
+            if self.scan_source(scan_id) != "mobile" or not safe_file(original, directory):
+                raise ServiceError(404, "not_found", "Mobile image not found.")
+            data = original.read_bytes()
+            if sha256(data) != scan.input.original_sha256:
+                raise ServiceError(
+                    503, "service_unavailable", "The saved image could not be verified."
+                )
+            return data, scan.input.mime_type

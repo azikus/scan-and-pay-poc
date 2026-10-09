@@ -2,13 +2,13 @@
 
 Independent Azikus backend for turning one JPEG/PNG invoice image into an editable payment draft. Every draft requires user review and confirmation; the PoC does not execute payments.
 
-**Phase 2 is closed for the current scope.** Ten provider families, versioned interpretation and hybrid experiments, full-corpus tooling and reviewed-subset scoring are implemented. We selected **direct-image GPT-4.1 mini** for correctness and speed: 79/102 reviewed readable fields, 51/63 critical fields, 4.02-second median and 9.43-second p95 in the latest 17-image run. These are partial development-corpus results, not whole-invoice or production accuracy. See [selection and limitations](docs/PHASE2_CLOSEOUT.md) and [all direct providers](docs/M3_DIRECT_PROVIDER_RESULTS.md).
+**Current checkpoint — 9 October 2026:** the native iOS capture/crop → Send → editable review → confirmation/reset flow and the authenticated admin inspector are implemented. Markus confirmed that his real-invoice iPhone testing is complete. This is PoC acceptance, not a production accuracy or measured end-to-end latency claim. See [mobile checkpoint](docs/MOBILE_CHECKPOINT.md), [mobile implementation](docs/MOBILE_IMPLEMENTATION.md) and [iOS setup](apps/ios/README.md).
 
-The active private `.local/providers.json` selects `openai-mini-image-roles-v3@2-5094b6dc13ef5718`. The prior default and all experiments are preserved. [providers.selected.example.json](providers.selected.example.json) is a disabled portable template, not the account-ready local snapshot. The current ledger is 2,197 dispatched calls / €336.05 allowance; no new call allowance was added during closeout.
+The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. Seven tested profiles are enabled under the existing bounded mobile allowance. The persisted admin selection is currently **Mistral Small** (`mistral-small-image-roles-v3@2-b292ba761e512607`); pending drafts retain their original profile. OpenAI remains the historical Phase 2 baseline, described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
 
-**Next:** finalize the [fourth-chat handoff](docs/CHAT4_HANDOFF.md) when Markus supplies its remaining brief, agree mobile designs, then build iOS against the Mac backend in that chat. A physical iPhone requires the Mac's reachable URL. Android and final findings follow later; barcode decoding remains outside this PoC. No new chat or mobile code is created by this closeout.
+At this checkpoint, the original ledger contains **2,201 dispatched reservations / €336.45 held**. The unchanged mobile limits are 2,217 / €338.05; no paid calls are authorized for PR preparation or repository reorganization. Private samples, labels, raw responses, reports and credentials remain outside Git. These holds are not actual billed charges.
 
-Latest offline checks: **651 passing tests**, **95.57% statements / 90.85% branches** in domain/orchestration/evaluation, plus lint, formatting and strict typing. Private samples, reviewed labels, provider results, reports and credentials stay outside Git. Target remote: `git@github.com:azikus/scan-and-pay-poc.git`. Start with [coding handoff](docs/CODING_HANDOFF.md), [roadmap](docs/ROADMAP.md), [API contract](docs/API_CONTRACT.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
+**Next:** merge this checked mobile/admin checkpoint, then reorganize the repository in a separate chat and merge that checked refactor, updating status/docs in both steps. Afterward, build the presentation **together with Markus**, then improve the mobile client and backend, and implement Android last. Hotspot testing and automatic Mac discovery remain open; Reconnect currently tries saved USB/Wi-Fi addresses. See [coding handoff](docs/CODING_HANDOFF.md), [roadmap](docs/ROADMAP.md), [API contract](docs/API_CONTRACT.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
 
 ## Local setup
 
@@ -82,7 +82,7 @@ A localhost service accepts one JPEG/PNG, persists a job and returns a payment d
 - Preserve paired UK bank details, IBAN, Croatian model/poziv na broj, amount/currency and required references. Customer numbers are not bank routing.
 - Every draft requires review/confirmation. No silent banking-digit repairs, model-confidence guarantees or majority-vote truth.
 - Up to €500 and client-sample provider testing are authorized. Configure secrets locally; no automatic subscription purchases. Public use requires separate permission.
-- Native mobile designs later, iOS first and Android next. HTML findings report and separate attendee display are end deliverables, not current work.
+- Native iOS is implemented. Presentation collaboration comes after repository cleanup; further mobile/backend improvements follow, with Android last. Final findings and the separate attendee display remain distinct deliverables.
 
 ## Existing material
 

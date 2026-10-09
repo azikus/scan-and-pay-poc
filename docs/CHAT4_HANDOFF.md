@@ -1,12 +1,18 @@
-# Fourth-chat handoff — technical baseline
+# Fourth-chat handoff — mobile design and iOS
 
-**Status:** baseline prepared; Markus will supply the remaining handoff brief later. No fourth chat has been created. Do not infer design approval, device/project details or additional requirements from this placeholder.
+**Status:** ready with Markus’s mobile brief, supplied 8 October 2026. Read [mobile UX brief](MOBILE_UX_BRIEF.md) for the requested flow and proposed design; [copyable new-chat prompt](CHAT4_PROMPT.md) starts the next phase. No fourth chat has been created and no mobile code is written. The proposed loader and bottom sheet need design iteration, not another requirements-collection round.
 
 ## Start here
 
-Continue in `/Users/markusi/Developer/Azikus/scan-and-pay`, remote `git@github.com:azikus/scan-and-pay-poc.git`. Inspect Git status/log and preserve private local files. The closeout work uses `codex/m2-provider-coverage`; inspect the remote for its merged checkpoint before starting a new `codex/` implementation branch. Do not discard this checkout or assume ignored evidence is in Git.
+Continue in `/Users/markusi/Developer/Azikus/scan-and-pay`, remote `git@github.com:azikus/scan-and-pay-poc.git`. Inspect Git status/log and preserve private local files. Phase 2 PR #1 merged into `main` at `c7f2fc9471e744b75f47614b60e8b648fc876b1e`. The local closeout branch is `codex/m2-provider-coverage`; preserve any newer handoff edits when starting a new `codex/` implementation branch from the merged checkpoint. Do not discard this checkout or assume ignored evidence is in Git.
 
 Read `AGENTS.md`, [Phase 2 closeout](PHASE2_CLOSEOUT.md), [coding handoff](CODING_HANDOFF.md), [roadmap](ROADMAP.md), [API contract](API_CONTRACT.md), and [operations](OPERATIONS.md). Follow the coding handoff's remaining read order before implementation. Historical M2/M3 documents describe experiments, not instructions to restart them.
+
+## Mobile brief and first task
+
+Start with [MOBILE_UX_BRIEF.md](MOBILE_UX_BRIEF.md): a modern Azikus camera interface; capture, manual crop/adjustment, explicit Send, a proposed shimmer loader, editable result bottom sheet, and a clearly simulated Demo Pay action that dismisses the sheet and re-enables capture. Show the actual final image before sending. No request should leave the device before Send.
+
+The first task in the new chat is a concrete visual/interaction proposal covering these states, then refinement with Markus before native implementation. The bottom sheet and loader are suggestions, not approved final screens. Paper detection and a live outline are a separate TODO for physical invoice testing on 9 October 2026 morning (the “tomorrow morning” mentioned on 8 October); they do not block manual capture/crop. If starting later, confirm invoice availability and do not imply testing has occurred. No automatic reminder was created.
 
 ## Settled choice
 
@@ -46,4 +52,4 @@ The active configuration is capped at the current ledger: **2,197 dispatches / �
 
 Known limitations: partial labels, development-corpus bias, erroneous observed values, reference association, uncertain name/inference grading, small timing sample and no mobile-camera validation. Additional label adjudication can rescore saved responses offline. xAI cost accounting omits separate reasoning output in its historical runtime estimate; the latest report uses returned cost ticks. Fix this separately before relying on a future xAI estimate.
 
-Next authorized direction is M5 design agreement followed by M6 iOS in the next chat. Await Markus's additional brief before finalizing that handoff. No mobile code, final HTML findings, attendee display, Android implementation or barcode decoding belongs to this closeout.
+Next direction is M5 design iteration using the supplied mobile brief, followed by M6 iOS after screen agreement in the next chat. The handoff brief is now ready; device/signing details can be resolved through local inspection and focused questions when needed. No mobile code, final HTML findings, attendee display, Android implementation or barcode decoding belongs to this closeout.

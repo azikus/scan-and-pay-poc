@@ -1,0 +1,42 @@
+name: ScanAndPay
+options:
+  bundleIdPrefix: com.azikus.scanpay
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  ScanAndPay:
+    type: application
+    platform: iOS
+    sources: [ScanAndPay]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.azikus.scanpay.poc
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_FILE: ScanAndPay/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme:
+      testTargets: [ScanAndPayTests, ScanAndPayUITests]
+      gatherCoverageData: true
+  ScanAndPayTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [ScanAndPayTests]
+    dependencies:
+      - target: ScanAndPay
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  ScanAndPayUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [ScanAndPayUITests]
+    dependencies:
+      - target: ScanAndPay
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
