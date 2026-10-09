@@ -10,7 +10,7 @@ At this checkpoint, the original ledger contains **2,202 dispatched reservations
 
 The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). Repository reorganization is [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), with its checks recorded in the [reorganization handoff](docs/REPOSITORY_REORGANIZATION_HANDOFF.md).
 
-**Latest change:** the review and confirmation sheets show all extracted payment/invoice fields and explicit edits, with untouched inference omitted from new mobile confirmations. See [sheet behavior and verification](docs/CONFIRMATION_SHEETS.md).
+**Latest change ([PR #4](https://github.com/azikus/scan-and-pay-poc/pull/4)):** the review and confirmation sheets show all extracted payment/invoice fields and explicit edits, with untouched inference omitted from new mobile confirmations. See [sheet behavior and verification](docs/CONFIRMATION_SHEETS.md).
 
 **Next:** create the initial presentation **together with Markus in a new chat**. The [comprehensive presentation handoff](docs/PRESENTATION_HANDOFF.md) contains functionality, architecture, dated results, caveats, source evidence and demo setup; use the [copyable new-chat prompt](docs/PRESENTATION_PROMPT.md). The agreed [milestones](docs/ROADMAP.md) then continue through iOS improvements/testing, backend/admin work/integration, Android as the final development step, and a comprehensive final presentation plus embeddable website HTML. No later implementation or presentation creation is part of this sheet/documentation change. Hotspot testing and automatic discovery remain open. See [coding handoff](docs/CODING_HANDOFF.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
 

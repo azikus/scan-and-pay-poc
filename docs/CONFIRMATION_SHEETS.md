@@ -1,6 +1,6 @@
 # Extracted-field review and confirmation sheets — 9 October 2026
 
-Markus authorized this as a separate checked PR and merge before the initial presentation, then explicitly limited implementation to the confirmation sheets. Scope includes the editable review sheet, Pay confirmation sheet, their value/persistence handling and regression tests. The agreed milestones and comprehensive presentation handoff are documentation only. No other features or presentation artifacts are implemented in this change.
+Implemented in [PR #4](https://github.com/azikus/scan-and-pay-poc/pull/4). Markus authorized this as a separate checked PR and merge before the initial presentation, then explicitly limited implementation to the confirmation sheets. Scope includes the editable review sheet, Pay confirmation sheet, their value/persistence handling and regression tests. The agreed milestones and comprehensive presentation handoff are documentation only. No other features or presentation artifacts are implemented in this change.
 
 ## Behavior
 

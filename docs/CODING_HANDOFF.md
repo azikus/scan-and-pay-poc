@@ -4,7 +4,7 @@
 
 Read [mobile checkpoint](MOBILE_CHECKPOINT.md) and [confirmation-sheet checkpoint](CONFIRMATION_SHEETS.md). Native iOS and the admin inspector merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2) at `62ac67da3aefd5817466e326cdd0b362ae58edd1`. Repository reorganization merged in [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3) at `1c7fcbdd235a9c7ea37d546d861339b0d4484e17`. Markus confirmed real-invoice testing is complete for that PoC checkpoint.
 
-The only newly authorized implementation is a **separate review/confirmation-sheet PR, including necessary value handling and tests, followed by merge**. It exposes all extracted fields and explicit edits, omits untouched inference, and preserves frozen pending confirmations. Markus explicitly said not to implement anything else now. Comprehensive handoff documentation and the agreed milestones are also requested. Consult actual Git/PR state and the sheet checkpoint for completion.
+The only newly authorized implementation is the **review/confirmation-sheet change in [PR #4](https://github.com/azikus/scan-and-pay-poc/pull/4), including necessary value handling and tests, followed by merge**. It exposes all extracted fields and explicit edits, omits untouched inference, and preserves frozen pending confirmations. Markus explicitly said not to implement anything else now. Comprehensive handoff documentation and the agreed milestones are also requested. Consult actual Git/PR state and the sheet checkpoint for completion.
 
 ## Immediate continuation
 
