@@ -2,11 +2,13 @@
 
 ## Current checkpoint — 9 October 2026
 
-The only new implementation is the extracted-field review/confirmation sheet change, with supporting draft persistence and regression tests. **23 native unit/recovery and 2 simulator UI tests pass**, with existing confirmation API checks and inspected synthetic screenshots. Original extraction and frozen pending confirmation bodies remain intact. See [sheet checkpoint](CONFIRMATION_SHEETS.md) for precise behavior and verification.
+Latest approved follow-up: **admin Connection controls and automatic local network updates** are implemented and running. The backend keeps loopback and adds/removes private IPv4 listeners without restarting jobs. **690 tests pass; 96.03% statements / 91.25% branches**, with lint/types/JS/contract/packaging, in-flight listener-change and browser checks. iOS still uses its existing URL fields/Reconnect. See [connection setup and physical hotspot evidence](CONNECTION_SETUP.md). The initial presentation is next.
+
+The preceding implementation was the extracted-field review/confirmation sheet change, with supporting draft persistence and regression tests. **23 native unit/recovery and 2 simulator UI tests pass**, with existing confirmation API checks and inspected synthetic screenshots. Original extraction and frozen pending confirmation bodies remain intact. See [sheet checkpoint](CONFIRMATION_SHEETS.md) for precise behavior and verification.
 
 The accepted iOS/admin implementation merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2), followed by root `backend/`, `frontend/`, `ios/`, `android/` reorganization in [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3). Android is a README only. Baseline checks were 672 backend/evaluation tests, 95.92% statement / 91.15% branch coverage, lint/format/types/contracts/JS and installed-wheel/source-distribution validation. A later merged-main rebuild/install passed while preserving phone data; phone launch was blocked by lock. Distinguish this from the user's earlier real-invoice acceptance and USB-failed/Wi-Fi-connected result.
 
-Ledger remains **2,202 dispatches / €336.55 held**, within 2,217 / €338.05 mobile caps; persisted admin selection is Gemini Flash-Lite. No paid calls, experiment reruns or other features are part of this sheet/documentation checkpoint.
+Ledger remains **2,204 dispatches / €336.75 held**, within 2,217 / €338.05 mobile caps; persisted admin selection is Mistral Small. No agent paid calls or experiment reruns were part of the sheets or the approved connection follow-up.
 
 Next is the **initial presentation together with Markus in a new chat**. [Presentation handoff](PRESENTATION_HANDOFF.md) is the comprehensive source pack, with a [copyable prompt](PRESENTATION_PROMPT.md). [Roadmap](ROADMAP.md) records the agreed order: presentation → iOS improvements/testing → backend/admin/integration → Android and both-platform testing, the final development milestone → comprehensive final presentation and embeddable website HTML. Later work is not started.
 

@@ -1,6 +1,6 @@
 # Presentation handoff — Scan and Pay PoC
 
-Prepared for Markus to start a new presentation chat, 9 October 2026. This is a source pack and working brief, not a presentation or permission to implement later features. Read [coding handoff](CODING_HANDOFF.md), [roadmap](ROADMAP.md) and [confirmation-sheet checkpoint](CONFIRMATION_SHEETS.md) for current authority. Use [the copyable prompt](PRESENTATION_PROMPT.md) in the next chat.
+Prepared for Markus to start a new presentation chat, 9 October 2026. This is a source pack and working brief, not a presentation or permission to implement later features. Read [coding handoff](CODING_HANDOFF.md), [roadmap](ROADMAP.md), [confirmation-sheet checkpoint](CONFIRMATION_SHEETS.md) and [connection setup](CONNECTION_SETUP.md) for current authority. Use [the copyable prompt](PRESENTATION_PROMPT.md) in the next chat.
 
 ## 1. What the next chat should accomplish
 
@@ -8,7 +8,7 @@ Build the **initial presentation together with Markus**, using the implemented P
 
 Keep the presentation factual and visual: show what works, explain the approaches tested, compare correctness and latency with their denominators, demonstrate review and correction, and identify the remaining development. Cost is secondary to correctness and speed. A comprehensive final presentation and an embeddable website HTML are separate deliverables after development, not this initial deck.
 
-The confirmation-sheet change is the only pre-presentation implementation exception. No other iOS, backend/admin or Android implementation is in scope now. The user requested this handoff so a fresh chat can continue without reconstructing the earlier conversations. Do not create or message another chat automatically.
+The extracted-field confirmation sheets and the subsequently approved admin Connection/automatic backend network update are the two pre-presentation implementation exceptions. The next prompt/chat is the initial presentation; no other iOS, backend/admin or Android implementation is in scope now. The user requested this handoff so a fresh chat can continue without reconstructing the earlier conversations. Do not create or message another chat automatically.
 
 ## 2. Agreed milestones
 
@@ -43,6 +43,7 @@ The display includes account holder, bank details, reference, payment model, pur
 
 The local authenticated inspector is at `http://127.0.0.1:8000/admin` on the Mac. It provides:
 
+- A collapsible **Connection** section with current Mac addresses, availability/status and **Copy address**. The managed backend keeps loopback available and updates private network listeners automatically; the phone still uses explicit saved URLs and **Reconnect**.
 - A compact scan list with **Mobile / Automated** filtering.
 - An always-visible **Next scan** form: **Method → Model / provider → Use for next scan**. Selection is persisted and applies on the phone's next explicit Send; pending scans keep their original exact profile/version and recovery key.
 - Original normalized extraction JSON, including nulls, evidence, candidate links and warnings.
@@ -78,7 +79,7 @@ Seven exact tested profiles are enabled for the current mobile setup, across thr
 | OCR + rules | Mistral OCR |
 | OCR → LLM | Mistral OCR → OpenAI |
 
-**Current persisted demo choice:** Gemini Flash-Lite, `gemini-flash-lite-image-roles-v3@2-85773fe34609a2ff`. This live selection superseded Mistral Small during sheet/handoff preparation; one additional live scan brought the ledger to 2,202 / €336.55 while the original 2,201 rows remained intact. The agent made no inference call. Preserve the actual latest selection unless Markus deliberately changes it. **Historical Phase 2 choice:** OpenAI GPT-4.1 mini, `openai-mini-image-roles-v3@2-5094b6dc13ef5718`, selected for the measured correctness/speed tradeoff on 8 October. These are different facts; do not present the historical selection as the current admin state or infer that the current choice has the best accuracy.
+**Current persisted demo choice:** Mistral Small, `mistral-small-image-roles-v3@2-b292ba761e512607`. The connection-update snapshot is 2,204 / €336.75, superseding the earlier Gemini/2,202 snapshot. Original ledger rows remain intact. The agent made no inference call. Preserve the actual latest selection unless Markus deliberately changes it. **Historical Phase 2 choice:** OpenAI GPT-4.1 mini, `openai-mini-image-roles-v3@2-5094b6dc13ef5718`, selected for the measured correctness/speed tradeoff on 8 October. These are different facts; do not present the historical selection as the current admin state or infer that the current choice has the best accuracy.
 
 Grok is disabled pending its documented runtime reasoning-cost accounting fix. Other managed document integrations remain catalogued but inactive in this mobile configuration. Do not enable them, change model/prompt versions or start new experiments to prepare a slide. [Mobile live testing](MOBILE_LIVE_TESTING.md) records the scope amendment; [Phase 2 closeout](PHASE2_CLOSEOUT.md) explains the historical choice.
 
@@ -122,15 +123,17 @@ The latest six-provider batch's known usage estimates/reported charges total **$
 
 ## 8. Verification, acceptance and remaining limits
 
+The latest connection update passes **690 offline backend/evaluation tests**, including listener replacement, discovery/bind failure handling, authenticated address reads and startup/shutdown checks. See [connection setup](CONNECTION_SETUP.md) for final coverage, real TCP listener-change checks, browser checks and packaging. No native code changed in that update. The preceding sheets passed **23 native unit/recovery and 2 UI tests**.
+
 The baseline backend/refactor verification passed 672 offline tests, 95.92% statement / 91.15% branch domain/orchestration coverage, lint/format/strict typing, unchanged contract generation, JS syntax, installed-wheel serving and source-distribution rebuild. The preceding native baseline passed 16 unit/recovery and 2 UI tests. [CONFIRMATION_SHEETS.md](CONFIRMATION_SHEETS.md) records the new sheet-specific verification separately; use its final result rather than assuming the older native count still applies.
 
-Markus confirmed real-invoice iPhone testing is complete for the accepted PoC checkpoint. That establishes user acceptance, not an independently scored camera dataset. No measured mobile capture-to-review study is available. The latest documented physical reconnect was **USB failed → Wi-Fi connected**; an earlier successful USB check is historical. A later main rebuild passed Mac-side reads on loopback, USB and Wi-Fi. The confirmation-sheet build was subsequently signed and installed too, preserving phone preferences and Application Support; its launch was blocked by phone lock. Mac-side reachability is not new proof of phone connectivity.
+Markus confirmed real-invoice iPhone testing is complete for the accepted PoC checkpoint. That establishes user acceptance, not an independently scored camera dataset. No measured mobile capture-to-review study is available. The physical iPhone authenticated over the **same-iPhone hotspot at 09:13:12 CEST** on 9 October: old USB failed, hotspot Wi-Fi connected at `http://172.20.10.2:8000`. An earlier successful USB check is historical. The confirmation-sheet build is signed and installed, preserving phone preferences and Application Support. Mac-side authenticated reads also pass with the automatic network launcher. Automated listener-change checks simulate discovery changes on a real interface; they do not establish every physical network transition.
 
 Known limitations for an honest initial presentation:
 
 - Confidently wrong amounts, recipient-role mistakes, reference/invoice-number confusion, missing bank fields and variation between runs remain possible. Format/checksum validation does not establish correctness or account ownership.
 - Images are manually cropped; paper detection, perspective correction, live outlines and native OCR are possible later iOS work, not delivered capabilities.
-- Connection uses explicit saved Mac URLs. USB addresses may change; automatic discovery and same-iPhone hotspot behavior are not established.
+- The Mac backend automatically follows active private/link-local IPv4 addresses on physical interfaces. The phone uses explicit saved Mac URLs; automatic phone discovery is not implemented. When an IP changes, copy its new URL from admin Connection into the iOS Connection settings and reconnect. Same-iPhone hotspot authentication is verified; broader physical network-transition coverage remains future work.
 - Android is not implemented. The backend is a trusted local PoC deployment, with no production readiness or availability claim.
 - Every draft requires review; Pay is simulated, even when confirmation completes successfully.
 - Payment QR/barcode decoding and payload interpretation are outside this PoC. Printed identifiers remain in scope. Mention decoding only as a future possibility, not unfinished acceptance work.
@@ -139,15 +142,15 @@ Known limitations for an honest initial presentation:
 
 Use the existing checkout and read actual Git/runtime state; transient addresses, PIDs and signing readiness must be checked again before a live session. Do not reset private state or start a second backend.
 
-1. Read `ios/README.md`, `MOBILE_LIVE_TESTING.md` and the sheet checkpoint. Open `ios/ScanAndPay.xcodeproj`, scheme `ScanAndPay`, if a build is needed. Keep bundle ID `com.azikus.scanpay.poc`, signing supplied locally and existing on-device data.
-2. Check the existing one-process Mac backend and `/health`, then authenticated profiles and admin reads. Private launcher/log/PID are `.local/mobile-live-2026-10-09/serve.py`, `server.log`, `server.pid`; database is `.local/backend/jobs.sqlite3`. Read-only health/profile/admin checks make no provider call. Never print credentials.
-3. Open the existing admin and connect using the existing `SCANPAY_TOKEN` from root `.env` locally. The admin token is held in page memory. Preserve the persisted selection unless Markus requests a change.
-4. Unlock/open the phone and use **Reconnect**, which probes saved USB then Wi-Fi with authenticated reads. Inspect its actual result. A phone's localhost is not the Mac. Do not send a real invoice just to test connectivity.
+1. Read `ios/README.md`, `MOBILE_LIVE_TESTING.md`, `CONNECTION_SETUP.md` and the sheet checkpoint. Open `ios/ScanAndPay.xcodeproj`, scheme `ScanAndPay`, if a build is needed. Keep bundle ID `com.azikus.scanpay.poc`, signing supplied locally and existing on-device data.
+2. Check the existing one-process Mac backend and `/health`, then authenticated profiles and admin reads. Private launcher/log/PID are `.local/mobile-live-2026-10-09/serve.py`, `server.log`, `server.pid`; database is `.local/backend/jobs.sqlite3`. The private launcher delegates to `.venv/bin/scanpay-serve` / `backend.local_server`, which follows local addresses without restarting jobs. If stopped, start one managed process from the repository root. Read-only health/profile/admin checks make no provider call. Never print credentials.
+3. Open `http://127.0.0.1:8000/admin` on the Mac and connect using the existing `SCANPAY_TOKEN` from root `.env` locally. The admin token is held in page memory. Preserve the persisted selection unless Markus requests a change. Expand **Connection** and copy the current Wi-Fi/hotspot base URL.
+4. Unlock/open the phone, update **Connection → Wi-Fi address** if needed and use **Reconnect**, which probes saved USB then Wi-Fi with authenticated reads. Inspect its actual result. A phone's localhost is not the Mac. Do not send a real invoice just to test connectivity.
 5. For screenshots or a no-cost walkthrough, run `-synthetic-preview` in a simulator. It is explicitly labelled and uses bundled synthetic data without network calls. Remove the launch argument for normal operation. Its artificial delay is not extraction performance.
 6. Saved scan/provider outputs can support an evidence walkthrough without new calls. Label saved/replayed material clearly. Synthetic examples or separately approved sanitized images are appropriate for shareable slides.
 7. A live extraction requires Markus's explicit Send under the existing bounded mobile plan. Preparation does not authorize agents to dispatch inference. If connectivity fails, show the labelled synthetic flow or retained results and explain the limitation.
 
-The ledger at this documentation checkpoint is **2,202 dispatched reservations / €336.55 held**, within unchanged mobile caps **2,217 / €338.05** and the original €500 project limit. Holds are internal conservative allowances, not provider charges. The remaining allowance is at most 15 calls / €1.50; hybrids reserve two calls and Anthropic has a €0.15 call ceiling, so that is not a promise of 15 scans. Do not increase caps, rerun completed evaluations, change selected versions or buy subscriptions for presentation work.
+The ledger at this documentation checkpoint is **2,204 dispatched reservations / €336.75 held**, within unchanged mobile caps **2,217 / €338.05** and the original €500 project limit. Holds are internal conservative allowances, not provider charges. The remaining allowance is at most 13 calls / €1.30; hybrids reserve two calls and Anthropic has a €0.15 call ceiling, so that is not a promise of 13 scans. Do not increase caps, rerun completed evaluations, change selected versions or buy subscriptions for presentation work.
 
 ## 10. Proposed story to agree, not a finished deck
 
@@ -161,9 +164,9 @@ Use the available **presentations:Presentations** and **azikus-brand** skills wh
 
 | Question | Start here |
 | --- | --- |
-| Current scope and agreed next order | `CODING_HANDOFF.md`, `ROADMAP.md`, `CONFIRMATION_SHEETS.md` |
+| Current scope and agreed next order | `CODING_HANDOFF.md`, `ROADMAP.md`, `CONFIRMATION_SHEETS.md`, `CONNECTION_SETUP.md` |
 | Implemented product and acceptance | `MOBILE_CHECKPOINT.md`, `MOBILE_IMPLEMENTATION.md`, `../ios/README.md` |
-| Current enabled methods/network/budget | `MOBILE_LIVE_TESTING.md`; authenticated `/v1/profiles` for live readiness |
+| Current enabled methods/network/budget | `MOBILE_LIVE_TESTING.md`, `CONNECTION_SETUP.md`; authenticated `/v1/profiles` for live readiness |
 | API semantics, outcomes and provenance | `API_CONTRACT.md`, `ARCHITECTURE.md`, `DECISIONS.md` |
 | Latest reviewed provider comparison | `M3_DIRECT_PROVIDER_RESULTS.md`, `PHASE2_CLOSEOUT.md` |
 | Recipient-role iterations and scoring changes | `M3_RECIPIENT_ROLES.md`, `M3_REVIEWED_RESULTS.md`, `M3_DRAFT_POLICY.md` |
@@ -181,6 +184,8 @@ These private local sources may contain real financial or personal data. Read on
 - `.local/mobile-live-2026-10-09/`: bounded mobile plan, method-selection amendment, read-only connection checks, device/test evidence and live server files.
 - `.local/main-rebuild-2026-10-09/completion.json`: merged-main rebuild/install and Mac read checks; phone launch limitation.
 - `.local/confirmation-sheets-2026-10-09/`: sheet regression logs, result bundle and synthetic screenshots.
+- `.local/hotspot-check-2026-10-09/phone-hotspot-check.json`: actual phone authentication over its hotspot.
+- `.local/local-network-setup-2026-10-09/`: automatic listener tests, live read checks, preservation snapshot, browser verification and package logs.
 - `reports/overview-2026-10-07/index.html` and `reports/repeatability-2026-10-07/index.html`: earlier private progress explainers, not the final website deliverable; reconcile their dated claims with this handoff before reuse.
 
 Root `.env`, `.local/providers.json`, SQLite, source invoices, labels, raw responses, SDK credentials and all original ledger rows must remain private and intact. Public/reusable examples need sanitized data. Historical docs retain old no-mobile gates, defaults and budget snapshots; follow current scope and date each claim instead of overwriting historical evidence.

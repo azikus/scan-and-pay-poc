@@ -106,8 +106,55 @@ function clearSelection() {
   $('selected').hidden=true; $('empty').hidden=false; $('json').textContent='';
   $('changes').replaceChildren(); $('review-choice').replaceChildren();
 }
+let networkBusy=false, networkSignature='';
+function clearNetwork() {
+  networkSignature=''; $('network-addresses').replaceChildren();
+  $('network-status').textContent='Checking addresses…';
+  $('network-warning').textContent=''; $('network-warning').hidden=true;
+  $('network-copy-status').textContent='';
+}
+async function loadNetwork() {
+  if(!token||networkBusy)return;
+  networkBusy=true;const version=epoch;
+  try {
+    const data=await api('/v1/admin/connection');
+    if(version!==epoch)return;
+    const signature=JSON.stringify([data.automatic,data.addresses,data.warnings]);
+    if(signature===networkSignature)return;
+    networkSignature=signature;$('network-copy-status').textContent='';
+    $('network-status').textContent=data.warnings.length?'Needs attention':data.addresses.length?'Ready':'No phone address';
+    $('network-help').textContent=data.automatic
+      ? 'Addresses update automatically. Enter one in the mobile app’s Connection settings, then tap Reconnect.'
+      : 'Automatic network updates are off for this server. Use the address below if available.';
+    $('network-addresses').replaceChildren(...data.addresses.map(address=>{
+      const row=element('div',undefined,'network-address');
+      const label=element('label',address.kind==='link_local'?'USB / link-local address':'Wi-Fi / hotspot address');
+      const input=document.createElement('input');input.type='text';input.readOnly=true;input.value=address.url;
+      input.setAttribute('aria-label',label.textContent);input.spellcheck=false;
+      const copy=element('button','Copy address');copy.type='button';
+      copy.addEventListener('click',async()=>{
+        try {
+          await navigator.clipboard.writeText(address.url);
+          if(version===epoch)$('network-copy-status').textContent='Address copied.';
+        } catch {
+          if(version!==epoch)return;
+          input.focus();input.select();
+          $('network-copy-status').textContent='Address selected. Copy it using your device’s copy command.';
+        }
+      });
+      label.append(input);row.append(label,copy);return row;
+    }));
+    if(!data.addresses.length)$('network-addresses').append(element('p','Connect the Mac to Wi-Fi, an iPhone hotspot or USB networking.','muted'));
+    $('network-warning').textContent=data.warnings.join(' ');$('network-warning').hidden=!data.warnings.length;
+  } catch(e) {
+    if(version!==epoch)return;
+    clearNetwork();$('network-status').textContent='Unavailable';
+    $('network-warning').textContent='Could not refresh Mac addresses. Keep the admin open on the Mac at 127.0.0.1 to recover after a network change.';
+    $('network-warning').hidden=false;
+  } finally {networkBusy=false;}
+}
 function disconnect() {
-  epoch++; token=''; limit=50; clearSelection();
+  epoch++; token=''; limit=50; clearSelection();clearNetwork();
   profileData=null; methodsAt=0; methodsSignature=''; selectionDirty=false;
   $('current-selection').textContent='';$('method-description').textContent='';$('methods-error').textContent='';
   for(const id of ['extraction-method','extraction-profile','scan-method'])$(id).replaceChildren();
@@ -220,7 +267,7 @@ function renderList(items) {
 }
 async function refresh() {
   if(!token||busy)return;busy=true;const version=epoch,source=$('source').value;
-  loadMethods().catch(()=>{});
+  loadMethods().catch(()=>{});loadNetwork();
   try {
     const pages=[];for(let offset=0;offset<limit;offset+=50){const result=await api(`/v1/admin/scans?limit=50&offset=${offset}${source?'&source='+encodeURIComponent(source):''}`);pages.push(...result.scans);next=result.next_offset;if(next===null)break;}
     if(version!==epoch)return;

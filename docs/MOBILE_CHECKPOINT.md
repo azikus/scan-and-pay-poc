@@ -1,6 +1,8 @@
 # Mobile and inspector checkpoint — 9 October 2026
 
-**Latest continuation:** [confirmation sheets](CONFIRMATION_SHEETS.md) records the separately authorized extracted-field review change and updated tests. [ROADMAP.md](ROADMAP.md) owns the newly agreed five milestones; [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md) and [PRESENTATION_PROMPT.md](PRESENTATION_PROMPT.md) prepare the next chat. No other implementation or deck creation now. The acceptance and verification below retain the preceding mobile/refactor checkpoint.
+**Latest connection follow-up:** [Connection setup](CONNECTION_SETUP.md) records the newly approved admin panel, automatic backend network updates and verified same-iPhone hotspot. Presentation is next; no new native code.
+
+**Preceding continuation:** [confirmation sheets](CONFIRMATION_SHEETS.md) records the separately authorized extracted-field review change and updated tests. [ROADMAP.md](ROADMAP.md) owns the newly agreed five milestones; [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md) and [PRESENTATION_PROMPT.md](PRESENTATION_PROMPT.md) prepare the next chat. No other implementation or deck creation now. The acceptance and verification below retain the preceding mobile/refactor checkpoint.
 
 Markus confirmed that his real-invoice iPhone testing is complete and accepted the current PoC flow. He authorized autonomous review, checks, commit/push, PR creation and merge for this checkpoint, followed by a separate repository-reorganization chat and its checked PR/merge. Status and documentation must be updated in both steps.
 
@@ -29,7 +31,7 @@ Keep root `.env`, SDK credential stores, `.local/providers.json`, `.local/backen
 
 ## Known limits and next order
 
-The phone currently uses saved addresses; there is no automatic Mac discovery. Joining a personal hotspot or changing the Mac's IP may require restarting the backend at its current interfaces and updating the saved URLs. The same-iPhone hotspot setup is not yet verified. Hotspot/discovery improvements are later work, not part of the structural refactor.
+At the original refactor checkpoint, network listeners required a restart and same-iPhone hotspot had not yet been verified. The later [connection update](CONNECTION_SETUP.md) supersedes those limits: hotspot authentication is verified and the managed backend follows local network changes. The phone still uses saved URLs; update them from admin Connection when needed. Automatic phone discovery remains later work.
 
 The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). The separate [repository reorganization](REPOSITORY_REORGANIZATION_HANDOFF.md) records the new root layout, checks and PR. Next: **initial presentation together with Markus in a new chat** → iOS improvements and real-invoice testing → backend/admin improvements and integration testing → Android and both-platform testing as the final development milestone → comprehensive final presentation and embeddable website HTML. See the agreed roadmap; do not start later work during the sheet/documentation task.
 
