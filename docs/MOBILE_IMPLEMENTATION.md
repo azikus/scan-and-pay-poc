@@ -1,5 +1,11 @@
 # Mobile implementation — 9 October 2026
 
+## Latest sheet update — 9 October 2026
+
+The review and Pay confirmation sheets now show every non-null extracted selected-payment/invoice field, grouped into Payment details and Invoice details. Untouched inferred/derived values and recipient-role fallbacks stay out of new mobile confirmations; explicit edits remain visible and marked Edited. Original JSON and already-frozen confirmation retries are preserved. See [CONFIRMATION_SHEETS.md](CONFIRMATION_SHEETS.md) for implementation, migration and verification (23 native unit/recovery tests and 2 UI tests). No backend/admin implementation changed.
+
+The approved next task is the initial presentation together in a new chat, using [the comprehensive handoff](PRESENTATION_HANDOFF.md). [ROADMAP.md](ROADMAP.md) records the full agreed order through Android as the final development milestone and the final presentation/embeddable HTML afterward. Older iterations below remain dated history.
+
 ## Current checkpoint and next work
 
 Markus confirmed on 9 October that real-invoice iPhone testing is complete. The current iOS/admin slice is accepted for this PoC checkpoint. Device acceptance is no longer pending; hotspot/address-change testing and automatic discovery remain separate open improvements. Current admin selection is Mistral Small, and the original ledger is 2,201 dispatches / €336.45 held. These are current observations, superseding historical selection/budget statements below.

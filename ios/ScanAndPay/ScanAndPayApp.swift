@@ -362,7 +362,9 @@ struct ReviewSheet: View {
             .presentationCornerRadius(30)
         }
       }
-      .sheet(isPresented: $showJSON) { JSONOutput(response: model.response, draft: model.draft) }
+      .sheet(isPresented: $showJSON) {
+        JSONOutput(response: model.response, mobileValues: model.confirmationValues)
+      }
       .fullScreenCover(isPresented: $showImage) { DocumentViewer(image: model.image) }
       .onChange(of: focused) { _, value in if value != nil { expand() } }
       .onChange(of: missing) { _, value in if value { expand() } }
@@ -382,9 +384,7 @@ struct ReviewSheet: View {
       ) {
         Text("Choose a payment option").tag("")
         ForEach(Array(draft.candidates.enumerated()), id: \.offset) { index, candidate in
-          Text(
-            "Option \(index+1) · \(candidate["amount"]["value"]["value"].string ?? "Amount unknown") \(candidate["amount"]["currency"]["value"].string ?? "")"
-          ).tag(candidate["id"].string ?? "")
+          Text(draft.optionLabel(at: index)).tag(candidate["id"].string ?? "")
         }
       }.pickerStyle(.menu).tint(.primary).accessibilityIdentifier("payment-option")
     }
@@ -394,8 +394,14 @@ struct ReviewSheet: View {
         systemImage: "exclamationmark.circle"
       ).font(Brand.font(13)).foregroundStyle(.orange)
     }
-    ForEach(draft.fields) { field in
-      if field.value != nil || missing || focused == field.id {
+    ForEach(
+      draft.sections(
+        for: draft.fields.filter {
+          $0.value != nil || missing || focused == $0.id
+        })
+    ) { section in
+      Text(section.title).font(Brand.font(17, .semibold)).padding(.top, 8)
+      ForEach(section.fields) { field in
         fieldEditor(field)
       }
     }
@@ -423,7 +429,10 @@ struct ReviewSheet: View {
   }
   private func fieldEditor(_ field: DraftField) -> some View {
     VStack(alignment: .leading, spacing: 7) {
-      Text(field.label).font(Brand.font(12)).foregroundStyle(.secondary)
+      HStack {
+        Text(field.label).font(Brand.font(12)).foregroundStyle(.secondary)
+        if field.value != nil && field.isEdited { EditedValueLabel() }
+      }
       TextField(
         "Enter \(field.label.lowercased())",
         text: Binding(
@@ -438,13 +447,12 @@ struct ReviewSheet: View {
         $focused, equals: field.id
       ).accessibilityLabel(field.label).accessibilityIdentifier(field.id)
       .disabled(model.saving || model.pending?.confirmationBody != nil)
-      if field.observation["state"].string == "inferred" {
-        Text("Inferred value. Check the document.").font(Brand.font(12)).foregroundStyle(.orange)
-      }
-      ForEach(Array(field.observation["alternatives"].array.enumerated()), id: \.offset) {
-        _, alternative in
-        Text("Alternative: \(alternative["value"].string ?? "")").font(Brand.font(12))
-          .foregroundStyle(.secondary)
+      if PaymentDraft.isExtracted(field.observation) {
+        ForEach(Array(field.observation["alternatives"].array.enumerated()), id: \.offset) {
+          _, alternative in
+          Text("Alternative: \(alternative["value"].string ?? "")").font(Brand.font(12))
+            .foregroundStyle(.secondary)
+        }
       }
       Divider()
     }
@@ -547,7 +555,7 @@ struct ConnectionSettings: View {
 }
 struct JSONOutput: View {
   let response: JSONValue?
-  let draft: PaymentDraft?
+  let mobileValues: JSONValue?
   @State private var original = true
   @Environment(\.dismiss) private var dismiss
   var body: some View {
@@ -560,7 +568,7 @@ struct JSONOutput: View {
         JSONTextView(
           text: original
             ? (response?.pretty ?? "No response available.")
-            : (draft?.confirmation.pretty ?? "No mobile values available.")
+            : (mobileValues?.pretty ?? "No mobile values available.")
         )
         .accessibilityIdentifier("json-content")
 

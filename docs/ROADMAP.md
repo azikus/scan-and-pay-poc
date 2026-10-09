@@ -1,17 +1,30 @@
 # Delivery roadmap
 
-**Current direction — 9 October 2026:** Phase 2 remains closed for the current PoC scope. M5 is agreed; M6's iOS implementation is complete for this checkpoint and Markus confirmed his real-invoice device testing is done. No universal accuracy or camera-to-review timing claim follows from that acceptance. The inspector supports selectable extraction methods, saved provider outputs/mobile images and separate confirmed edits. See [mobile checkpoint](MOBILE_CHECKPOINT.md).
+## Agreed next milestones — 9 October 2026
 
-| Phase | Milestones | Current status |
+Markus explicitly approved this sequence. These five **next milestones** supersede the old execution order; historical M1–M8 identifiers below remain unchanged so earlier evidence stays traceable. Development milestones may span multiple sessions. Agree the detailed work for each when it starts.
+
+| Next milestone | Scope and completion checkpoint | Status |
 | --- | --- | --- |
-| 1 — Backend foundation | M1: service and v1 contract | Complete |
-| 2 — Extraction and evaluation | M2–M4: providers, interpretation, reviewed comparisons | Closed for current scope; original evidence retained |
-| 3 — Mobile | M5: design; M6: iOS; M7: Android | M5/M6 accepted for this PoC checkpoint; improvements follow presentation; Android last |
-| 4 — Demonstration and findings | M8: presentation, dependable demo, companion and report | Presentation is the next joint task; final deliverables remain open |
+| 1 — Initial presentation | Create the presentation **together with Markus** from the working PoC and retained measured results. Agree audience, story, format and demo; distinguish delivered functionality, evidence and remaining work. | Next; not started |
+| 2 — iOS improvements and real-invoice testing | Complete the remaining agreed iOS work and verify it with real invoices, review/edit/recovery scenarios and device networking. Record actual mobile timing when measured. | Planned after 1 |
+| 3 — Backend/admin improvements and integration testing | Complete the remaining agreed backend/admin work and verify the iOS → backend → admin journey, extraction/review semantics and failure handling. Preserve evidence and version changes. | Planned after 2 |
+| 4 — Android app and both-platform testing | Implement Android against the shared contract, then complete testing across iOS, Android, backend and admin. **This is the final development milestone.** | Planned after 3 |
+| 5 — Comprehensive final presentation and website HTML | Create a fuller final presentation plus embeddable HTML explaining functionality, workflow, architecture, measured results and limitations using sanitized material. Agree the site's embedding constraints before authoring. | Planned after development |
 
-Milestone numbers retain their historical definitions; they do not override Markus's newly agreed execution order. The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). The separate [repository reorganization](REPOSITORY_REORGANIZATION_HANDOFF.md) establishes root backend/frontend/iOS/Android directories, preserving one FastAPI deployment and adding only a README for Android. Next: presentation together → mobile-client improvements → backend improvements → Android. Keep experimental method switching for the client demonstration; do not silently freeze or replace the current selection.
+**Only current implementation exception, before milestone 1:** the separately authorized review/confirmation-sheet PR shows every non-null extracted field for the selected payment option and invoice, omits untouched inferred values, marks user edits, and keeps newly saved values consistent with the display. Its supporting tests/persistence and the documentation handoff are in scope. No other mobile, backend/admin or Android implementation, deck creation or website development is authorized now. See [sheet checkpoint](CONFIRMATION_SHEETS.md).
 
-Backend managed OCR already shipped in M1. M2 broadens OCR/document providers; M3 improves how their observations become payment candidates. Native platform OCR belongs to mobile work. These are separate capabilities, not conflicting milestone assignments.
+The presentation chat starts from [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md); [PRESENTATION_PROMPT.md](PRESENTATION_PROMPT.md) is the copyable opening prompt. This checkpoint prepares documentation only; Markus starts that chat when ready.
+
+The original iOS/admin checkpoint is accepted and merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2); the root backend/frontend/ios/android reorganization merged in [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3). Android contains a README only. The current admin selection is Gemini Flash-Lite; historical OpenAI selection and benchmark results remain dated evidence.
+
+## Authority and preservation
+
+The sheet implementation, checks, commit/push, separate PR and merge are explicitly authorized. The milestone sequence is agreed, but is not permission to begin later development or run paid experiments now. Retain the original ledger (2,202 dispatches / €336.55 held at this checkpoint), current selection, pending drafts, credentials and private evidence. No new paid calls, completed evaluation reruns, force push or public publication. Read [coding handoff](CODING_HANDOFF.md) for current scope and [mobile checkpoint](MOBILE_CHECKPOINT.md) for prior acceptance.
+
+## Historical delivery record — original M1–M8
+
+The sections below retain the original milestone definitions and dated acceptance criteria. Their prospective wording describes the original plan; it does not start later work or override the five next milestones above. Backend managed OCR shipped before mobile; native OCR remains a separate possible mobile improvement.
 
 ## M1 — Backend foundation: complete
 
@@ -75,12 +88,6 @@ Acceptance: both apps implement the same field/review semantics with measured pl
 Freeze the demonstration configuration; test fresh photographs, laptop/device networking, failure recovery and any clearly labelled replay. Build the separate attendee companion from actual processing events with masked details. Produce the Azikus HTML findings report and substantiated external summary from the measured evidence. Refresh and link the separate cost report using the final configuration; keep it a standalone deliverable.
 
 Acceptance: dependable end-to-end demonstration, reproducible evidence, visible limitations and recovery instructions. Public materials use separately approved sanitised data. No publication, live payment execution or production-validation claim is implied.
-
-## Sequence and authority
-
-Markus authorized review/checks/commit/push/PR/merge for the current changes, followed by a separate chat to reorganize into `backend/`, `frontend/`, `ios/` and `android/` and create/merge its checked PR. Update status and documentation in both steps. Routine implementation choices and checks are autonomous; no new paid calls, completed evaluation reruns, private-data publication or force push. Preserve the current ledger, selected profile, drafts and credentials. The refactor can keep backend and frontend in one deployment; `android/` is a documented placeholder until Android is explicitly started.
-
-After cleanup, wait for Markus to collaborate on the presentation. Further mobile and backend work follows, with Android at the end. Do not start the presentation, new mobile/backend features, Android, automatic discovery or paper detection during this cleanup authorization. Read [coding handoff](CODING_HANDOFF.md) for concrete continuation and [mobile checkpoint](MOBILE_CHECKPOINT.md) for current evidence and known limits.
 
 ## Future improvement outside the PoC
 

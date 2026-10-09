@@ -38,6 +38,18 @@ final class ScanAndPayUITests: XCTestCase {
       confirmation.name = "Payment confirmation"
       confirmation.lifetime = .keepAlways
       add(confirmation)
+      let confirmationScroll = app.scrollViews["confirmation-details"]
+      for _ in 0..<5 {
+        if app.staticTexts["confirmation-field-/invoice_number"].isHittable { break }
+        confirmationScroll.swipeUp()
+      }
+      XCTAssertEqual(app.staticTexts["confirmation-field-/invoice_number"].label, "DEMO-UK-42")
+      XCTAssertTrue(app.staticTexts["Invoice details"].exists)
+      XCTAssertFalse(app.staticTexts["confirmation-field-/due_date"].exists)
+      let invoice = XCTAttachment(screenshot: app.screenshot())
+      invoice.name = "Confirmation invoice details"
+      invoice.lifetime = .keepAlways
+      add(invoice)
       app.buttons["cancel-pay"].tap()
       XCTAssertTrue(app.buttons["pay"].waitForExistence(timeout: 5))
       app.buttons["pay"].tap()
@@ -78,6 +90,24 @@ final class ScanAndPayUITests: XCTestCase {
     due.tap()
     due.typeText("2026-10-31")
     XCTAssertEqual(due.value as? String, "2026-10-31")
+    // Dismiss the keyboard, then confirm the added field remains visible and marked as edited.
+    scroll.swipeDown()
+    app.switches["review-confirmation"].tap()
+    app.buttons["pay"].tap()
+    XCTAssertTrue(app.buttons["confirm-pay"].waitForExistence(timeout: 5))
+    let confirmation = app.scrollViews["confirmation-details"]
+    let added = app.staticTexts["confirmation-field-/due_date"]
+    for _ in 0..<8 {
+      if added.isHittable { break }
+      confirmation.swipeUp()
+    }
+    XCTAssertTrue(added.isHittable)
+    XCTAssertEqual(added.label, "2026-10-31")
+    XCTAssertTrue(app.staticTexts["Edited"].exists)
+    let attachment = XCTAttachment(screenshot: app.screenshot())
+    attachment.name = "Edited invoice detail confirmation"
+    attachment.lifetime = .keepAlways
+    add(attachment)
   }
 
 }
