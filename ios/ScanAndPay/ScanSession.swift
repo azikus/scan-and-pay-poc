@@ -53,12 +53,14 @@ import SwiftUI
       {
         accept(result, data: data)
         if let values = stored.editedValues {
-          draft?.selectedID = stored.selectedCandidateID
-          draft?.values = values
+          draft?.restore(
+            values: values, selectedID: stored.selectedCandidateID,
+            editedFieldIDs: stored.editedFieldIDs)
         }
         if stored.confirmationBody != nil {
           phase = .recovery
-          message = "Save the pending confirmation to finish this scan."
+          message =
+            "Retry the original confirmation to finish this scan. Its saved values are unchanged."
         }
       }
     }
@@ -75,6 +77,12 @@ import SwiftUI
     #endif
   }
   var processing: Bool { [.uploading, .queued, .reading].contains(phase) }
+  var confirmationValues: JSONValue? {
+    if let body = pending?.confirmationBody {
+      return try? JSONDecoder().decode(JSONValue.self, from: body)
+    }
+    return draft?.confirmation
+  }
   var processingTitle: String {
     phase == .uploading
       ? "Uploading image…" : phase == .queued ? "Waiting to read…" : "Reading payment details…"
@@ -359,6 +367,7 @@ import SwiftUI
   }
   private func saveEdits() {
     pending?.editedValues = draft?.values
+    pending?.editedFieldIDs = draft?.editedFieldIDs
     pending?.selectedCandidateID = draft?.selectedID
     do { try persist() } catch {
       message = "Could not save edits on this phone. Keep this screen open and try again."

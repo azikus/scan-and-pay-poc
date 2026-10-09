@@ -64,8 +64,15 @@ struct DraftField: Identifiable, Equatable {
   let original: String?
   let observation: JSONValue
   var value: String?
+  var isEdited = false
   var isAmount: Bool { id.hasSuffix("/amount/value") }
   var numeric: Bool { isAmount || id.hasSuffix("/sort_code") || id.hasSuffix("/account_number") }
+}
+
+struct DraftSection: Identifiable {
+  let id: String
+  let title: String
+  let fields: [DraftField]
 }
 
 struct PaymentDraft {
@@ -73,7 +80,8 @@ struct PaymentDraft {
   let run: JSONValue
   let payment: JSONValue
   var selectedID: String?
-  var values: [String: JSONValue] = [:]
+  private(set) var values: [String: JSONValue] = [:]
+  private(set) var editedFieldIDs = Set<String>()
   static let documentKeys = [
     "supplier_name", "invoice_number", "customer_number", "description", "due_date",
   ]
@@ -138,8 +146,36 @@ struct PaymentDraft {
       !path.hasPrefix("/candidates/") || (candidateIndex != nil && path.hasPrefix(prefix + "/"))
     }
   }
+  static func isExtracted(_ observation: JSONValue) -> Bool {
+    // A copied supplier/account-holder observation still has document provenance,
+    // but the draft policy inferred its role as the payment recipient.
+    observation["state"].string == "observed"
+      && observation["origin"].string == "document"
+      && !observation["normalization"].array.contains {
+        $0.string?.hasPrefix("draft_beneficiary_from_") == true
+      }
+  }
   mutating func resetValues() {
-    values = Dictionary(uniqueKeysWithValues: relevantObservations.map { ($0.0, $0.1["value"]) })
+    editedFieldIDs = []
+    values = Dictionary(
+      uniqueKeysWithValues: relevantObservations.map {
+        ($0.0, Self.isExtracted($0.1) ? $0.1["value"] : .null)
+      })
+  }
+  mutating func restore(
+    values saved: [String: JSONValue], selectedID: String?, editedFieldIDs: Set<String>?
+  ) {
+    self.selectedID = selectedID
+    resetValues()
+    for (path, observation) in relevantObservations {
+      guard let value = saved[path], value == .null || value.string != nil else { continue }
+      // Legacy snapshots saved every value; only a difference proves an edit in those drafts.
+      let edited = editedFieldIDs.map { $0.contains(path) } ?? (value != observation["value"])
+      if Self.isExtracted(observation) || edited {
+        values[path] = value
+        if edited { self.editedFieldIDs.insert(path) }
+      }
+    }
   }
   mutating func select(_ id: String) {
     selectedID = id
@@ -149,7 +185,8 @@ struct PaymentDraft {
     let key = path.split(separator: "/").last.map(String.init) ?? path
     return DraftField(
       id: path, label: Self.labels[key] ?? key, original: observation["value"].string,
-      observation: observation, value: values[path]?.string)
+      observation: observation, value: values[path]?.string,
+      isEdited: editedFieldIDs.contains(path))
   }
   var fields: [DraftField] {
     let order =
@@ -165,14 +202,45 @@ struct PaymentDraft {
   }
   var visibleFields: [DraftField] { fields.filter { $0.value != nil } }
   var missingFields: [DraftField] { fields.filter { $0.value == nil } }
+  func sections(for fields: [DraftField]) -> [DraftSection] {
+    [
+      DraftSection(
+        id: "payment", title: "Payment details",
+        fields: fields.filter { $0.id.hasPrefix("/candidates/") }),
+      DraftSection(
+        id: "invoice", title: "Invoice details",
+        fields: fields.filter { !$0.id.hasPrefix("/candidates/") }),
+    ].filter { !$0.fields.isEmpty }
+  }
+  var amountField: DraftField? { visibleFields.first { $0.id == prefix + "/amount/value" } }
+  var currencyField: DraftField? { visibleFields.first { $0.id == prefix + "/amount/currency" } }
+  var recipientField: DraftField? { visibleFields.first { $0.id == prefix + "/beneficiary_name" } }
+  var confirmationSections: [DraftSection] {
+    let highlighted = Set(
+      [recipientField?.id, amountField?.id, amountField == nil ? nil : currencyField?.id]
+        .compactMap { $0 })
+    return sections(for: visibleFields.filter { !highlighted.contains($0.id) })
+  }
+  func optionLabel(at index: Int) -> String {
+    let amount = candidates[index]["amount"]
+    let value = Self.isExtracted(amount["value"]) ? amount["value"]["value"].string : nil
+    let currency = Self.isExtracted(amount["currency"]) ? amount["currency"]["value"].string : nil
+    return "Option \(index + 1) · \(value ?? "Amount unknown") \(currency ?? "")"
+      .trimmingCharacters(in: .whitespaces)
+  }
   mutating func edit(_ path: String, value: String) {
+    guard values.keys.contains(path) else { return }
     // Decimal keyboards can emit a comma; the wire amount remains a decimal string.
     let value =
       path.hasSuffix("/amount/value") ? value.replacingOccurrences(of: ",", with: ".") : value
     values[path] =
       value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .null : .string(value)
+    editedFieldIDs.insert(path)
   }
-  var canConfirm: Bool { candidateIndex != nil && outcome != "error" }
+  var canConfirm: Bool {
+    candidateIndex != nil && outcome != "error"
+      && visibleFields.contains { !$0.id.hasPrefix("/document_context/") }
+  }
   var paymentIssues: [String] {
     guard candidateIndex != nil else { return ["Choose a payment option."] }
     func v(_ key: String) -> String { values[prefix + key]?.string ?? "" }

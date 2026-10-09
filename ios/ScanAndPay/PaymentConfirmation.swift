@@ -17,18 +17,34 @@ struct PaymentConfirmation: View {
       Text("Confirm payment").font(Brand.font(30, .semibold))
       ScrollView {
         VStack(alignment: .leading, spacing: 22) {
-          Text(draft.summaryAmount).font(Brand.font(46, .semibold)).minimumScaleFactor(0.6)
-            .lineLimit(2).padding(.top, 26)
-          Text(draft.summaryRecipient).font(Brand.font(21, .semibold))
-          Divider()
-          ForEach(
-            draft.visibleFields.filter {
-              $0.id.contains("/destination/") || $0.id.hasSuffix("/remittance/reference")
-            }
-          ) { field in
+          if let amount = draft.amountField {
             VStack(alignment: .leading, spacing: 6) {
-              Text(field.label).font(Brand.font(12)).foregroundStyle(.secondary)
-              Text(field.value ?? "").font(Brand.font(17)).textSelection(.enabled)
+              Text(draft.summaryAmount).font(Brand.font(46, .semibold)).minimumScaleFactor(0.6)
+                .lineLimit(2).accessibilityIdentifier("confirmation-field-" + amount.id)
+              if amount.isEdited || draft.currencyField?.isEdited == true { EditedValueLabel() }
+            }
+          }
+          if let recipient = draft.recipientField {
+            VStack(alignment: .leading, spacing: 6) {
+              Text(recipient.value ?? "").font(Brand.font(21, .semibold))
+                .accessibilityIdentifier("confirmation-field-" + recipient.id)
+              if recipient.isEdited { EditedValueLabel() }
+            }
+          }
+          ForEach(draft.confirmationSections) { section in
+            VStack(alignment: .leading, spacing: 18) {
+              Divider()
+              Text(section.title).font(Brand.font(17, .semibold))
+              ForEach(section.fields) { field in
+                VStack(alignment: .leading, spacing: 6) {
+                  HStack {
+                    Text(field.label).font(Brand.font(12)).foregroundStyle(.secondary)
+                    if field.isEdited { EditedValueLabel() }
+                  }
+                  Text(field.value ?? "").font(Brand.font(17)).textSelection(.enabled)
+                    .accessibilityIdentifier("confirmation-field-" + field.id)
+                }
+              }
             }
           }
           if !draft.paymentIssues.isEmpty {
@@ -39,8 +55,8 @@ struct PaymentConfirmation: View {
             }.padding(18).frame(maxWidth: .infinity, alignment: .leading)
               .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
           }
-        }.frame(maxWidth: .infinity, alignment: .leading)
-      }
+        }.padding(.top, 26).frame(maxWidth: .infinity, alignment: .leading)
+      }.accessibilityIdentifier("confirmation-details")
       VStack(spacing: 8) {
         Button(action: confirm) {
           HStack {
@@ -54,6 +70,13 @@ struct PaymentConfirmation: View {
         .accessibilityIdentifier("cancel-pay")
       }.padding(.top, 18)
     }.padding(24).background(Color(uiColor: .systemBackground)).tint(.primary)
+  }
+}
+
+struct EditedValueLabel: View {
+  var body: some View {
+    Text("Edited").font(Brand.font(11, .semibold)).foregroundStyle(Brand.ink)
+      .padding(.horizontal, 8).padding(.vertical, 3).background(Brand.ice, in: Capsule())
   }
 }
 

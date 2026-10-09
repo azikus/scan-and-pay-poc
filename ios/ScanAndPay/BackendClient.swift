@@ -187,6 +187,7 @@ struct PendingScan: Codable {
   var response: Data?
   var selectedCandidateID: String?
   var editedValues: [String: JSONValue]?
+  var editedFieldIDs: Set<String>?
   var confirmationID: String?
   var confirmationBody: Data?
   var serverID: String?

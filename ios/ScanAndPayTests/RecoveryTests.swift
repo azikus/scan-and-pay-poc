@@ -83,8 +83,10 @@ private final class FakeMac: @unchecked Sendable {
 }
 
 @MainActor final class RecoveryTests: XCTestCase {
-  private func setup(empty: Bool = false) throws -> (ScanSession, FakeMac, URL) {
-    let source = try ScanAndPayTests().fixture()
+  private func setup(empty: Bool = false, result: JSONValue? = nil) throws -> (
+    ScanSession, FakeMac, URL
+  ) {
+    let source = try result ?? ScanAndPayTests().fixture()
     var object = source.object
     object["scan_id"] = .string("scan-network-test")
     if empty {
@@ -164,6 +166,71 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 2)
     XCTAssertNil(PendingStore.read(from: file))
     XCTAssertNil(restored.response)
+  }
+  func testExtractedDraftAndExplicitEditsPersistWithoutSavingHiddenInference() async throws {
+    let currency = "/candidates/0/amount/currency"
+    let recipient = "/candidates/0/beneficiary_name"
+    let source = try ScanAndPayTests().fixture()
+      .replacingPayment(currency + "/state", with: .string("inferred"))
+      .replacingPayment(
+        recipient + "/normalization", with: .array([.string("draft_beneficiary_from_supplier")]))
+    let (model, mac, file) = try setup(result: source)
+    defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+    model.send()
+    try await wait { model.phase == .review }
+    model.edit(currency, "GBP")
+    let config = URLSessionConfiguration.ephemeral
+    config.protocolClasses = [StubProtocol.self]
+    let restored = ScanSession(clientSession: URLSession(configuration: config), pendingFile: file)
+    restored.token = "synthetic-only"
+    XCTAssertEqual(restored.draft?.currencyField?.isEdited, true)
+    XCTAssertEqual(restored.draft?.currencyField?.value, "GBP")
+    XCTAssertNil(restored.draft?.recipientField)
+    XCTAssertEqual(restored.draft?.editedFieldIDs.contains(recipient), false)
+    XCTAssertEqual(restored.response, model.response)
+    restored.checked = true
+    mac.timeoutConfirmation = true
+    restored.confirm()
+    try await wait { restored.phase == .recovery }
+    let saved = try XCTUnwrap(PendingStore.read(from: file))
+    let payload = try JSONDecoder().decode(JSONValue.self, from: XCTUnwrap(saved.confirmationBody))
+    XCTAssertEqual(payload["values"][currency], .string("GBP"))
+    XCTAssertEqual(payload["values"][recipient], .null)
+    XCTAssertEqual(restored.confirmationValues, payload)
+  }
+  func testLegacyConfirmationRetryKeepsFrozenBodyAndInspectorValues() async throws {
+    let currency = "/candidates/0/amount/currency"
+    let source = try ScanAndPayTests().fixture()
+      .replacingPayment(currency + "/state", with: .string("inferred"))
+    let (model, mac, file) = try setup(result: source)
+    defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+    model.send()
+    try await wait { model.phase == .review }
+    var legacy = try XCTUnwrap(PendingStore.read(from: file))
+    let draft = try XCTUnwrap(model.draft)
+    legacy.editedValues = Dictionary(
+      uniqueKeysWithValues: draft.relevantObservations.map { ($0.0, $0.1["value"]) })
+    legacy.editedFieldIDs = nil
+    legacy.selectedCandidateID = draft.selectedID
+    var body = draft.confirmation.object
+    body["values"] = .object(try XCTUnwrap(legacy.editedValues))
+    legacy.confirmationBody = try JSONEncoder().encode(JSONValue.object(body))
+    legacy.confirmationID = UUID().uuidString
+    try PendingStore.save(legacy, to: file)
+    let config = URLSessionConfiguration.ephemeral
+    config.protocolClasses = [StubProtocol.self]
+    let restored = ScanSession(clientSession: URLSession(configuration: config), pendingFile: file)
+    restored.token = "synthetic-only"
+    XCTAssertEqual(restored.phase, .recovery)
+    XCTAssertNil(restored.draft?.currencyField)
+    XCTAssertEqual(restored.confirmationValues?["values"][currency], .string("GBP"))
+    restored.edit(currency, "EUR")
+    XCTAssertEqual(restored.pending?.confirmationBody, legacy.confirmationBody)
+    XCTAssertEqual(restored.pending?.confirmationID, legacy.confirmationID)
+    restored.recover()
+    try await wait { restored.complete }
+    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "PUT" }.count, 1)
+    XCTAssertEqual(mac.requests.last?.url?.lastPathComponent, legacy.confirmationID)
   }
   func testAcceptedScanResumesPollingAfterBackgroundWithoutUpload() async throws {
     let (model, mac, file) = try setup()

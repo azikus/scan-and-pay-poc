@@ -115,4 +115,132 @@ final class ScanAndPayTests: XCTestCase {
     XCTAssertNil(model.draft)
     XCTAssertNil(model.response)
   }
+  func testOnlyObservedDocumentValuesPopulateNewDrafts() throws {
+    let source = try fixture()
+    let path = "/candidates/0/amount/currency"
+    let original = try XCTUnwrap(
+      PaymentDraft(response: source).relevantObservations.first { $0.0 == path }?.1)
+    let cases: [(String, String, [String], Bool)] = [
+      ("observed", "document", ["explicit_currency_token"], true),
+      ("inferred", "document", [], false),
+      ("observed", "derived", [], false),
+      ("observed", "caller_hint", [], false),
+      ("observed", "barcode", [], false),
+      ("ambiguous", "document", [], false),
+      ("unreadable", "document", [], false),
+      ("unsupported", "document", [], false),
+      ("observed", "document", ["draft_beneficiary_from_supplier"], false),
+      ("observed", "document", ["draft_beneficiary_from_account_holder"], false),
+    ]
+    for (state, origin, normalization, extracted) in cases {
+      var observation = original.object
+      observation["state"] = .string(state)
+      observation["origin"] = .string(origin)
+      observation["normalization"] = .array(normalization.map(JSONValue.string))
+      let response = source.replacingPayment(path, with: .object(observation))
+      let draft = try PaymentDraft(response: response)
+      XCTAssertEqual(draft.values[path], extracted ? .string("GBP") : .null)
+      XCTAssertEqual(draft.confirmation["values"][path], extracted ? .string("GBP") : .null)
+      XCTAssertEqual(draft.values.count, draft.relevantObservations.count)
+      XCTAssertEqual(draft.response, response)
+      XCTAssertEqual(draft.optionLabel(at: 0).contains("GBP"), extracted)
+    }
+  }
+  func testExplicitEditOfInferredValueSurvivesRestorationEvenWhenTextMatches() throws {
+    let path = "/candidates/0/amount/currency"
+    let source = try fixture().replacingPayment(path + "/state", with: .string("inferred"))
+    var draft = try PaymentDraft(response: source)
+    XCTAssertNil(draft.currencyField)
+    draft.edit(path, value: "GBP")
+    var restored = try PaymentDraft(response: source)
+    restored.restore(
+      values: draft.values, selectedID: draft.selectedID, editedFieldIDs: draft.editedFieldIDs)
+    XCTAssertEqual(restored.currencyField?.value, "GBP")
+    XCTAssertEqual(restored.currencyField?.isEdited, true)
+    XCTAssertEqual(restored.response, source)
+    restored.edit(path, value: "")
+    XCTAssertNil(restored.currencyField)
+    XCTAssertEqual(restored.confirmation["values"][path], .null)
+    restored.edit("/not-a-field", value: "ignored")
+    XCTAssertNil(restored.values["/not-a-field"])
+  }
+  func testLegacyDraftDropsUntouchedInferenceButPreservesCorrections() throws {
+    let path = "/candidates/0/amount/currency"
+    let source = try fixture().replacingPayment(path + "/state", with: .string("inferred"))
+    var draft = try PaymentDraft(response: source)
+    var legacyValues = Dictionary(
+      uniqueKeysWithValues: draft.relevantObservations.map { ($0.0, $0.1["value"]) })
+    legacyValues["/invoice_number"] = .string("EDITED-42")
+    legacyValues["/candidates/1/beneficiary_name"] = .string("Unselected")
+    draft.restore(values: legacyValues, selectedID: draft.selectedID, editedFieldIDs: nil)
+    XCTAssertNil(draft.currencyField)
+    XCTAssertEqual(draft.values["/invoice_number"], .string("EDITED-42"))
+    XCTAssertTrue(draft.editedFieldIDs.contains("/invoice_number"))
+    XCTAssertNil(draft.values["/candidates/1/beneficiary_name"])
+    legacyValues[path] = .string("EUR")
+    draft.restore(values: legacyValues, selectedID: draft.selectedID, editedFieldIDs: nil)
+    XCTAssertEqual(draft.currencyField?.value, "EUR")
+    XCTAssertEqual(draft.currencyField?.isEdited, true)
+  }
+  func testConfirmationDisplaysEveryNonNullValueExactlyOnce() throws {
+    var draft = try PaymentDraft(response: fixture())
+    for (path, value) in [
+      "/customer_number": "000123", "/due_date": "2026-10-31",
+      "/candidates/0/remittance/model": "HR00", "/candidates/0/remittance/purpose_code": "OTHR",
+      "/document_context/language": "en",
+    ] { draft.edit(path, value: value) }
+    func check(_ draft: PaymentDraft, file: StaticString = #filePath, line: UInt = #line) {
+      let hero = [
+        draft.amountField, draft.recipientField,
+        draft.amountField == nil ? nil : draft.currencyField,
+      ].compactMap { $0 }
+      let fields = hero + draft.confirmationSections.flatMap(\.fields)
+      XCTAssertEqual(fields.count, Set(fields.map(\.id)).count, file: file, line: line)
+      XCTAssertEqual(
+        Set(fields.map(\.id)), Set(draft.values.filter { $0.value != .null }.keys), file: file,
+        line: line)
+    }
+    check(draft)
+    XCTAssertEqual(draft.confirmationSections.map(\.title), ["Payment details", "Invoice details"])
+    XCTAssertTrue(draft.confirmationSections[0].fields.contains { $0.label == "Account holder" })
+    XCTAssertTrue(draft.confirmationSections[1].fields.contains { $0.label == "Invoice number" })
+    draft.edit("/candidates/0/amount/value", value: "")
+    check(draft)
+    XCTAssertTrue(draft.confirmationSections[0].fields.contains { $0.label == "Currency" })
+  }
+  func testInferenceOnlyDraftCannotConfirmUntilUserAddsDetails() throws {
+    var source = try fixture()
+    let baseline = try PaymentDraft(response: source)
+    for (path, _) in baseline.relevantObservations {
+      source = source.replacingPayment(path + "/state", with: .string("inferred"))
+    }
+    var draft = try PaymentDraft(response: source)
+    XCTAssertTrue(draft.visibleFields.isEmpty)
+    XCTAssertFalse(draft.canConfirm)
+    XCTAssertEqual(draft.optionLabel(at: 0), "Option 1 · Amount unknown")
+    draft.edit("/candidates/0/amount/value", value: "12.34")
+    XCTAssertTrue(draft.canConfirm)
+    XCTAssertTrue(draft.paymentIssues.contains("Currency is missing or invalid."))
+  }
+
+}
+
+extension JSONValue {
+  func replacingPayment(_ path: String, with value: JSONValue) -> JSONValue {
+    replacing(["runs", "0", "payment"] + path.split(separator: "/").map(String.init), with: value)
+  }
+  private func replacing(_ path: [String], with value: JSONValue) -> JSONValue {
+    guard let first = path.first else { return value }
+    let tail = Array(path.dropFirst())
+    switch self {
+    case .object(var object):
+      object[first] = (object[first] ?? .null).replacing(tail, with: value)
+      return .object(object)
+    case .array(var array):
+      guard let index = Int(first), array.indices.contains(index) else { return self }
+      array[index] = array[index].replacing(tail, with: value)
+      return .array(array)
+    default: return self
+    }
+  }
 }
