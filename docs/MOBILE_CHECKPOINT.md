@@ -11,6 +11,8 @@ Markus confirmed that his real-invoice iPhone testing is complete and accepted t
 
 ## Verification
 
+The folder reorganization reran 672 backend tests (95.92% statements / 91.15% branches), all 16 native unit/recovery and 2 simulator UI tests, and installed-wheel/source-distribution checks. See [full reorganization verification](REPOSITORY_REORGANIZATION_HANDOFF.md). The checks below retain the original mobile PR #2 checkpoint; no device reinstall was performed for the folder move.
+
 - 672 offline backend/evaluation tests pass. Domain/orchestration coverage is **95.92% statements / 91.20% branches** (3,595/3,748 and 1,317/1,444). Ruff lint/format and strict mypy pass; generated contracts and JavaScript syntax were checked.
 - 16 native unit/recovery tests and 2 simulator UI tests pass in the final checkpoint run. Signed device build succeeded and the update is installed on the iPhone 16 Pro. Earlier synthetic hardware/UI checks and browser checks are detailed in [mobile implementation](MOBILE_IMPLEMENTATION.md).
 - The latest physical reconnect result was **USB failed → Wi-Fi connected**. Do not describe that check as successful USB connectivity. Saved mobile image bytes match their recorded hashes and provider-output inspection makes no new inference call.
@@ -27,6 +29,6 @@ Keep root `.env`, SDK credential stores, `.local/providers.json`, `.local/backen
 
 The phone currently uses saved addresses; there is no automatic Mac discovery. Joining a personal hotspot or changing the Mac's IP may require restarting the backend at its current interfaces and updating the saved URLs. The same-iPhone hotspot setup is not yet verified. Hotspot/discovery improvements are later work, not part of the structural refactor.
 
-Next: finish the checked current-changes PR/merge → complete [repository reorganization](REPOSITORY_REORGANIZATION_HANDOFF.md) in its separate chat and merge its checked PR → **create the presentation together with Markus when he returns** → improve the mobile client → work on the backend → implement Android last. Update the roadmap, implementation status, README, operational instructions and handoff in each PR. Do not start the presentation or additional features while Markus is away.
+The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). The separate [repository reorganization](REPOSITORY_REORGANIZATION_HANDOFF.md) records the new root layout, checks and PR. Next: **create the presentation together with Markus when he returns** → improve the mobile client → work on the backend → implement Android last. Do not start the presentation or additional features while Markus is away.
 
 Paper detection, automatic crop, native OCR experiments, Android, final findings and the attendee companion remain later scope. Payment QR/barcode decoding remains outside the PoC. No public publication, production-readiness claim or actual payment execution is authorized by this checkpoint.

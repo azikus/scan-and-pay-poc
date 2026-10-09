@@ -2,13 +2,25 @@
 
 Independent Azikus backend for turning one JPEG/PNG invoice image into an editable payment draft. Every draft requires user review and confirmation; the PoC does not execute payments.
 
-**Current checkpoint — 9 October 2026:** the native iOS capture/crop → Send → editable review → confirmation/reset flow and the authenticated admin inspector are implemented. Markus confirmed that his real-invoice iPhone testing is complete. This is PoC acceptance, not a production accuracy or measured end-to-end latency claim. See [mobile checkpoint](docs/MOBILE_CHECKPOINT.md), [mobile implementation](docs/MOBILE_IMPLEMENTATION.md) and [iOS setup](apps/ios/README.md).
+**Current checkpoint — 9 October 2026:** the native iOS capture/crop → Send → editable review → confirmation/reset flow and the authenticated admin inspector are implemented. Markus confirmed that his real-invoice iPhone testing is complete. This is PoC acceptance, not a production accuracy or measured end-to-end latency claim. See [mobile checkpoint](docs/MOBILE_CHECKPOINT.md), [mobile implementation](docs/MOBILE_IMPLEMENTATION.md) and [iOS setup](ios/README.md).
 
 The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. Seven tested profiles are enabled under the existing bounded mobile allowance. The persisted admin selection is currently **Mistral Small** (`mistral-small-image-roles-v3@2-b292ba761e512607`); pending drafts retain their original profile. OpenAI remains the historical Phase 2 baseline, described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
 
 At this checkpoint, the original ledger contains **2,201 dispatched reservations / €336.45 held**. The unchanged mobile limits are 2,217 / €338.05; no paid calls are authorized for PR preparation or repository reorganization. Private samples, labels, raw responses, reports and credentials remain outside Git. These holds are not actual billed charges.
 
-**Next:** merge this checked mobile/admin checkpoint, then reorganize the repository in a separate chat and merge that checked refactor, updating status/docs in both steps. Afterward, build the presentation **together with Markus**, then improve the mobile client and backend, and implement Android last. Hotspot testing and automatic Mac discovery remain open; Reconnect currently tries saved USB/Wi-Fi addresses. See [coding handoff](docs/CODING_HANDOFF.md), [roadmap](docs/ROADMAP.md), [API contract](docs/API_CONTRACT.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
+The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). Repository reorganization is [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), with its checks recorded in the [reorganization handoff](docs/REPOSITORY_REORGANIZATION_HANDOFF.md).
+
+**Next:** build the presentation **together with Markus**, then improve the mobile client and backend, and implement Android last. Hotspot testing and automatic Mac discovery remain open; Reconnect currently tries saved USB/Wi-Fi addresses. See [coding handoff](docs/CODING_HANDOFF.md), [roadmap](docs/ROADMAP.md), [API contract](docs/API_CONTRACT.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
+
+## Repository layout
+
+- `backend/`: Python API, domain/orchestration, providers, persistence and offline tests.
+- [frontend/](frontend/README.md): admin HTML/CSS/JavaScript and assets, served by the same FastAPI process and bundled into the Python wheel.
+- [ios/](ios/README.md): native app, XcodeGen specification, Xcode project and synthetic tests.
+- [android/](android/README.md): future-work README only.
+- `contracts/`, `docs/`, `evaluation/`: shared contracts, documentation and retained evaluation tooling.
+
+Python packaging/configuration stays at the root. Private `.env`, `.local/`, `samples/`, `results/` and historical `reference/` locations stay unchanged.
 
 ## Local setup
 
@@ -55,6 +67,8 @@ The CLI prints the accepted scan ID and a safe summary, polls by default, and sa
 .venv/bin/pytest --cov=backend --cov=evaluation --cov-report=term-missing --cov-report=json:.local/coverage.json
 .venv/bin/python -m backend.check_coverage
 .venv/bin/python -m backend.export
+node --check frontend/admin/admin.js
+.venv/bin/python -m hatchling build
 ```
 
 Tests block socket connections and use synthetic payment details. Coverage gates require ≥90% statements and ≥85% branches across domain/orchestration, including API/configuration, persistence, every backend adapter and evaluation corpus/batch/replay/cost tooling. CLI/export/coverage-report entry points are separately visible in the full report, not used to inflate that scope. Generated JSON contracts and third-party dependencies are excluded.

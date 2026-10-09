@@ -1,26 +1,43 @@
-# Repository reorganization handoff — 9 October 2026
+# Repository reorganization — 9 October 2026
 
-Markus explicitly requested a separate chat to do this after the current mobile/admin PR is merged. He authorizes the refactor, checks, status/documentation updates, commit/push, PR creation and merge without further routine confirmation. Read CODING_HANDOFF.md and MOBILE_CHECKPOINT.md, then inspect the actual current Git/PR state. Start a `codex/` branch from the merged checkpoint, preserving any newer work.
+The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2) at `62ac67da3aefd5817466e326cdd0b362ae58edd1`. Markus authorized this separate structural refactor, checks, documentation/status updates and normal PR/merge without further routine confirmation. Refactor: [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), from `codex/repository-layout` into `main`. The PR records the final merge commit and status.
 
-## Intended structure
+## Delivered layout
 
-- `backend/`: existing Python backend. Keep package/import semantics stable where possible; avoid an unrelated architecture rewrite.
-- `frontend/`: move the admin inspector source/assets out of `backend/admin_assets/`. It can still be served by FastAPI as part of one deployment. Verify both source-checkout serving and wheel/package assets; do not assume source-relative paths work in an installed wheel.
-- `ios/`: move `apps/ios/` intact and update XcodeGen/project references, schemes, build commands, docs and relevant scripts. Preserve the bundle ID, app data/recovery compatibility, source/resources, signing behavior and existing fixtures.
-- `android/`: add a concise future-work README. No Android scaffolding, dependencies or implementation yet.
+| Directory | Contents |
+| --- | --- |
+| `backend/` | Existing Python package, API, domain/orchestration, providers, persistence and offline tests; import names unchanged |
+| `frontend/admin/` | Inspector HTML, JavaScript, CSS, artwork and licensed fonts, moved byte-for-byte from the former `backend/admin_assets/` source directory |
+| `ios/` | Native project, XcodeGen specification, source/resources and tests, moved from the former `apps/ios/`; README paths/current setup updated |
+| `android/` | Future-work README only; no app, scaffolding or dependencies |
+| `contracts/`, `docs/`, `evaluation/` | Shared contract, documentation and evaluation tooling, retained at the root |
 
-Keep shared contracts/docs and useful root tooling where appropriate. Do not move private samples, results, credential stores or the `.local/backend/` database/artifacts merely to match the source layout. Root `.env` remains the credential/configuration source. Update private launcher paths only if necessary, preserving listeners, original data directory and selected profile.
+Root `pyproject.toml`, `requirements.lock`, examples and private configuration remain in place. Backend and frontend still use a single FastAPI deployment. Source/editable runs resolve assets in `frontend/admin/`; Hatch bundles those same files and the font license into `backend/admin_assets/` inside installed wheels. That internal wheel path is intentional. No separate frontend build or server was introduced.
 
-## Scope and checks
+API routes/contracts, extraction profiles/behavior, scan UX, source filters, saved provider-output/mobile-image inspection, confirmation, recovery and reconnect semantics are unchanged. Historical experiment records were not rewritten. Private source/evidence/data directories were not moved.
 
-This is a structural refactor: preserve API routes/contracts, extraction behavior/profiles, budgets, scanner UX, source filtering, provider-output and mobile-image inspection, confirmation/recovery and reconnect semantics. No new paid calls, corpus runs, default changes, presentation, automatic discovery, paper detection, backend features or Android implementation.
+## Verification
 
-Run the relevant backend lint/format/type/tests/coverage gates and contract comparison; verify JS syntax, package/wheel asset serving, and local authenticated health/profile/admin reads without inference. Build iOS from its new path and run all unit/recovery and UI tests using synthetic fixtures. A device reinstall is unnecessary unless a functional build change warrants it; preserve the user's current app/draft and do not require an unlock for this folder-only refactor.
+The PR was checked locally and reported mergeable with a clean merge state. This repository has no GitHub CI/status checks or required branch checks configured; no protection bypass or forced update is used. The checks below are local results, not hosted CI results.
 
-Update README, ROADMAP, IMPLEMENTATION_STATUS, CODING_HANDOFF, MOBILE_CHECKPOINT, MOBILE_IMPLEMENTATION, MOBILE_LIVE_TESTING, ARCHITECTURE, operational/iOS instructions and AGENTS where paths/current status change. Label historical paths in old experiment records rather than rewriting immutable evidence. Check active documentation links and stale executable path references.
+- **672 offline backend/evaluation tests pass**. Measured domain/orchestration coverage: **3,598/3,751 statements (95.92%) and 1,318/1,446 branches (91.15%)**. Ruff lint/format, strict mypy, JavaScript syntax and regenerated-contract comparison pass; all three contract exports are unchanged.
+- Source-checkout admin serving passes. A wheel installed into a temporary directory was exercised outside the checkout with network connections blocked and synthetic settings: health, authentication, `/admin`, every allowlisted asset, security headers and rejection of unlisted assets pass. Every packaged asset and the font license matches its source hash. Tests/private/mobile files are absent from the wheel. A fresh wheel rebuilt from the source distribution retains the same assets.
+- `xcodegen generate --spec ios/project.yml` regenerates a byte-identical project. All moved iOS implementation, project, scheme, resources and fixtures are byte-identical; only its README changes. A fresh simulator build from the new path passes **16 native unit/recovery tests and 2 UI tests** on the existing iPhone 16 Pro / iOS 18.6 simulator (`A01D44F3-7512-4AED-BD55-5B5688DB2015`). No physical-phone reinstall, unlock or new device test was needed or performed.
+- Authenticated local profiles, methods and mobile scan-list reads pass, along with health and all admin asset routes. These are GET requests only; no inference, evaluation replay or paid call occurred.
+- The Python check reports a dependency deprecation warning for Starlette's httpx TestClient integration. Xcode reports skipped App Intents metadata extraction because the app does not use that framework. Neither warning fails a check; dependencies and app behavior were not changed for this refactor.
 
-Record a concise final handoff with actual directory layout, validation results, preserved private-state evidence and PR/merge result. Create and attach the PR, review/check it, then merge through the normal checked flow without force push or bypassing protections. Leave the original checkout usable with the inspector running if it was running before; confirm clean Git status and original ledger/profile after any restart.
+Private verification evidence is in `.local/repository-reorganization-2026-10-09/`: `backend-checks.log`, `ios-checks.log`, `ios-tests.xcresult`, `packaging-checks.log`, the packaging verification script/builds, and preservation records. No private logs, artifacts or raw payment data enter Git.
 
-## What comes afterward
+## Private state and runtime
 
-Wait for Markus to build the presentation together. Mobile-client improvements follow, then backend improvements, and Android last. The presentation will use retained experiment evidence and speed/correctness comparisons; it is not part of this unattended refactor.
+Before editing, the original credential/config fingerprints and all **2,201 budget rows** matched `.local/mobile-pr-checkpoint-2026-10-09/private-state-before.json`, including its original-row digest. The reorganization recorded a fresh database snapshot, SQLite backup and hashes for **8,102 private files** across source samples, results, historical reference material and backend job artifacts. Verification compares every recorded database table, credential/config fingerprint and artifact hash after the move.
+
+The ledger remains **2,201 dispatches / €336.45 held**, under unchanged cumulative limits of 2,217 / €338.05. The persisted selection remains **Mistral Small direct**, `mistral-small-image-roles-v3@2-b292ba761e512607`. Existing scans, keys, confirmations, profile snapshots and backend identity are preserved. Root `.env`, SDK credential stores, `.local/providers.json`, `.local/backend/jobs.sqlite3`, source invoices, labels and raw responses remain private.
+
+The existing launcher `.local/mobile-live-2026-10-09/serve.py` was restarted only after checking its PID and confirming zero queued/running jobs. The same launcher, PID file, log, settings and data directory remain the single backend owner; no launcher or network-design change was required. Read its `server.pid` for the current PID. The inspector is available at `http://127.0.0.1:8000/admin`, with the existing local token and interface listeners. Startup still discovers the Mac's current configured interfaces; saved phone URLs are not automatic discovery.
+
+The installed iPhone app and its data were untouched. The latest physical reconnect evidence remains **USB failed → Wi-Fi connected**; this refactor does not establish new USB, hotspot, real-invoice accuracy or camera-to-review timing results.
+
+## Next joint task
+
+Build the presentation **together with Markus when he returns**, using retained speed/correctness evidence. Then improve the mobile client, work on the backend and implement Android last. Presentation work, paper detection, native OCR, automatic discovery and new backend features were not started during cleanup. No force push, protection bypass, public publication or subscription is part of this work.

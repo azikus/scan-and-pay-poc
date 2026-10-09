@@ -4,7 +4,7 @@
 
 Markus confirmed on 9 October that real-invoice iPhone testing is complete. The current iOS/admin slice is accepted for this PoC checkpoint. Device acceptance is no longer pending; hotspot/address-change testing and automatic discovery remain separate open improvements. Current admin selection is Mistral Small, and the original ledger is 2,201 dispatches / €336.45 held. These are current observations, superseding historical selection/budget statements below.
 
-The authorized sequence is: checked current-changes PR/merge → separate repository-reorganization chat and checked PR/merge, updating status/docs in both → presentation together with Markus → mobile and backend improvements → Android last. No paid calls during either PR/refactor. See [checkpoint](MOBILE_CHECKPOINT.md) and [coding handoff](CODING_HANDOFF.md).
+The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). The native project now lives in `ios/`, admin source in `frontend/admin/`, Python in `backend/`, and `android/` contains only a future-work README. See [reorganization checks and PR](REPOSITORY_REORGANIZATION_HANDOFF.md). Next: presentation together with Markus → mobile and backend improvements → Android last. No paid calls occur during cleanup. See [checkpoint](MOBILE_CHECKPOINT.md) and [coding handoff](CODING_HANDOFF.md).
 
 ## Historical implementation and verification notes
 
@@ -22,7 +22,7 @@ Verification: 665 backend tests pass; 12 iOS unit/recovery tests cover selection
 
 Markus selected the **image-led sheet**, shimmer for every displayable field, omission of null-valued result rows, and **Pay / Complete** wording. The action remains simulated in code. He requested formatted nullable JSON on mobile and a private admin frontend, and confirmed **original JSON + mobile edits**. This agreement supersedes the earlier documentation-only/no-mobile handoff gate for this implementation. No new chat was created.
 
-The native iOS project is at `apps/ios/ScanAndPay.xcodeproj`; setup and behavior are documented in [the iOS README](../apps/ios/README.md). M5’s direction is agreed. M6’s first implementation is present; its physical-device acceptance is still open. No real invoice capture or camera-to-review latency is claimed.
+At the original checkpoint the project was under `apps/ios/`; it now lives at `ios/ScanAndPay.xcodeproj`. Current setup and behavior are documented in [the iOS README](../ios/README.md). M5’s direction is agreed. M6’s first implementation is present; its physical-device acceptance is still open. No real invoice capture or camera-to-review latency is claimed.
 
 ## Latest UI iteration — 9 October
 

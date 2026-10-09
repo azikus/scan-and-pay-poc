@@ -75,6 +75,11 @@ def create_app(
     )
     bearer = HTTPBearer(auto_error=False)
 
+    # Wheels bundle the frontend inside the package; editable installs use its source.
+    admin_assets = Path(__file__).parent / "admin_assets"
+    if not admin_assets.is_dir():
+        admin_assets = Path(__file__).parent.parent / "frontend" / "admin"
+
     def auth(
         request: Request,
         credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
@@ -198,7 +203,7 @@ def create_app(
 
     @app.get("/admin", include_in_schema=False)
     async def admin_shell() -> FileResponse:
-        return FileResponse(Path(__file__).parent / "admin_assets" / "index.html")
+        return FileResponse(admin_assets / "index.html")
 
     @app.get("/admin/assets/{name}", include_in_schema=False)
     async def admin_asset(name: str) -> FileResponse:
@@ -210,7 +215,7 @@ def create_app(
             "logo.svg",
         }:
             raise ServiceError(404, "not_found", "Asset not found.")
-        return FileResponse(Path(__file__).parent / "admin_assets" / name)
+        return FileResponse(admin_assets / name)
 
     @app.get("/v1/admin/methods", response_model=ExtractionCatalog, dependencies=[Depends(auth)])
     async def extraction_methods() -> ExtractionCatalog:
