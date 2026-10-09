@@ -1,6 +1,6 @@
 # Phase 2 closeout — 8 October 2026
 
-Markus asked to wrap up the phase, select the best tested provider or hybrid for correctness and speed, commit/push the work and prepare a fourth-chat handoff. This supplies the requested checkpoint confirmation. Phase 2 (M2–M4) is closed for the current PoC scope with a provisional pipeline, not a production-accuracy claim. Additional handoff details will come from Markus later; do not create the next chat yet.
+Markus asked to wrap up the phase, select the best tested provider or hybrid for correctness and speed, commit/push the work and prepare a fourth-chat handoff. This supplies the requested checkpoint confirmation. Phase 2 (M2–M4) is closed for the current PoC scope with a provisional pipeline, not a production-accuracy claim. The subsequent mobile brief is now recorded in MOBILE_UX_BRIEF.md and CHAT4_HANDOFF.md, with a copyable CHAT4_PROMPT.md. Do not create the next chat as part of documentation preparation.
 
 ## Selected pipeline
 
@@ -43,6 +43,6 @@ Wrong amounts, payment-reference versus invoice-number confusion, missing bank d
 
 ## Next phase
 
-Prepare M5 capture/processing/editable-review/error/retake designs, then implement M6 iOS against the existing Mac backend in the fourth chat after Markus supplies the remaining brief. Use a configurable reachable Mac URL for a physical iPhone, with deliberate development network configuration and backend-only provider credentials. Android follows as M7. Native OCR is optional later; barcode decoding remains outside this PoC. M8 final findings and attendee display remain deferred.
+Prepare M5 capture/processing/editable-review/error/retake designs, then implement M6 iOS against the existing Mac backend in the fourth chat using the supplied MOBILE_UX_BRIEF.md and after design agreement. Use a configurable reachable Mac URL for a physical iPhone, with deliberate development network configuration and backend-only provider credentials. Android follows as M7. Native OCR is optional later; barcode decoding remains outside this PoC. M8 final findings and attendee display remain deferred.
 
 Start with [fourth-chat handoff](CHAT4_HANDOFF.md). Do not launch new model tournaments, paid calls, mobile implementation or a new chat during this closeout.

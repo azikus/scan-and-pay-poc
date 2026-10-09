@@ -44,6 +44,339 @@
         ]
       }
     },
+    "/v1/admin/selection": {
+      "put": {
+        "summary": "Select Mobile Profile",
+        "operationId": "select_mobile_profile_v1_admin_selection_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/methods": {
+      "get": {
+        "summary": "Extraction Methods",
+        "operationId": "extraction_methods_v1_admin_methods_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionCatalog"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/scans": {
+      "get": {
+        "summary": "List Scans",
+        "operationId": "list_scans_v1_admin_scans_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "mobile",
+                    "automated"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/scans/{scan_id}/artifacts": {
+      "get": {
+        "summary": "Scan Artifacts",
+        "operationId": "scan_artifacts_v1_admin_scans__scan_id__artifacts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanArtifacts"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/scans/{scan_id}/image": {
+      "get": {
+        "summary": "Mobile Image",
+        "operationId": "mobile_image_v1_admin_scans__scan_id__image_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/scans/{scan_id}/reviews": {
+      "get": {
+        "summary": "List Reviews",
+        "operationId": "list_reviews_v1_scans__scan_id__reviews_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientReviews"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/scans/{scan_id}/reviews/{review_id}": {
+      "put": {
+        "summary": "Save Review",
+        "operationId": "save_review_v1_scans__scan_id__reviews__review_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scan Id"
+            }
+          },
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Review Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientReview"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedClientReview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/scans": {
       "post": {
         "summary": "Submit",
@@ -62,6 +395,20 @@
               "type": "string",
               "minLength": 1,
               "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "x-scanpay-client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "enum": [
+                "mobile",
+                "automated"
+              ],
+              "type": "string",
+              "default": "automated",
+              "title": "X-Scanpay-Client"
             }
           }
         ],
@@ -545,6 +892,80 @@
         "type": "object",
         "title": "Amount"
       },
+      "Benchmark": {
+        "properties": {
+          "profile": {
+            "type": "string",
+            "title": "Profile"
+          },
+          "profile_version": {
+            "type": "string",
+            "title": "Profile Version"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "median_seconds": {
+            "type": "number",
+            "title": "Median Seconds"
+          },
+          "p95_seconds": {
+            "type": "number",
+            "title": "P95 Seconds"
+          },
+          "timing_n": {
+            "type": "integer",
+            "title": "Timing N"
+          },
+          "timeouts": {
+            "type": "integer",
+            "title": "Timeouts"
+          },
+          "error": {
+            "type": "integer",
+            "title": "Error"
+          },
+          "accepted_readable": {
+            "type": "integer",
+            "title": "Accepted Readable"
+          },
+          "readable_total": {
+            "type": "integer",
+            "title": "Readable Total"
+          },
+          "critical_matches": {
+            "type": "integer",
+            "title": "Critical Matches"
+          },
+          "critical_total": {
+            "type": "integer",
+            "title": "Critical Total"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "profile",
+          "profile_version",
+          "provider",
+          "model",
+          "median_seconds",
+          "p95_seconds",
+          "timing_n",
+          "timeouts",
+          "error",
+          "accepted_readable",
+          "readable_total",
+          "critical_matches",
+          "critical_total"
+        ],
+        "title": "Benchmark"
+      },
       "BillerDestination": {
         "properties": {
           "kind": {
@@ -639,6 +1060,79 @@
           "destination"
         ],
         "title": "Candidate"
+      },
+      "ClientReview": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "run_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Run Id"
+          },
+          "selected_candidate_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Selected Candidate Id"
+          },
+          "event": {
+            "type": "string",
+            "const": "review_confirmed",
+            "title": "Event",
+            "default": "review_confirmed"
+          },
+          "simulated": {
+            "type": "boolean",
+            "const": true,
+            "title": "Simulated",
+            "default": true
+          },
+          "values": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Values"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "run_id",
+          "selected_candidate_id",
+          "values"
+        ],
+        "title": "ClientReview"
+      },
+      "ClientReviews": {
+        "properties": {
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/SavedClientReview"
+            },
+            "type": "array",
+            "title": "Reviews"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reviews"
+        ],
+        "title": "ClientReviews"
       },
       "Cost": {
         "properties": {
@@ -981,6 +1475,49 @@
         ],
         "title": "ExcludedProfile"
       },
+      "ExtractionCatalog": {
+        "properties": {
+          "measured_on": {
+            "type": "string",
+            "title": "Measured On"
+          },
+          "measurement_note": {
+            "type": "string",
+            "title": "Measurement Note"
+          },
+          "methods": {
+            "items": {
+              "$ref": "#/components/schemas/MethodGuide"
+            },
+            "type": "array",
+            "title": "Methods"
+          },
+          "benchmarks": {
+            "items": {
+              "$ref": "#/components/schemas/Benchmark"
+            },
+            "type": "array",
+            "title": "Benchmarks"
+          },
+          "deferred": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Deferred"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "measured_on",
+          "measurement_note",
+          "methods",
+          "benchmarks",
+          "deferred"
+        ],
+        "title": "ExtractionCatalog"
+      },
       "Finding": {
         "properties": {
           "code": {
@@ -1018,6 +1555,19 @@
           "status"
         ],
         "title": "Finding"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
       },
       "Hints": {
         "properties": {
@@ -1119,6 +1669,39 @@
           "mime_type"
         ],
         "title": "ImageInput"
+      },
+      "JsonValue": {},
+      "MethodGuide": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Options"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "options"
+        ],
+        "title": "MethodGuide"
       },
       "Observation": {
         "properties": {
@@ -1399,6 +1982,17 @@
       },
       "ProfilesResponse": {
         "properties": {
+          "server_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server Id"
+          },
           "profiles": {
             "items": {
               "$ref": "#/components/schemas/Profile"
@@ -1416,6 +2010,17 @@
               }
             ],
             "title": "Default Extract Profile Id"
+          },
+          "default_extract_profile_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Extract Profile Version"
           }
         },
         "additionalProperties": false,
@@ -1651,6 +2256,149 @@
         ],
         "title": "Run"
       },
+      "RunOutputs": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "profile_id": {
+            "type": "string",
+            "title": "Profile Id"
+          },
+          "profile_version": {
+            "type": "string",
+            "title": "Profile Version"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/StageOutputs"
+            },
+            "type": "array",
+            "title": "Stages"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "run_id",
+          "profile_id",
+          "profile_version",
+          "state"
+        ],
+        "title": "RunOutputs"
+      },
+      "SavedClientReview": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "run_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Run Id"
+          },
+          "selected_candidate_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Selected Candidate Id"
+          },
+          "event": {
+            "type": "string",
+            "const": "review_confirmed",
+            "title": "Event",
+            "default": "review_confirmed"
+          },
+          "simulated": {
+            "type": "boolean",
+            "const": true,
+            "title": "Simulated",
+            "default": true
+          },
+          "values": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Values"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Id"
+          },
+          "scan_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Scan Id"
+          },
+          "received_at": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Received At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "run_id",
+          "selected_candidate_id",
+          "values",
+          "id",
+          "scan_id",
+          "received_at"
+        ],
+        "title": "SavedClientReview"
+      },
+      "SavedOutput": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "provider_response",
+              "ocr_document",
+              "llm_input"
+            ],
+            "title": "Kind"
+          },
+          "value": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "SavedOutput"
+      },
       "Scan": {
         "properties": {
           "schema_version": {
@@ -1753,6 +2501,132 @@
           "runs"
         ],
         "title": "Scan"
+      },
+      "ScanArtifacts": {
+        "properties": {
+          "scan_id": {
+            "type": "string",
+            "title": "Scan Id"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "automated"
+            ],
+            "title": "Source"
+          },
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/RunOutputs"
+            },
+            "type": "array",
+            "title": "Runs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "scan_id",
+          "source",
+          "runs"
+        ],
+        "title": "ScanArtifacts"
+      },
+      "ScanList": {
+        "properties": {
+          "scans": {
+            "items": {
+              "$ref": "#/components/schemas/ScanSummary"
+            },
+            "type": "array",
+            "title": "Scans"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "scans",
+          "next_offset"
+        ],
+        "title": "ScanList"
+      },
+      "ScanSummary": {
+        "properties": {
+          "scan_id": {
+            "type": "string",
+            "title": "Scan Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "execution_kind": {
+            "type": "string",
+            "title": "Execution Kind"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "automated"
+            ],
+            "title": "Source"
+          },
+          "outcomes": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Outcomes"
+          },
+          "profiles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Profiles"
+          },
+          "client_review_count": {
+            "type": "integer",
+            "title": "Client Review Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "scan_id",
+          "created_at",
+          "state",
+          "execution_kind",
+          "source",
+          "outcomes",
+          "profiles",
+          "client_review_count"
+        ],
+        "title": "ScanSummary"
       },
       "Stage": {
         "properties": {
@@ -1954,6 +2828,66 @@
         ],
         "title": "Stage"
       },
+      "StageOutputs": {
+        "properties": {
+          "stage_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Id"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "execution": {
+            "type": "string",
+            "title": "Execution"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/SavedOutput"
+            },
+            "type": "array",
+            "title": "Outputs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "stage_id",
+          "method",
+          "execution"
+        ],
+        "title": "StageOutputs"
+      },
       "Timings": {
         "properties": {
           "queue": {
@@ -2060,6 +2994,46 @@
           "reason"
         ],
         "title": "UnresolvedDestination"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     },
     "securitySchemes": {

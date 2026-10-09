@@ -37,8 +37,10 @@ class Profile(Model):
 
 
 class ProfilesResponse(Model):
+    server_id: str | None = None
     profiles: list[Profile]
     default_extract_profile_id: str | None = None
+    default_extract_profile_version: str | None = None
 
 
 @dataclass(frozen=True)

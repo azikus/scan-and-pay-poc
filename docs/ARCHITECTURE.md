@@ -1,6 +1,10 @@
 # Architecture and data destinations
 
-Current extraction path: one direct-image OpenAI GPT-4.1 mini call, compact field recovery and shared review. See [selection](PHASE2_CLOSEOUT.md). OCR/hybrid methods remain implemented comparison options; the hybrid has since been freshly evaluated and is not selected. Historical planned/unvalidated descriptions below retain their original context.
+Current consumers are the native iOS app and authenticated admin inspector. The admin's Next scan form chooses an exact enabled direct-image, OCR/rules or OCR→LLM profile; the persisted selection is Mistral Small at this checkpoint. The historical Phase 2 OpenAI baseline remains documented in [closeout](PHASE2_CLOSEOUT.md). See [mobile checkpoint](MOBILE_CHECKPOINT.md) for accepted behavior and [reorganization handoff](REPOSITORY_REORGANIZATION_HANDOFF.md) for the next structural change.
+
+Mobile edits and source metadata live separately from immutable extraction records. The inspector reads saved provider responses and exact mobile upload bytes through authenticated endpoints; it does not initiate inference. Backend identity supports safe USB/Wi-Fi reconnection of pending drafts. Frontend/backend remain one local deployment; Android and subsequent features follow the jointly prepared presentation.
+
+The dated architectural notes below retain their original context; earlier "later mobile" and "unvalidated hybrid" descriptions are historical.
 
 Updated 7 October 2026. The implemented backend accepts one image and returns separate, reviewable payment drafts. See [implementation status](IMPLEMENTATION_STATUS.md) for measured provider results.
 
