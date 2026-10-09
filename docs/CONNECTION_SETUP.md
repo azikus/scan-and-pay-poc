@@ -2,6 +2,8 @@
 
 Markus authorized this small connection improvement after the extracted-field sheets: add current Mac addresses/status to the admin and remove the manual backend restart when switching local networks. The initial presentation is next, in his next prompt/chat. No other development or presentation creation is part of this update.
 
+Implementation and checked merge: [PR #5](https://github.com/azikus/scan-and-pay-poc/pull/5). Consult its actual status if resuming an interrupted closeout.
+
 ## Use it
 
 1. On the Mac, open `http://127.0.0.1:8000/admin`, sign in with the existing token and expand **Connection** above Next scan. This loopback URL remains usable when Wi-Fi changes.

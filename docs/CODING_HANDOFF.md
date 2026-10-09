@@ -8,7 +8,7 @@ The sheet update merged in [PR #4](https://github.com/azikus/scan-and-pay-poc/pu
 
 ## Immediate continuation
 
-1. Finish the authorized connection follow-up PR/checks/merge if still open; do not repeat completed work. Preserve private state and make no paid calls.
+1. The connection follow-up is [PR #5](https://github.com/azikus/scan-and-pay-poc/pull/5). Finish its checked merge only if still open; do not repeat completed work. Preserve private state and make no paid calls.
 2. The next prompt/chat is **the initial presentation together with Markus**. He requested comprehensive documentation so he can start it himself. Use [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md) for the source pack and [PRESENTATION_PROMPT.md](PRESENTATION_PROMPT.md) for a copyable opening prompt. Do not create another chat or build the presentation during this documentation task.
 3. Agreed later order: iOS improvements and real-invoice testing → backend/admin improvements and integration testing → Android and both-platform testing, the final development milestone → comprehensive final presentation and embeddable website HTML. Development can span multiple sessions. [ROADMAP.md](ROADMAP.md) owns the five next milestones; old M1–M8 definitions remain historical.
 
