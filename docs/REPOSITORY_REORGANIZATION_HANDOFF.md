@@ -1,6 +1,6 @@
 # Repository reorganization — 9 October 2026
 
-The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2) at `62ac67da3aefd5817466e326cdd0b362ae58edd1`. Markus authorized this separate structural refactor, checks, documentation/status updates and normal PR/merge without further routine confirmation. Refactor branch: `codex/repository-layout`. The PR link is recorded below when created; verify actual merge state at that link.
+The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2) at `62ac67da3aefd5817466e326cdd0b362ae58edd1`. Markus authorized this separate structural refactor, checks, documentation/status updates and normal PR/merge without further routine confirmation. Refactor: [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), from `codex/repository-layout` into `main`. The PR records the final merge commit and status.
 
 ## Delivered layout
 
@@ -17,6 +17,8 @@ Root `pyproject.toml`, `requirements.lock`, examples and private configuration r
 API routes/contracts, extraction profiles/behavior, scan UX, source filters, saved provider-output/mobile-image inspection, confirmation, recovery and reconnect semantics are unchanged. Historical experiment records were not rewritten. Private source/evidence/data directories were not moved.
 
 ## Verification
+
+The PR was checked locally and reported mergeable with a clean merge state. This repository has no GitHub CI/status checks or required branch checks configured; no protection bypass or forced update is used. The checks below are local results, not hosted CI results.
 
 - **672 offline backend/evaluation tests pass**. Measured domain/orchestration coverage: **3,598/3,751 statements (95.92%) and 1,318/1,446 branches (91.15%)**. Ruff lint/format, strict mypy, JavaScript syntax and regenerated-contract comparison pass; all three contract exports are unchanged.
 - Source-checkout admin serving passes. A wheel installed into a temporary directory was exercised outside the checkout with network connections blocked and synthetic settings: health, authentication, `/admin`, every allowlisted asset, security headers and rejection of unlisted assets pass. Every packaged asset and the font license matches its source hash. Tests/private/mobile files are absent from the wheel. A fresh wheel rebuilt from the source distribution retains the same assets.

@@ -8,7 +8,7 @@ The admin selects the next scan's method/model, filters mobile/automated scans, 
 
 At this checkpoint, the original ledger contains **2,201 dispatched reservations / €336.45 held**. The unchanged mobile limits are 2,217 / €338.05; no paid calls are authorized for PR preparation or repository reorganization. Private samples, labels, raw responses, reports and credentials remain outside Git. These holds are not actual billed charges.
 
-The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). Repository reorganization and its checks are recorded in the [reorganization handoff](docs/REPOSITORY_REORGANIZATION_HANDOFF.md).
+The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). Repository reorganization is [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), with its checks recorded in the [reorganization handoff](docs/REPOSITORY_REORGANIZATION_HANDOFF.md).
 
 **Next:** build the presentation **together with Markus**, then improve the mobile client and backend, and implement Android last. Hotspot testing and automatic Mac discovery remain open; Reconnect currently tries saved USB/Wi-Fi addresses. See [coding handoff](docs/CODING_HANDOFF.md), [roadmap](docs/ROADMAP.md), [API contract](docs/API_CONTRACT.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
 
