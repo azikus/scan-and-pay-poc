@@ -44,6 +44,29 @@
         ]
       }
     },
+    "/v1/admin/connection": {
+      "get": {
+        "summary": "Connection",
+        "operationId": "connection_v1_admin_connection_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionStatus"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/v1/admin/selection": {
       "put": {
         "summary": "Select Mobile Profile",
@@ -1133,6 +1156,83 @@
           "reviews"
         ],
         "title": "ClientReviews"
+      },
+      "ConnectionAddress": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "interface": {
+            "type": "string",
+            "title": "Interface"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "network",
+              "link_local"
+            ],
+            "title": "Kind"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "url",
+          "interface",
+          "kind"
+        ],
+        "title": "ConnectionAddress"
+      },
+      "ConnectionStatus": {
+        "properties": {
+          "automatic": {
+            "type": "boolean",
+            "title": "Automatic",
+            "default": false
+          },
+          "refresh_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Seconds"
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          },
+          "addresses": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectionAddress"
+            },
+            "type": "array",
+            "title": "Addresses"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ConnectionStatus"
       },
       "Cost": {
         "properties": {

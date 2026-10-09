@@ -21,6 +21,7 @@ from backend.config import Settings
 from backend.errors import ServiceError
 from backend.extraction_catalog import ExtractionCatalog, catalog
 from backend.images import prepare_image
+from backend.local_network import ConnectionStatus, LocalNetwork, manual_status
 from backend.models import Accepted, Error, ErrorResponse, Options, ProfileRef, Scan
 from backend.profiles import Definition, ProfilesResponse, registry, resolve, validate_limits
 from backend.runtime import Adapter, Runtime
@@ -32,6 +33,7 @@ def create_app(
     settings: Settings | None = None,
     definitions: dict[str, Definition] | None = None,
     adapters: dict[str, Adapter] | None = None,
+    network: LocalNetwork | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -168,6 +170,13 @@ def create_app(
             default_extract_profile_id=default_id,
             default_extract_profile_version=default_version,
         )
+
+    @app.get("/v1/admin/connection", response_model=ConnectionStatus, dependencies=[Depends(auth)])
+    async def connection(request: Request) -> ConnectionStatus:
+        if network is not None:
+            return network.status
+        server = request.scope.get("server")
+        return manual_status(server[0], server[1]) if server else ConnectionStatus()
 
     @app.put("/v1/admin/selection", response_model=ProfileRef, dependencies=[Depends(auth)])
     async def select_mobile_profile(selection: ProfileRef, request: Request) -> ProfileRef:

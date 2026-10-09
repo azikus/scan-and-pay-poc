@@ -132,3 +132,9 @@ New submissions accept `X-Scanpay-Client: mobile|automated` (default `automated`
 The app submits edits only after Pay opens a summary and the user presses Confirm. Keystrokes are not logged. The inspector shows original JSON and mobile-confirmed values separately and highlights differences.
 
 The PoC confirmation accepts a checked, selected, reviewable candidate even when payment fields are incomplete. Missing/invalid fields remain visible in the confirmation summary. This records `review_confirmed` with `simulated=true`; it does not change backend review state or make the candidate executable. Empty/error results and unselected candidates cannot be confirmed.
+
+## Local connection status (additive, 9 October 2026)
+
+Authenticated `GET /v1/admin/connection` returns `automatic` (boolean), `refresh_seconds` (nullable integer), `checked_at` (nullable timestamp of the last successful interface check), `addresses` (URL, interface identifier and `network|link_local` kind) and `warnings` (strings). The managed Mac launcher reports only successfully bound private/link-local IPv4 listeners. Loopback is not advertised as a phone URL. Discovery failure retains the previous listener list and check time with an explicit warning; bind failures are excluded and retried by the launcher. Responses are no-store and contain no token. Reads do not enumerate interfaces, dispatch inference, alter selection or change drafts.
+
+Ordinary manual Uvicorn startup reports `automatic=false` and, when the request's actual server socket address is private/link-local, that address only. It never treats a client Host header as a discovered address. Listener availability is not proof of connectivity from a particular phone. Existing scan, review, profile and identity semantics are unchanged.

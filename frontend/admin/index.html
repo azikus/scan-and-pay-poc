@@ -7,6 +7,13 @@
 <section id="login"><h1>Scan &amp; Pay</h1><p>Review extracted data and mobile edits.</p><form id="login-form"><label for="token">Access token</label><div class="login-row"><input id="token" type="password" autocomplete="off" required placeholder="Enter access token"><button type="submit" class="primary">Connect</button></div></form></section>
 <p id="error" role="alert" hidden></p>
 <section id="workspace" hidden>
+<details class="network-connection">
+<summary class="network-heading"><h2 id="network-heading">Connection</h2><span id="network-status" role="status">Checking addresses…</span></summary>
+<p id="network-help" class="muted">Use a Mac address in the mobile app’s Connection settings, then tap Reconnect.</p>
+<div id="network-addresses"></div>
+<p id="network-warning" role="status" hidden></p>
+<p id="network-copy-status" class="muted" role="status" aria-live="polite"></p>
+</details>
 <section class="extraction-selector" aria-label="Extraction method">
 <div class="selector-heading"><h2>Next scan</h2><p id="current-selection" class="muted">Loading current selection…</p></div>
 <form id="method-form">

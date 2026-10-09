@@ -1,5 +1,9 @@
 # Local backend operations
 
+## Current mobile demo launcher
+
+Run `.venv/bin/scanpay-serve` from the root, or continue using the existing private launcher, which now delegates to `backend.local_server`. This macOS launcher keeps `127.0.0.1:8000` available and automatically reconciles physical private/link-local IPv4 listeners every two seconds without restarting jobs. Open the Mac admin at `http://127.0.0.1:8000/admin` and expand **Connection** for the current phone URL. Copy changed URLs into the existing mobile Connection settings and Reconnect. See [setup and verification](CONNECTION_SETUP.md). The following older launcher/network notes are historical; manual Uvicorn startup remains supported but does not provide automatic listener updates.
+
 **Current continuation (9 October):** see [coding handoff](CODING_HANDOFF.md) and [mobile checkpoint](MOBILE_CHECKPOINT.md). The dated Phase 2 text below is historical; its old implementation/approval gates do not govern the current work.
 
 The repository uses root `backend/`, `frontend/`, `ios/` and `android/` directories. Start the same single FastAPI process from the repository root; root `.env`, `.local/providers.json` and `.local/backend/` are unchanged. Editable installs serve `frontend/admin/`; wheels bundle those assets internally as `backend/admin_assets/`. No separate frontend service is needed. The existing private launcher/PID/log remain under `.local/mobile-live-2026-10-09/`; inspect its PID and confirm zero queued/running jobs before any restart. Do not start a second owner. Current method is the persisted Mistral Small selection, with 2,201 dispatches / €336.45 held at reorganization. See [verification and merge status](REPOSITORY_REORGANIZATION_HANDOFF.md).

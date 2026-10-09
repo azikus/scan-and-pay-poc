@@ -4,15 +4,17 @@ Independent Azikus backend for turning one JPEG/PNG invoice image into an editab
 
 **Current checkpoint — 9 October 2026:** the native iOS capture/crop → Send → editable review → confirmation/reset flow and the authenticated admin inspector are implemented. Markus confirmed that his real-invoice iPhone testing is complete. This is PoC acceptance, not a production accuracy or measured end-to-end latency claim. See [mobile checkpoint](docs/MOBILE_CHECKPOINT.md), [mobile implementation](docs/MOBILE_IMPLEMENTATION.md) and [iOS setup](ios/README.md).
 
-The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. Seven tested profiles are enabled under the existing bounded mobile allowance. The persisted admin selection is currently **Gemini Flash-Lite** (`gemini-flash-lite-image-roles-v3@2-85773fe34609a2ff`); pending drafts retain their original profile. OpenAI remains the historical Phase 2 baseline, described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
+The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. Seven tested profiles are enabled under the existing bounded mobile allowance. The persisted admin selection is currently **Mistral Small** (`mistral-small-image-roles-v3@2-b292ba761e512607`); pending drafts retain their original profile. OpenAI remains the historical Phase 2 baseline, described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
 
-At this checkpoint, the original ledger contains **2,202 dispatched reservations / €336.55 held**. The unchanged mobile limits are 2,217 / €338.05; no paid calls are authorized for PR preparation or repository reorganization. Private samples, labels, raw responses, reports and credentials remain outside Git. These holds are not actual billed charges.
+At this checkpoint, the original ledger contains **2,204 dispatched reservations / €336.75 held**. The unchanged mobile limits are 2,217 / €338.05; no paid calls are authorized for this connection update or presentation preparation. Private samples, labels, raw responses, reports and credentials remain outside Git. These holds are not actual billed charges.
 
 The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). Repository reorganization is [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), with its checks recorded in the [reorganization handoff](docs/REPOSITORY_REORGANIZATION_HANDOFF.md).
 
-**Latest change ([PR #4](https://github.com/azikus/scan-and-pay-poc/pull/4)):** the review and confirmation sheets show all extracted payment/invoice fields and explicit edits, with untouched inference omitted from new mobile confirmations. See [sheet behavior and verification](docs/CONFIRMATION_SHEETS.md).
+**Sheet change ([PR #4](https://github.com/azikus/scan-and-pay-poc/pull/4)):** the review and confirmation sheets show all extracted payment/invoice fields and explicit edits, with untouched inference omitted from new mobile confirmations. See [sheet behavior and verification](docs/CONFIRMATION_SHEETS.md).
 
-**Next:** create the initial presentation **together with Markus in a new chat**. The [comprehensive presentation handoff](docs/PRESENTATION_HANDOFF.md) contains functionality, architecture, dated results, caveats, source evidence and demo setup; use the [copyable new-chat prompt](docs/PRESENTATION_PROMPT.md). The agreed [milestones](docs/ROADMAP.md) then continue through iOS improvements/testing, backend/admin work/integration, Android as the final development step, and a comprehensive final presentation plus embeddable website HTML. No later implementation or presentation creation is part of this sheet/documentation change. Hotspot testing and automatic discovery remain open. See [coding handoff](docs/CODING_HANDOFF.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
+**Connection setup ([PR #5](https://github.com/azikus/scan-and-pay-poc/pull/5)):** expand **Connection** in the admin to copy the current Mac URL into the existing iOS Connection settings. The new `.venv/bin/scanpay-serve` launcher follows private local network changes without restarting the backend. Keep the Mac admin open at `http://127.0.0.1:8000/admin`. See [setup, verification and limits](docs/CONNECTION_SETUP.md).
+
+**Next:** create the initial presentation **together with Markus in a new chat**. The [comprehensive presentation handoff](docs/PRESENTATION_HANDOFF.md) contains functionality, architecture, dated results, caveats, source evidence and demo setup; use the [copyable new-chat prompt](docs/PRESENTATION_PROMPT.md). The agreed [milestones](docs/ROADMAP.md) then continue through iOS improvements/testing, backend/admin work/integration, Android as the final development step, and a comprehensive final presentation plus embeddable website HTML. The sheets and connection setup are the approved pre-presentation updates; no later milestone or presentation is started. Same-iPhone hotspot connectivity is verified; automatic phone discovery remains open. See [coding handoff](docs/CODING_HANDOFF.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
 
 ## Repository layout
 
@@ -39,7 +41,7 @@ Configure a random `SCANPAY_TOKEN` in `.env` using [.env.example](.env.example).
 Use this same root `.env` for all credentials and connection settings. See the [access checklist](docs/PHASE2_ACCESS.md). Billing tiers and access notes belong in private integration evidence. Credentials alone do not enable a profile; each option requires explicit readiness metadata and a bounded plan.
 
 ```sh
-.venv/bin/uvicorn backend.api:create_app --factory --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
+.venv/bin/scanpay-serve
 ```
 
 In another terminal:
