@@ -26,6 +26,9 @@ scanpay-contracts = "backend.export:main"
 packages = ["backend"]
 exclude = ["backend/tests"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"frontend/admin" = "backend/admin_assets"
+
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
 asyncio_mode = "auto"

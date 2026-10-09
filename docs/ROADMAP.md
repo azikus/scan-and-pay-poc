@@ -7,9 +7,9 @@
 | 1 — Backend foundation | M1: service and v1 contract | Complete |
 | 2 — Extraction and evaluation | M2–M4: providers, interpretation, reviewed comparisons | Closed for current scope; original evidence retained |
 | 3 — Mobile | M5: design; M6: iOS; M7: Android | M5/M6 accepted for this PoC checkpoint; improvements follow presentation; Android last |
-| 4 — Demonstration and findings | M8: presentation, dependable demo, companion and report | Presentation is the next joint task after repository cleanup; final deliverables remain open |
+| 4 — Demonstration and findings | M8: presentation, dependable demo, companion and report | Presentation is the next joint task; final deliverables remain open |
 
-Milestone numbers retain their historical definitions; they do not override Markus's newly agreed execution order. Current work is two checked PRs: mobile/admin checkpoint, then a separate repository-reorganization chat with status/documentation updates. Next: presentation together → mobile-client improvements → backend improvements → Android. Keep experimental method switching for the client demonstration; do not silently freeze or replace the current selection.
+Milestone numbers retain their historical definitions; they do not override Markus's newly agreed execution order. The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). The separate [repository reorganization](REPOSITORY_REORGANIZATION_HANDOFF.md) establishes root backend/frontend/iOS/Android directories, preserving one FastAPI deployment and adding only a README for Android. Next: presentation together → mobile-client improvements → backend improvements → Android. Keep experimental method switching for the client demonstration; do not silently freeze or replace the current selection.
 
 Backend managed OCR already shipped in M1. M2 broadens OCR/document providers; M3 improves how their observations become payment candidates. Native platform OCR belongs to mobile work. These are separate capabilities, not conflicting milestone assignments.
 
@@ -58,7 +58,7 @@ Acceptance: Markus agrees the screens/states and API mapping before mobile code.
 
 Implemented and accepted for this PoC checkpoint (Markus confirmed real-invoice testing on 9 October): capture/import → JPEG/PNG upload → processing → editable review using the existing backend: `POST /v1/scans`, then poll `GET /v1/scans/{scan_id}`. Connect to a configurable backend URL on Markus's Mac. A physical iPhone's `localhost` is the phone itself, so use the Mac's reachable LAN address with deliberate development network configuration; simulator loopback can reach the host setup. Keep provider credentials on the backend and the client API token in secure device storage. Do not expose the backend publicly as part of this work.
 
-The first slice has a capture button and manual crop; no paper detection dependency. TODO for 9 October 2026 morning, once invoices are available: test paper-edge detection and a stable live outline, retaining manual fallback. This is a deferred task, not a scheduled automation.
+The first slice has a capture button and manual crop; no paper detection dependency. Test paper-edge detection and a stable live outline during later mobile improvements, retaining manual fallback. This is deferred until after the joint presentation, not a scheduled automation.
 
 Test on Markus's device: orientation/cropping/compression, upload, polling, edits, incomplete/error states, duplicate taps, late-result isolation, Pay/reset, interruption and network recovery. Measure actual capture-to-review latency. Native OCR/quality signals are optional later experiments, not a dependency of this first image-upload flow. Every payment draft requires explicit review/confirmation; the app does not execute payments.
 

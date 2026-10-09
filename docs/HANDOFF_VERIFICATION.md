@@ -2,11 +2,11 @@
 
 ## Current checkpoint — 9 October 2026
 
-Native iOS and the authenticated admin inspector are implemented, and Markus confirmed his real-invoice testing is complete. Current acceptance, scope and limitations are recorded in [mobile checkpoint](MOBILE_CHECKPOINT.md). Final checks: **672 offline backend/evaluation tests; 95.92% statement / 91.20% branch coverage; 16 native unit/recovery and 2 simulator UI tests**, with lint/format/types/contracts/JS checks passing. Signed device build and installation are complete.
+Native iOS and the authenticated admin inspector are implemented, and Markus confirmed his real-invoice testing is complete. Current acceptance, scope and limitations are recorded in [mobile checkpoint](MOBILE_CHECKPOINT.md). Reorganization checks: **672 offline backend/evaluation tests; 95.92% statement / 91.15% branch coverage; 16 native unit/recovery and 2 simulator UI tests**, with lint/format/types/contracts/JS, installed-wheel serving and source-distribution rebuild checks passing. Signed device build and installation belong to the prior mobile checkpoint; this folder move leaves the installed phone app untouched.
 
 The current ledger is **2,201 dispatches / €336.45 held** under the unchanged 2,217 / €338.05 mobile caps. Persisted admin selection is Mistral Small. The latest hardware reconnect tried USB first, then connected over Wi-Fi; hotspot discovery remains unverified. No paid calls are part of this checkpoint or refactor.
 
-Authorized next steps: create/merge the checked current-changes PR with docs/status updated, then a separate [repository-reorganization chat](REPOSITORY_REORGANIZATION_HANDOFF.md) with its own checks/docs/status and PR/merge. After cleanup: **presentation together with Markus → mobile improvements → backend work → Android last**. See [coding handoff](CODING_HANDOFF.md).
+The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). The source layout is now `backend/`, `frontend/`, `ios/` and `android/` (README only); shared contracts/docs/evaluation and private storage remain in place. See the [reorganization record](REPOSITORY_REORGANIZATION_HANDOFF.md) for current checks and its PR. Next: **presentation together with Markus → mobile improvements → backend work → Android last**. See [coding handoff](CODING_HANDOFF.md).
 
 ## Historical checkpoints
 

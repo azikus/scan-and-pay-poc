@@ -4,7 +4,7 @@ Markus authorized bounded real API use from the mobile client, local connection 
 
 ## Current checkpoint
 
-Markus confirmed real-invoice iPhone testing complete on 9 October. The latest ledger is 2,201 dispatched reservations / €336.45 held, leaving at most 16 calls / €1.60 under unchanged caps; current persisted choice is Mistral Small. Subsequent figures below are dated historical snapshots. PR preparation and repository reorganization make no paid calls. Status/docs are updated in both authorized PRs; the presentation is a joint task when Markus returns, followed by mobile improvements, backend work and Android last. See [checkpoint](MOBILE_CHECKPOINT.md).
+Markus confirmed real-invoice iPhone testing complete on 9 October. The latest ledger is 2,201 dispatched reservations / €336.45 held, leaving at most 16 calls / €1.60 under unchanged caps; current persisted choice is Mistral Small. Subsequent figures below are dated historical snapshots. PR preparation and repository reorganization make no paid calls. Status/docs are updated in both authorized PRs; the presentation is a joint task when Markus returns, followed by mobile improvements, backend work and Android last. See [checkpoint](MOBILE_CHECKPOINT.md). The [repository reorganization](REPOSITORY_REORGANIZATION_HANDOFF.md) moves source only: the launcher, root `.env`, SQLite database/artifacts and installed iPhone app retain their locations and identity; no phone reinstall or unlock is needed.
 
 ## Authorized allowance
 
