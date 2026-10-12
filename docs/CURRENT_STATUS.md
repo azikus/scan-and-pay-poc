@@ -2,12 +2,18 @@
 
 This file supersedes prospective wording and operational snapshots in the dated 8–9 October handoffs. Historical experiment evidence remains unchanged.
 
+## Latest follow-up
+
+Markus requested the bounded iOS Liquid Glass/motion update and hotspot/hosting assessment. See [implementation and connection evidence](IOS_GLASS_AND_MOTION.md). Markus clarified that scan-screen glass should replace the large black header/footer; the scan screen uses light glass panels. The subsequent live-preview framing fix fits the complete camera frame between them, avoiding aspect-fill zoom before capture. The glass treatment now extends through Adjust image, Ready to send, review, confirmation and completion, with matching light settings/document viewers. A shared Azikus / Scan & Pay header now gives each screen its own subtitle. Markus then narrowed connectivity to the working hotspot only: one saved Mac address, no USB fallback or hosted endpoint selection. This begins iOS polish without starting cloud deployment, new inference, Android or the final website milestone.
+
 ## Code and presentation
+
+The latest iOS follow-up addresses Send remaining on Ready to send: the preview no longer intercepts taps, primary actions have explicit hit areas, and photo encoding runs off the UI thread with immediate progress. See the Send section in [IOS_GLASS_AND_MOTION.md](IOS_GLASS_AND_MOTION.md) for verification and the outstanding physical-device acceptance. No paid extraction was run by the agent.
 
 - Application code through PRs [#2](https://github.com/azikus/scan-and-pay-poc/pull/2), [#3](https://github.com/azikus/scan-and-pay-poc/pull/3), [#4](https://github.com/azikus/scan-and-pay-poc/pull/4) and [#5](https://github.com/azikus/scan-and-pay-poc/pull/5) is merged. The last application commit is `57fa993cfd01e7533a6140d1c7a5d71f96289293`.
 - The native capture/review/confirmation flow, admin inspector and automatic Mac network listeners are implemented. Android remains a README only. Source folders are `backend/`, `frontend/admin/`, `ios/` and `android/`.
 - The initial presentation was created with Markus and revised on 9 October. Its approved version has **25 slides**, English slides, Croatian notes and approximately **19–20 minutes** including the live demo. The old “presentation not started” instructions are historical.
-- The 12 October repository import places editable HTML, theme, motion, reviewed assets and reproducible build/serve/export tooling under [presentation/](../presentation/README.md). The normal build excludes the real invoice gallery; a separate ignored local edition preserves it. The original external deck is untouched.
+- The 12 October repository import merged in [PR #6](https://github.com/azikus/scan-and-pay-poc/pull/6), commit `75c8cd0`. It places editable HTML, theme, motion, reviewed assets and reproducible build/serve/export tooling under [presentation/](../presentation/README.md). The normal build excludes the real invoice gallery; a separate ignored local edition preserves it. The original external deck is untouched.
 - [PRESENTATION_CONTENT.md](PRESENTATION_CONTENT.md) is generated from the HTML source. [PRESENTATION_EVIDENCE.md](PRESENTATION_EVIDENCE.md) records authoring sources and revisions. Both belong in Git alongside the deck. No later application development is part of this import.
 
 ## Source follow-up — 12 October
@@ -28,7 +34,7 @@ A separately authorized comparison run on 9 October was stopped at Markus's expl
 
 ## Device and runtime
 
-The managed launcher is `.venv/bin/scanpay-serve`; the private `serve.py` delegates to it. It follows local interface changes automatically while keeping a single backend owner. The app uses saved editable URLs, not automatic discovery. Do not restart an active extraction job or launch a second owner against the same database.
+The managed launcher is `.venv/bin/scanpay-serve`; the private `serve.py` delegates to it. It follows local interface changes automatically while keeping a single backend owner. The app now uses one saved editable hotspot address, not automatic discovery. The hotspot-only build authenticated on the physical iPhone at 21:31:30 UTC on 12 October using `http://172.20.10.2:8000`; 24 offline native unit/recovery tests passed. Do not restart an active extraction job or launch a second owner against the same database.
 
 Physical-phone checks on 9 October verified USB at 11:17:20 UTC, hotspot Wi-Fi at 11:21:41 UTC, and ordinary Wi-Fi at 18:18:55 UTC. The last saved phone URL was `http://192.168.1.134:8000`. These are dated successful checks, not a guarantee of today's connectivity or IP address. Evidence is under `.local/phone-reconnect-2026-10-09/` and `.local/phone-wifi-reconnect-w0txfh0w/`. The later idle restart applied the authorized allowance; loopback and Wi-Fi authenticated reads returned 200.
 

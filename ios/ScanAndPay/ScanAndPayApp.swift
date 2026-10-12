@@ -11,14 +11,140 @@ enum Brand {
       relativeTo: .body)
   }
 }
-struct PrimaryButton: ButtonStyle {
-  @Environment(\.isEnabled) var enabled
+// Glass floats above the camera; document pixels and editable text stay unobstructed.
+struct ControlSurface: ViewModifier {
+  var prominent = false
+  var enabled = true
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  func body(content: Content) -> some View {
+    let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+    if reduceTransparency {
+      content.background(
+        prominent && enabled ? Brand.ice : Color(uiColor: .secondarySystemBackground), in: shape)
+    } else if #available(iOS 26.0, *) {
+      content.glassEffect(
+        .regular.tint(prominent && enabled ? Brand.ice : nil).interactive(enabled), in: shape)
+    } else if prominent && enabled {
+      content.background(Brand.ice, in: shape)
+    } else {
+      content.background(.regularMaterial, in: shape)
+        .overlay(shape.strokeBorder(.white.opacity(0.16), lineWidth: 0.5))
+    }
+  }
+}
+struct GlassPanel: ViewModifier {
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  func body(content: Content) -> some View {
+    let shape = RoundedRectangle(cornerRadius: 30, style: .continuous)
+    if reduceTransparency {
+      content.background(Color(uiColor: .systemBackground), in: shape)
+    } else if #available(iOS 26.0, *) {
+      content.glassEffect(.regular, in: shape)
+    } else {
+      content.background(.regularMaterial, in: shape)
+        .overlay(shape.strokeBorder(.white.opacity(0.5), lineWidth: 0.5))
+    }
+  }
+}
+/// Shared identity and screen context, with space for each screen's actions.
+struct ScreenHeader<Actions: View>: View {
+  let subtitle: String
+  let detail: String?
+  let actions: Actions
+  @Environment(\.dynamicTypeSize) private var typeSize
+  init(subtitle: String, detail: String? = nil, @ViewBuilder actions: () -> Actions) {
+    self.subtitle = subtitle
+    self.detail = detail
+    self.actions = actions()
+  }
+  private var identity: some View {
+    HStack(spacing: 10) {
+      Image("AzikusMarkDark").resizable().scaledToFit()
+        .frame(width: 24, height: 24).padding(7).accessibilityLabel("Azikus")
+      VStack(alignment: .leading, spacing: 3) {
+        Text("Scan & Pay").font(Brand.font(21, .semibold))
+        Text(subtitle).font(Brand.font(13)).foregroundStyle(Brand.slate)
+          .fixedSize(horizontal: false, vertical: true)
+        if let detail {
+          Text(detail).font(Brand.font(12)).foregroundStyle(Brand.slate)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+      }
+    }.layoutPriority(1)
+  }
+  var body: some View {
+    Group {
+      if typeSize.isAccessibilitySize {
+        VStack(alignment: .leading, spacing: 8) {
+          identity
+          HStack {
+            Spacer(minLength: 0)
+            actions
+          }
+        }
+      } else {
+        HStack(spacing: 10) {
+          identity
+          Spacer(minLength: 0)
+          actions
+        }
+      }
+    }.font(Brand.font(15, .semibold)).foregroundStyle(Brand.ink).tint(Brand.ink)
+      .buttonStyle(.plain).padding(12).modifier(GlassPanel())
+  }
+}
+/// A soft image-derived backdrop; the foreground document always stays sharp.
+struct DocumentBackdrop: View {
+  var image: UIImage? = nil
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  var body: some View {
+    GeometryReader { geo in
+      ZStack {
+        Brand.ice
+        if let image, !reduceTransparency {
+          Image(uiImage: image).resizable().scaledToFill()
+            .frame(width: geo.size.width, height: geo.size.height).clipped()
+            .blur(radius: 45).opacity(0.22)
+        }
+      }.frame(width: geo.size.width, height: geo.size.height).clipped()
+    }.ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
+  }
+}
+struct GlassControlButton: ButtonStyle {
+  @Environment(\.isEnabled) private var enabled
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   func makeBody(configuration: Configuration) -> some View {
-    configuration.label.font(Brand.font(17, .semibold)).foregroundStyle(
-      enabled ? Brand.ink : Color.secondary
-    ).padding(.vertical, 17).frame(maxWidth: .infinity).background(
-      enabled ? Brand.ice : Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 18)
-    ).opacity(configuration.isPressed ? 0.7 : 1)
+    configuration.label.font(Brand.font(15, .semibold)).foregroundStyle(.primary)
+      .padding(.horizontal, 14).frame(minHeight: 44)
+      .modifier(ControlSurface(enabled: enabled))
+      .opacity(enabled ? 1 : 0.45)
+      .scaleEffect(configuration.isPressed && !reduceMotion ? 0.96 : 1)
+      .animation(reduceMotion ? nil : .smooth(duration: 0.18), value: configuration.isPressed)
+  }
+}
+struct PrimaryButton: ButtonStyle {
+  @Environment(\.isEnabled) private var enabled
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label.font(Brand.font(17, .semibold))
+      .foregroundStyle(enabled ? Brand.ink : Color.secondary)
+      .padding(.vertical, 17).frame(maxWidth: .infinity)
+      .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+      .modifier(ControlSurface(prominent: true, enabled: enabled))
+      .opacity(configuration.isPressed ? 0.8 : 1)
+      .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
+      .animation(reduceMotion ? nil : .smooth(duration: 0.18), value: configuration.isPressed)
+  }
+}
+struct DocumentContinuity: ViewModifier {
+  let namespace: Namespace.ID
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @ViewBuilder func body(content: Content) -> some View {
+    if reduceMotion {
+      content
+    } else {
+      content.matchedGeometryEffect(id: "document", in: namespace, properties: .frame)
+    }
   }
 }
 
@@ -32,6 +158,8 @@ struct ScanHome: View {
   @StateObject private var camera = CameraController()
   @Environment(\.scenePhase) private var scenePhase
   @Environment(\.dynamicTypeSize) private var typeSize
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Namespace private var documentMotion
   @State private var picked: PhotosPickerItem?
   @State private var settings = false
   @State private var json = false
@@ -43,9 +171,15 @@ struct ScanHome: View {
   var body: some View {
     NavigationStack {
       ZStack {
-        Brand.ink.ignoresSafeArea()
+        DocumentBackdrop(image: model.originalImage ?? model.image)
         content
-      }
+          .environment(\.colorScheme, .light)
+          .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 16)))
+      }.animation(
+        reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.46, dampingFraction: 0.9),
+        value: screen
+      )
+      .preferredColorScheme(.light)
       .toolbar(.hidden, for: .navigationBar)
       .sheet(isPresented: $settings) { ConnectionSettings(model: model) }
 
@@ -55,6 +189,7 @@ struct ScanHome: View {
         )
         .presentationDetents([.fraction(0.42), .fraction(0.68), .large], selection: $detent)
         .presentationDragIndicator(.visible).presentationCornerRadius(30)
+        .presentationBackground(.regularMaterial)
         .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.68)))
         .interactiveDismissDisabled()
       }
@@ -83,7 +218,8 @@ struct ScanHome: View {
         updateCamera()
       } else {
         camera.stop()
-        model.background()
+        // Permission prompts and Control Centre are inactive, not backgrounded.
+        if phase == .background { model.background() }
       }
     }
     .onChange(of: typeSize) { _, size in if size.isAccessibilitySize { detent = .large } }
@@ -104,46 +240,20 @@ struct ScanHome: View {
       }
     }
   }
+  private var screen: String {
+    model.phase == .capture ? "capture" : model.phase == .crop ? "crop" : "document"
+  }
   @ViewBuilder private var content: some View {
-    if model.phase == .crop, let image = model.originalImage {
-      ManualCrop(image: image, use: model.cropped, retake: model.reset)
+    if model.phase == .capture {
+      captureScreen.id(screen)
+    } else if model.phase == .crop, let image = model.originalImage {
+      ManualCrop(image: image, namespace: documentMotion, use: model.cropped, retake: model.reset)
+        .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 18)))
     } else {
-      VStack(spacing: 0) {
-        HStack(spacing: 12) {
-          if model.phase == .capture {
-            Image("AzikusMark").resizable().scaledToFit().frame(width: 28, height: 28)
-          }
-          VStack(alignment: .leading, spacing: 3) {
-            Text(
-              model.phase == .capture
-                ? "Scan & Pay" : model.phase == .preview ? "Ready to send" : "Your document"
-            ).font(Brand.font(23, .semibold))
-            if let status = model.connectionStatus, model.phase == .capture {
-              Text(status).font(Brand.font(12)).foregroundStyle(Brand.ice).lineLimit(2)
-            }
-            if model.fixtureMode {
-              Text("Synthetic preview").font(Brand.font(12)).foregroundStyle(Brand.ice)
-            }
-          }
-          Spacer()
-          if model.phase == .capture {
-            Button {
-              Task { await model.reconnect() }
-            } label: {
-              if model.reconnecting {
-                ProgressView().tint(Brand.ice).frame(width: 44, height: 44)
-              } else {
-                Image(systemName: "arrow.clockwise").frame(width: 44, height: 44)
-              }
-            }.accessibilityLabel("Reconnect").accessibilityIdentifier("reconnect")
-              .disabled(model.reconnecting || model.fixtureMode)
-            Button {
-              settings = true
-            } label: {
-              Image(systemName: "slider.horizontal.3").frame(width: 44, height: 44)
-            }.accessibilityLabel("Connection settings")
-          } else if model.phase == .preview {
-            Button("Edit crop", action: model.editCrop).font(Brand.font(14))
+      VStack(spacing: 16) {
+        ScreenHeader(subtitle: model.phase == .preview ? "Ready to send" : "Your document") {
+          if model.phase == .preview {
+            Button("Edit crop", action: model.editCrop).buttonStyle(.plain).frame(minHeight: 44)
           } else {
             Button {
               imageViewer = true
@@ -151,83 +261,126 @@ struct ScanHome: View {
               Label("Image", systemImage: "arrow.up.left.and.arrow.down.right")
             }.font(Brand.font(14))
           }
-        }.foregroundStyle(.white).tint(Brand.ice).padding(.horizontal, 22).padding(.vertical, 12)
+        }.padding(.horizontal, 16)
         ZStack {
           if let image = model.image {
-            Image(uiImage: image).resizable().scaledToFit().padding(.horizontal, 16).frame(
-              maxWidth: .infinity, maxHeight: .infinity
-            ).contentShape(Rectangle()).onTapGesture {
-              if model.phase != .preview { imageViewer = true }
-            }
-          } else if model.fixtureMode {
-            Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(22)
-          } else if camera.available {
-            CameraPreview(session: camera.session).clipped()
-          } else {
-            VStack(spacing: 17) {
-              Image(systemName: "camera").font(.system(size: 42, weight: .light))
-              Text(camera.denied ? "Allow camera access" : "Ready when you are").font(
-                Brand.font(24, .semibold))
-              Text(
-                camera.denied
-                  ? "Enable the camera in Settings, or choose an image below."
-                  : camera.error ?? "Preparing the camera…"
-              ).font(Brand.font(15)).multilineTextAlignment(.center).foregroundStyle(
-                .white.opacity(0.75))
-              if camera.denied {
-                Button("Open Settings") {
-                  if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                  }
-                }.tint(Brand.ice)
+            Image(uiImage: image).resizable().scaledToFit()
+              .modifier(DocumentContinuity(namespace: documentMotion)).padding(.horizontal, 16)
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+              .clipped()
+              .contentShape(Rectangle()).onTapGesture {
+                if model.phase != .preview { imageViewer = true }
               }
-            }
+              .allowsHitTesting(model.phase != .preview)
           }
-        }.frame(maxWidth: .infinity, maxHeight: .infinity).background(Brand.slate.opacity(0.3))
-        if model.phase == .capture {
-          captureControls
-        } else if model.phase == .preview {
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        if model.phase == .preview {
           VStack(spacing: 12) {
             if let message = model.message {
               Text(message).font(Brand.font(14)).foregroundStyle(.orange)
             }
             Button(action: model.send) {
-              Label("Send", systemImage: "arrow.up.right").frame(maxWidth: .infinity)
-            }.buttonStyle(PrimaryButton()).accessibilityIdentifier("send-image")
+              Label(
+                model.reconnecting ? "Checking connection…" : "Send",
+                systemImage: model.reconnecting ? "wifi" : "arrow.up.right"
+              ).frame(maxWidth: .infinity)
+            }.buttonStyle(PrimaryButton()).disabled(model.reconnecting)
+              .accessibilityIdentifier("send-image")
           }.padding(22)
         } else {
           HStack {
             Button("Clear scan") { discard = true }
             Spacer()
             if model.response != nil { Button("JSON") { json = true } }
-          }.font(Brand.font(14)).tint(Brand.ice).padding(22)
+          }.font(Brand.font(14)).tint(Brand.ink).frame(minHeight: 44).padding(16)
+            .modifier(GlassPanel()).padding(16)
         }
-      }
+      }.padding(.top, 8).id(screen).transition(
+        reduceMotion ? .opacity : .opacity.combined(with: .offset(y: -12)))
+    }
+  }
+  private var captureScreen: some View {
+    VStack(spacing: 16) {
+      captureHeader
+      // Keep the whole camera frame visible, with controls outside its bounds.
+      // This uses aspect-fit, just like the still shown by Adjust image.
+      ZStack {
+        if model.fixtureMode {
+          Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(.horizontal, 8)
+        } else if camera.available {
+          CameraPreview(session: camera.session).clipped()
+        } else {
+          VStack(spacing: 16) {
+            Image(systemName: "camera").font(.system(size: 38, weight: .light))
+            Text(camera.denied ? "Allow camera access" : "Ready when you are")
+              .font(Brand.font(24, .semibold))
+            Text(
+              camera.denied
+                ? "Enable the camera in Settings, or choose an image below."
+                : camera.error ?? "Preparing the camera…"
+            )
+            .font(Brand.font(15)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            if camera.denied {
+              Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                  UIApplication.shared.open(url)
+                }
+              }.buttonStyle(.bordered)
+            }
+          }.padding(24).modifier(GlassPanel())
+        }
+      }.frame(maxWidth: .infinity, maxHeight: .infinity)
+      captureControls
+    }.padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 12)
+      .foregroundStyle(Brand.ink).tint(Brand.ink)
+  }
+  private var captureHeader: some View {
+    ScreenHeader(
+      subtitle: "Scan a document",
+      detail: model.fixtureMode ? "Synthetic preview" : model.connectionStatus
+    ) {
+      Button {
+        Task { await model.reconnect() }
+      } label: {
+        Group {
+          if model.reconnecting { ProgressView() } else { Image(systemName: "arrow.clockwise") }
+        }.frame(width: 44, height: 44).contentShape(Rectangle())
+      }.accessibilityLabel("Reconnect").accessibilityIdentifier("reconnect")
+        .disabled(model.reconnecting || model.fixtureMode)
+      Button {
+        settings = true
+      } label: {
+        Image(systemName: "slider.horizontal.3").frame(width: 44, height: 44)
+          .contentShape(Rectangle())
+      }.accessibilityLabel("Connection settings")
     }
   }
   private var captureControls: some View {
-    VStack(spacing: 14) {
-      if let message = model.message { Text(message).font(Brand.font(14)).foregroundStyle(.orange) }
-      Text("Start with a document.").font(Brand.font(26, .semibold))
-      Text("Take a photo or choose an image.").font(Brand.font(14)).foregroundStyle(
-        .white.opacity(0.7))
+    VStack(spacing: 10) {
+      if let message = model.message {
+        Text(message).font(Brand.font(14)).foregroundStyle(Brand.slate)
+      }
+      Text("Start with a document.").font(Brand.font(24, .semibold))
+      Text("Take a photo or choose an image.").font(Brand.font(14)).foregroundStyle(.secondary)
       HStack {
         PhotosPicker(selection: $picked, matching: .images, photoLibrary: .shared()) {
           VStack(spacing: 6) {
             Image(systemName: "photo.on.rectangle").font(.system(size: 21))
             Text(importing ? "Opening…" : "Import").font(Brand.font(12))
-          }.frame(maxWidth: .infinity, minHeight: 66)
-        }.disabled(importing)
+          }.frame(maxWidth: .infinity, minHeight: 66).contentShape(Rectangle())
+        }.buttonStyle(.plain).disabled(importing)
         Button {
           if model.fixtureMode { model.captured(fixtureImage()) } else { camera.capture() }
         } label: {
-          Circle().fill(.white).padding(6).overlay(Circle().stroke(.white, lineWidth: 2)).frame(
-            width: 78, height: 78)
-        }.disabled((!camera.available && !model.fixtureMode) || camera.takingPhoto || importing)
+          Circle().fill(.white).padding(7)
+            .overlay(Circle().stroke(Brand.slate.opacity(0.7), lineWidth: 2))
+            .frame(width: 78, height: 78)
+        }.buttonStyle(.plain)
+          .disabled((!camera.available && !model.fixtureMode) || camera.takingPhoto || importing)
           .accessibilityLabel("Capture document").accessibilityIdentifier("capture")
         Color.clear.frame(maxWidth: .infinity, maxHeight: 66)
-      }.tint(.white).padding(.top, 8)
-    }.foregroundStyle(.white).padding(.horizontal, 22).padding(.top, 24).padding(.bottom, 16)
+      }.padding(.top, 8)
+    }.padding(22).modifier(GlassPanel())
   }
   private func updateCamera() {
     if scenePhase == .active && model.phase == .capture && !model.fixtureMode {
@@ -267,15 +420,14 @@ struct ReviewSheet: View {
   @FocusState private var focused: String?
   var body: some View {
     VStack(spacing: 0) {
-      HStack {
-        Text(
+      ScreenHeader(
+        subtitle:
           model.processing
-            ? model.processingTitle
-            : model.phase == .review
-              ? "Review details"
-              : model.phase == .recovery ? "Connection interrupted" : "Couldn’t read details"
-        ).font(Brand.font(24, .semibold))
-        Spacer()
+          ? model.processingTitle
+          : model.phase == .review
+            ? "Review details"
+            : model.phase == .recovery ? "Connection interrupted" : "Couldn’t read details"
+      ) {
         Menu {
           Button("View image", action: openImage)
           if model.response != nil { Button("View JSON", action: openJSON) }
@@ -283,9 +435,9 @@ struct ReviewSheet: View {
             .disabled(model.processing || model.saving || model.reconnecting || model.fixtureMode)
           Button("Clear scan", role: .destructive) { discard = true }
         } label: {
-          Image(systemName: "ellipsis.circle").font(.system(size: 24)).frame(width: 44, height: 44)
-        }.accessibilityLabel("Scan options")
-      }.padding(.horizontal, 22).padding(.top, 24)
+          Image(systemName: "ellipsis").font(.system(size: 20)).frame(width: 20, height: 44)
+        }.buttonStyle(GlassControlButton()).accessibilityLabel("Scan options")
+      }.padding(.horizontal, 14).padding(.top, 14)
       ScrollView {
         VStack(alignment: .leading, spacing: 17) {
           if let status = model.connectionStatus {
@@ -321,6 +473,7 @@ struct ReviewSheet: View {
             Button("Retake") { discard = true }.buttonStyle(.bordered)
           }
         }.padding(22)
+          .animation(reduceMotion ? nil : .easeInOut(duration: 0.24), value: model.processing)
       }.scrollDismissesKeyboard(.interactively).disabled(model.reconnecting)
       if model.phase == .review {
         VStack(spacing: 10) {
@@ -338,10 +491,9 @@ struct ReviewSheet: View {
           }.buttonStyle(PrimaryButton()).disabled(
             !model.checked || model.draft?.canConfirm != true || model.saving || model.reconnecting
           ).accessibilityIdentifier("pay")
-        }.padding(.horizontal, 22).padding(.top, 10).padding(.bottom, 12).background(
-          Color(uiColor: .systemBackground))
+        }.padding(18).modifier(GlassPanel()).padding(.horizontal, 14).padding(.bottom, 12)
       }
-    }.background(Color(uiColor: .systemBackground)).tint(.primary)
+    }.background(DocumentBackdrop()).tint(.primary)
       .sheet(
         isPresented: $payConfirmation,
         onDismiss: {
@@ -359,7 +511,7 @@ struct ReviewSheet: View {
               payConfirmation = false
             }
           ).presentationDetents([.large]).presentationDragIndicator(.visible)
-            .presentationCornerRadius(30)
+            .presentationCornerRadius(30).presentationBackground(.regularMaterial)
         }
       }
       .sheet(isPresented: $showJSON) {
@@ -499,11 +651,10 @@ struct CheckboxToggle: ToggleStyle {
 struct ConnectionSettings: View {
   @ObservedObject var model: ScanSession
   @Environment(\.dismiss) private var dismiss
-  @State private var cable = ""
-  @State private var wifi = ""
+  @State private var hotspot = ""
   @State private var token = ""
   @State private var message: String?
-  private func save() throws { try model.configureRoutes(cable: cable, wifi: wifi, token: token) }
+  private func save() throws { try model.configureHotspot(address: hotspot, token: token) }
   var body: some View {
     NavigationStack {
       Form {
@@ -523,32 +674,30 @@ struct ConnectionSettings: View {
             .accessibilityIdentifier("reconnect-settings")
           if let status = model.connectionStatus { Text(status).font(.subheadline) }
         } footer: {
-          Text("Tries USB first, then Wi-Fi.")
+          Text("Connect the Mac to this iPhone’s Personal Hotspot.")
         }
-        Section("Mac addresses") {
-          TextField("USB address", text: $cable).keyboardType(.URL)
+        Section("Hotspot") {
+          TextField("Mac address", text: $hotspot).keyboardType(.URL)
             .textInputAutocapitalization(.never).autocorrectionDisabled()
-            .accessibilityIdentifier("usb-address")
-          TextField("Wi-Fi address", text: $wifi).keyboardType(.URL)
-            .textInputAutocapitalization(.never).autocorrectionDisabled()
-            .accessibilityIdentifier("wifi-address")
+            .accessibilityIdentifier("hotspot-address")
           SecureField("Access token", text: $token).textInputAutocapitalization(.never)
         }.disabled(model.reconnecting)
         if let message { Text(message).foregroundStyle(.orange) }
-      }.navigationTitle("Connection").toolbar {
-        ToolbarItem(placement: .confirmationAction) {
-          Button("Save") {
-            do {
-              try save()
-              dismiss()
-            } catch { message = error.localizedDescription }
-          }.disabled(model.reconnecting)
+      }.scrollContentBackground(.hidden).background(DocumentBackdrop())
+        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+          ScreenHeader(subtitle: "Connection") {
+            Button("Done") { dismiss() }.frame(minWidth: 44, minHeight: 44)
+            Button("Save") {
+              do {
+                try save()
+                dismiss()
+              } catch { message = error.localizedDescription }
+            }.frame(minWidth: 44, minHeight: 44).disabled(model.reconnecting)
+          }.padding(.horizontal, 16).padding(.top, 12)
         }
-        ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
-      }
     }.onAppear {
-      cable = model.cableAddress
-      wifi = model.wifiAddress
+      hotspot = model.hotspotAddress
       token = model.token
     }
   }
@@ -572,9 +721,12 @@ struct JSONOutput: View {
         )
         .accessibilityIdentifier("json-content")
 
-      }.navigationTitle("Structured output").navigationBarTitleDisplayMode(.inline).toolbar {
-        Button("Done") { dismiss() }
-      }
+      }.background(DocumentBackdrop()).toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+          ScreenHeader(subtitle: "Structured output") {
+            Button("Done") { dismiss() }.frame(minWidth: 44, minHeight: 44)
+          }.padding(.horizontal, 16).padding(.top, 12)
+        }
     }
   }
 }
@@ -590,12 +742,14 @@ struct DocumentViewer: View {
             width: UIScreen.main.bounds.width * zoom
           ).accessibilityLabel("Captured document")
         }
-      }.background(Brand.ink).toolbar {
-        ToolbarItem(placement: .topBarLeading) { Button("Done") { dismiss() } }
-        ToolbarItem(placement: .topBarTrailing) {
-          Button(zoom == 1 ? "Zoom in" : "Fit") { zoom = zoom == 1 ? 2.5 : 1 }
+      }.background(DocumentBackdrop(image: image)).toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+          ScreenHeader(subtitle: "Your document") {
+            Button(zoom == 1 ? "Zoom in" : "Fit") { zoom = zoom == 1 ? 2.5 : 1 }
+              .frame(minWidth: 44, minHeight: 44)
+            Button("Done") { dismiss() }.frame(minWidth: 44, minHeight: 44)
+          }.padding(.horizontal, 16).padding(.top, 8)
         }
-      }
     }
   }
 }

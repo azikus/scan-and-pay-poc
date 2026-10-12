@@ -7,7 +7,7 @@ Markus explicitly approved this sequence. These five **next milestones** superse
 | Next milestone | Scope and completion checkpoint | Status |
 | --- | --- | --- |
 | 1 — Initial presentation | Create the presentation **together with Markus** from the working PoC and retained measured results. Agree audience, story, format and demo; distinguish delivered functionality, evidence and remaining work. | Delivered 9 October; 25-slide source imported into `presentation/` |
-| 2 — iOS improvements and real-invoice testing | Complete the remaining agreed iOS work and verify it with real invoices, review/edit/recovery scenarios and device networking. Record actual mobile timing when measured. | Planned after 1 |
+| 2 — iOS improvements and real-invoice testing | Complete the remaining agreed iOS work and verify it with real invoices, review/edit/recovery scenarios and device networking. Record actual mobile timing when measured. | In progress: scoped Liquid Glass/motion update and hotspot verification; remaining work to agree |
 | 3 — Backend/admin improvements and integration testing | Complete the remaining agreed backend/admin work and verify the iOS → backend → admin journey, extraction/review semantics and failure handling. Preserve evidence and version changes. | Planned after 2 |
 | 4 — Android app and both-platform testing | Implement Android against the shared contract, then complete testing across iOS, Android, backend and admin. **This is the final development milestone.** | Planned after 3 |
 | 5 — Comprehensive final presentation and website HTML | Create a fuller final presentation plus embeddable HTML explaining functionality, workflow, architecture, measured results and limitations using sanitized material. Agree the site's embedding constraints before authoring. | Planned after development |
@@ -19,6 +19,8 @@ Continue the existing deck using [presentation/README.md](../presentation/README
 The original iOS/admin checkpoint is accepted and merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2); the root backend/frontend/ios/android reorganization merged in [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3). Android contains a README only. Read [CURRENT_STATUS.md](CURRENT_STATUS.md) for the current selection snapshot; all benchmark selections/results remain dated evidence.
 
 ## Authority and preservation
+
+**Latest scoped follow-up, 12 October:** Markus authorized Liquid Glass, screen/crop motion and connectivity/hosting assessment. The hotspot is verified; no hosted deployment or new inference is included. See [iOS scope and evidence](IOS_GLASS_AND_MOTION.md).
 
 The sheets and connection follow-up are merged. Markus authorized the presentation source import, documentation reconciliation and commit/push on 12 October. The milestone sequence is agreed, but is not permission to begin later development or run paid experiments now. Retain the original ledger, current selection, pending drafts, credentials and private evidence. [CURRENT_STATUS.md](CURRENT_STATUS.md) records the latest snapshot and authorized mobile allowance. No new paid calls, completed evaluation reruns, force push or public publication. Read [coding handoff](CODING_HANDOFF.md) for current scope and [mobile checkpoint](MOBILE_CHECKPOINT.md) for prior acceptance.
 

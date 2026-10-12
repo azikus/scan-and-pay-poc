@@ -102,7 +102,11 @@ struct CameraPreview: UIViewRepresentable {
   func makeUIView(context: Context) -> Preview {
     let view = Preview()
     view.preview.session = session
-    view.preview.videoGravity = .resizeAspectFill
+    // Show the complete photo field of view; filling the tall phone screen
+    // hides edges that otherwise reappear after capture in Adjust image.
+    view.preview.videoGravity = .resizeAspect
+    view.backgroundColor = .clear
+    view.preview.backgroundColor = UIColor.clear.cgColor
     return view
   }
   func updateUIView(_ view: Preview, context: Context) {
@@ -154,6 +158,10 @@ extension UIImage {
 
 struct ManualCrop: View {
   @State var image: UIImage
+  let namespace: Namespace.ID
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var rotation = 0.0
+  @State private var rotating = false
   let use: (UIImage) -> Void
   let retake: () -> Void
   @State private var crop = CGRect(x: 0, y: 0, width: 1, height: 1)
@@ -161,16 +169,15 @@ struct ManualCrop: View {
   @State private var error: String?
   var body: some View {
     VStack(spacing: 20) {
-      HStack {
-        Text("Adjust image").font(Brand.font(24, .semibold))
-        Spacer()
-        Button("Retake", action: retake).tint(Brand.ice)
-      }.padding(.horizontal, 22)
+      ScreenHeader(subtitle: "Adjust image") {
+        Button("Retake", action: retake).frame(minHeight: 44)
+      }.padding(.horizontal, 16)
       GeometryReader { geo in
         let factor = min(geo.size.width / image.size.width, geo.size.height / image.size.height)
         let size = CGSize(width: image.size.width * factor, height: image.size.height * factor)
         ZStack {
           Image(uiImage: image).resizable().frame(width: size.width, height: size.height)
+            .modifier(DocumentContinuity(namespace: namespace))
           Path { path in
             path.addRect(CGRect(origin: .zero, size: size))
             path.addRect(
@@ -178,7 +185,7 @@ struct ManualCrop: View {
                 x: crop.minX * size.width, y: crop.minY * size.height,
                 width: crop.width * size.width, height: crop.height * size.height))
           }.fill(.black.opacity(0.55), style: FillStyle(eoFill: true)).allowsHitTesting(false)
-          Rectangle().stroke(Brand.ice, lineWidth: 1).contentShape(Rectangle()).frame(
+          Rectangle().stroke(Brand.slate, lineWidth: 1).contentShape(Rectangle()).frame(
             width: crop.width * size.width, height: crop.height * size.height
           ).position(x: crop.midX * size.width, y: crop.midY * size.height)
             .gesture(
@@ -190,12 +197,28 @@ struct ManualCrop: View {
                 crop.origin.y = min(
                   max(0, start.minY + v.translation.height / size.height), 1 - start.height)
               }.onEnded { _ in dragStart = nil })
+          Path { path in
+            let rect = CGRect(
+              x: crop.minX * size.width, y: crop.minY * size.height,
+              width: crop.width * size.width, height: crop.height * size.height)
+            for step in 1...2 {
+              let fraction = CGFloat(step) / 3
+              path.move(to: CGPoint(x: rect.minX + rect.width * fraction, y: rect.minY))
+              path.addLine(to: CGPoint(x: rect.minX + rect.width * fraction, y: rect.maxY))
+              path.move(to: CGPoint(x: rect.minX, y: rect.minY + rect.height * fraction))
+              path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + rect.height * fraction))
+            }
+          }.stroke(.white.opacity(0.55), lineWidth: 0.5)
+            .opacity(dragStart == nil ? 0 : 1).allowsHitTesting(false)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: dragStart == nil)
           ForEach(0..<4) { corner in
             let right = corner % 2 == 1
             let bottom = corner >= 2
-            RoundedRectangle(cornerRadius: 4).fill(Brand.ice).frame(width: 18, height: 18).frame(
-              width: 44, height: 44
-            ).contentShape(Rectangle())
+            RoundedRectangle(cornerRadius: 4).fill(Brand.ice)
+              .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Brand.slate, lineWidth: 1.5))
+              .frame(width: 18, height: 18).frame(
+                width: 44, height: 44
+              ).contentShape(Rectangle())
               .position(
                 x: (right ? crop.maxX : crop.minX) * size.width,
                 y: (bottom ? crop.maxY : crop.minY) * size.height
@@ -218,21 +241,32 @@ struct ManualCrop: View {
                 dragStart = nil
               }
           }
-        }.frame(width: size.width, height: size.height).position(
-          x: geo.size.width / 2, y: geo.size.height / 2)
+        }.frame(width: size.width, height: size.height)
+          .rotationEffect(.degrees(rotation))
+          .scaleEffect(
+            rotating ? min(geo.size.width / size.height, geo.size.height / size.width) : 1
+          )
+          .position(
+            x: geo.size.width / 2, y: geo.size.height / 2)
       }.padding(.horizontal, 24)
-      Text("Drag the corners to keep all payment details.").font(Brand.font(13)).foregroundStyle(
-        .white.opacity(0.75))
-      HStack {
-        Button {
-          image = image.rotated()
-          crop = CGRect(x: 0, y: 0, width: 1, height: 1)
-        } label: {
-          Label("Rotate", systemImage: "rotate.right")
-        }
-        Spacer()
-        Button("Reset crop") { crop = CGRect(x: 0, y: 0, width: 1, height: 1) }
-      }.tint(Brand.ice).padding(.horizontal, 24)
+      VStack(spacing: 10) {
+        Text("Drag the corners to keep all payment details.")
+          .font(Brand.font(13)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+        HStack {
+          Button {
+            rotate()
+          } label: {
+            Label("Rotate", systemImage: "rotate.right").frame(minHeight: 44)
+          }
+          Spacer()
+          Button("Reset crop") {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.88)) {
+              crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+            }
+          }.frame(minHeight: 44)
+        }.buttonStyle(.plain).font(Brand.font(15, .semibold))
+      }.padding(.horizontal, 18).padding(.vertical, 12).modifier(GlassPanel())
+        .padding(.horizontal, 16)
       if let error { Text(error).foregroundStyle(.orange) }
       Button {
         if let result = image.cropped(to: crop) {
@@ -243,7 +277,32 @@ struct ManualCrop: View {
       } label: {
         Text("Use crop").frame(maxWidth: .infinity)
       }.buttonStyle(PrimaryButton()).padding(.horizontal, 22).accessibilityIdentifier("use-crop")
-    }.padding(.vertical, 14).background(Brand.ink).foregroundStyle(.white)
+    }.padding(.top, 8).padding(.bottom, 14).background(DocumentBackdrop(image: image))
+      .foregroundStyle(Brand.ink).tint(Brand.ink)
+      .disabled(rotating)
+  }
+  private func rotate() {
+    guard !rotating else { return }
+    let rotatedImage = image.rotated()
+    crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+    dragStart = nil
+    error = nil
+    if reduceMotion {
+      image = rotatedImage
+      return
+    }
+    withAnimation(.easeInOut(duration: 0.32), completionCriteria: .logicallyComplete) {
+      rotating = true
+      rotation = 90
+    } completion: {
+      var transaction = Transaction()
+      transaction.disablesAnimations = true
+      withTransaction(transaction) {
+        image = rotatedImage
+        rotation = 0
+        rotating = false
+      }
+    }
   }
   private func resize(_ corner: Int, translation: CGSize, size: CGSize) {
     if dragStart == nil { dragStart = crop }
