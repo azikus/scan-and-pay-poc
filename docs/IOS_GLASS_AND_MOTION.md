@@ -4,6 +4,8 @@ Markus requested native Liquid Glass, screen transitions (especially cropping), 
 
 ## UI changes
 
+**Scan-screen refinement:** Markus clarified that Liquid Glass should replace the large black scan-screen backgrounds, not only style individual buttons. Capture now shows the camera edge to edge behind a floating light glass header and capture/import panel. These use native iOS 26 glass, regular material on older systems, and opaque light surfaces with Reduce Transparency. Controls inside each panel remain plain to avoid stacking glass layers. The original dark Azikus mark is used on the light header. Crop and document-review backgrounds remain unchanged; capture pixels and upload behavior are unchanged.
+
 - Native iOS 26 `glassEffect` on secondary controls and tinted primary actions. iOS 18–25 uses material secondary controls and a solid ice-blue primary action. Reduce Transparency uses solid surfaces. The Azikus artwork and existing Hanken Grotesk fallback remain unchanged.
 - Capture/crop/document transitions use a brief spring with a shared document frame between crop and preview. Review/confirmation retain native sheet presentation. Processing fields animate into the ready review.
 - Crop rotation animates one quarter-turn, fits the rotated image inside its canvas, then commits the same pixel-preserving rotation. Actions wait until that transition finishes. Reset eases back to the full image; a rule-of-thirds guide appears while adjusting the crop.
@@ -23,6 +25,13 @@ Addresses may change after reconnecting. Use the admin Connection panel to obtai
 ## Hosting deferred
 
 Keep using the hotspot and local Mac backend. The earlier Railway/Hostinger assessment is deferred; no hosting account, subscription, endpoint, data migration or deployment was created. Revisit hosting as a separate task if independent phone use is needed.
+
+## Scan-panel follow-up verification
+
+- All **three existing UI tests passed** on iOS 26.2, including capture → crop → review → confirmation/reset, crop rotation/reset/retake, and editable invoice details. This later run successfully executes the crop test that was blocked by simulator infrastructure during the earlier update.
+- Signed build passed and the update was installed/opened on the physical iPhone with its saved data intact. An authenticated hotspot read passed at **21:35:00 UTC / 22:35:00 London time** on 12 October. No invoice was submitted by the agent.
+- Synthetic capture screenshots were inspected on iOS 26.2 and iOS 18.6: both floating panels, dark logo, text, shutter and Import fit on the iPhone 16 Pro without the previous black header/footer. Screenshots verify layout/material fallback; live-camera glass appearance remains visible on the installed phone for Markus to assess.
+- Private build/test logs, screenshots and the narrow connection diagnostic are in `.local/scan-glass-panels-2026-10-12/`. Swift formatting and diff checks pass.
 
 ## Hotspot-only follow-up verification
 

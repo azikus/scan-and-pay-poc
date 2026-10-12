@@ -4,7 +4,7 @@ This file supersedes prospective wording and operational snapshots in the dated 
 
 ## Latest follow-up
 
-Markus requested the bounded iOS Liquid Glass/motion update and hotspot/hosting assessment. See [implementation and connection evidence](IOS_GLASS_AND_MOTION.md). Markus then narrowed connectivity to the working hotspot only: one saved Mac address, no USB fallback or hosted endpoint selection. This begins iOS polish without starting cloud deployment, new inference, Android or the final website milestone.
+Markus requested the bounded iOS Liquid Glass/motion update and hotspot/hosting assessment. See [implementation and connection evidence](IOS_GLASS_AND_MOTION.md). Markus clarified that scan-screen glass should replace the large black header/footer; the camera now extends behind floating light glass panels. Markus then narrowed connectivity to the working hotspot only: one saved Mac address, no USB fallback or hosted endpoint selection. This begins iOS polish without starting cloud deployment, new inference, Android or the final website milestone.
 
 ## Code and presentation
 

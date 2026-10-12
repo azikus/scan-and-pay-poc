@@ -11,7 +11,7 @@ enum Brand {
       relativeTo: .body)
   }
 }
-// Glass belongs to controls; document pixels and editable text stay unobstructed.
+// Glass floats above the camera; document pixels and editable text stay unobstructed.
 struct ControlSurface: ViewModifier {
   var prominent = false
   var enabled = true
@@ -29,6 +29,20 @@ struct ControlSurface: ViewModifier {
     } else {
       content.background(.regularMaterial, in: shape)
         .overlay(shape.strokeBorder(.white.opacity(0.16), lineWidth: 0.5))
+    }
+  }
+}
+struct ScanGlassPanel: ViewModifier {
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  func body(content: Content) -> some View {
+    let shape = RoundedRectangle(cornerRadius: 30, style: .continuous)
+    if reduceTransparency {
+      content.background(Color(uiColor: .systemBackground), in: shape)
+    } else if #available(iOS 26.0, *) {
+      content.glassEffect(.regular, in: shape)
+    } else {
+      content.background(.regularMaterial, in: shape)
+        .overlay(shape.strokeBorder(.white.opacity(0.5), lineWidth: 0.5))
     }
   }
 }
@@ -92,9 +106,9 @@ struct ScanHome: View {
   var body: some View {
     NavigationStack {
       ZStack {
-        Brand.ink.ignoresSafeArea()
+        (model.phase == .capture ? Brand.ice : Brand.ink).ignoresSafeArea()
         content
-          .environment(\.colorScheme, .dark)
+          .environment(\.colorScheme, model.phase == .capture ? .light : .dark)
           .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 16)))
       }.animation(
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.46, dampingFraction: 0.9),
@@ -162,46 +176,18 @@ struct ScanHome: View {
     model.phase == .capture ? "capture" : model.phase == .crop ? "crop" : "document"
   }
   @ViewBuilder private var content: some View {
-    if model.phase == .crop, let image = model.originalImage {
+    if model.phase == .capture {
+      captureScreen.id(screen)
+    } else if model.phase == .crop, let image = model.originalImage {
       ManualCrop(image: image, namespace: documentMotion, use: model.cropped, retake: model.reset)
         .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 18)))
     } else {
       VStack(spacing: 0) {
         HStack(spacing: 12) {
-          if model.phase == .capture {
-            Image("AzikusMark").resizable().scaledToFit().frame(width: 28, height: 28)
-          }
-          VStack(alignment: .leading, spacing: 3) {
-            Text(
-              model.phase == .capture
-                ? "Scan & Pay" : model.phase == .preview ? "Ready to send" : "Your document"
-            ).font(Brand.font(23, .semibold))
-            if let status = model.connectionStatus, model.phase == .capture {
-              Text(status).font(Brand.font(12)).foregroundStyle(Brand.ice).lineLimit(2)
-            }
-            if model.fixtureMode {
-              Text("Synthetic preview").font(Brand.font(12)).foregroundStyle(Brand.ice)
-            }
-          }
+          Text(model.phase == .preview ? "Ready to send" : "Your document")
+            .font(Brand.font(23, .semibold))
           Spacer()
-          if model.phase == .capture {
-            Button {
-              Task { await model.reconnect() }
-            } label: {
-              if model.reconnecting {
-                ProgressView().tint(Brand.ice).frame(width: 20, height: 44)
-              } else {
-                Image(systemName: "arrow.clockwise").frame(width: 20, height: 44)
-              }
-            }.buttonStyle(GlassControlButton()).accessibilityLabel("Reconnect")
-              .accessibilityIdentifier("reconnect")
-              .disabled(model.reconnecting || model.fixtureMode)
-            Button {
-              settings = true
-            } label: {
-              Image(systemName: "slider.horizontal.3").frame(width: 20, height: 44)
-            }.buttonStyle(GlassControlButton()).accessibilityLabel("Connection settings")
-          } else if model.phase == .preview {
+          if model.phase == .preview {
             Button("Edit crop", action: model.editCrop).buttonStyle(GlassControlButton())
           } else {
             Button {
@@ -215,39 +201,13 @@ struct ScanHome: View {
           if let image = model.image {
             Image(uiImage: image).resizable().scaledToFit()
               .modifier(DocumentContinuity(namespace: documentMotion)).padding(.horizontal, 16)
-              .frame(
-                maxWidth: .infinity, maxHeight: .infinity
-              ).contentShape(Rectangle()).onTapGesture {
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+              .contentShape(Rectangle()).onTapGesture {
                 if model.phase != .preview { imageViewer = true }
               }
-          } else if model.fixtureMode {
-            Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(22)
-          } else if camera.available {
-            CameraPreview(session: camera.session).clipped()
-          } else {
-            VStack(spacing: 17) {
-              Image(systemName: "camera").font(.system(size: 42, weight: .light))
-              Text(camera.denied ? "Allow camera access" : "Ready when you are").font(
-                Brand.font(24, .semibold))
-              Text(
-                camera.denied
-                  ? "Enable the camera in Settings, or choose an image below."
-                  : camera.error ?? "Preparing the camera…"
-              ).font(Brand.font(15)).multilineTextAlignment(.center).foregroundStyle(
-                .white.opacity(0.75))
-              if camera.denied {
-                Button("Open Settings") {
-                  if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                  }
-                }.tint(Brand.ice)
-              }
-            }
           }
         }.frame(maxWidth: .infinity, maxHeight: .infinity).background(Brand.slate.opacity(0.3))
-        if model.phase == .capture {
-          captureControls
-        } else if model.phase == .preview {
+        if model.phase == .preview {
           VStack(spacing: 12) {
             if let message = model.message {
               Text(message).font(Brand.font(14)).foregroundStyle(.orange)
@@ -266,29 +226,102 @@ struct ScanHome: View {
       }.id(screen).transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: -12)))
     }
   }
+  private var captureScreen: some View {
+    ZStack {
+      // The preview extends behind both glass panels and the device safe areas.
+      GeometryReader { geo in
+        ZStack {
+          Brand.ice
+          if model.fixtureMode {
+            Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(28)
+          } else if camera.available {
+            CameraPreview(session: camera.session)
+          }
+        }.frame(width: geo.size.width, height: geo.size.height).clipped()
+      }.ignoresSafeArea()
+      VStack(spacing: 16) {
+        captureHeader
+        Spacer(minLength: 0)
+        if !model.fixtureMode && !camera.available {
+          VStack(spacing: 16) {
+            Image(systemName: "camera").font(.system(size: 38, weight: .light))
+            Text(camera.denied ? "Allow camera access" : "Ready when you are")
+              .font(Brand.font(24, .semibold))
+            Text(
+              camera.denied
+                ? "Enable the camera in Settings, or choose an image below."
+                : camera.error ?? "Preparing the camera…"
+            )
+            .font(Brand.font(15)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            if camera.denied {
+              Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                  UIApplication.shared.open(url)
+                }
+              }.buttonStyle(.bordered)
+            }
+          }.padding(24).modifier(ScanGlassPanel())
+          Spacer(minLength: 0)
+        }
+        captureControls
+      }.padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 12)
+    }.foregroundStyle(Brand.ink).tint(Brand.ink)
+  }
+  private var captureHeader: some View {
+    HStack(spacing: 10) {
+      Image("AzikusMarkDark").resizable().scaledToFit().frame(width: 24, height: 24).padding(7)
+      VStack(alignment: .leading, spacing: 3) {
+        Text("Scan & Pay").font(Brand.font(21, .semibold))
+        if let status = model.connectionStatus {
+          Text(status).font(Brand.font(12)).foregroundStyle(.secondary).lineLimit(2)
+        }
+        if model.fixtureMode {
+          Text("Synthetic preview").font(Brand.font(12)).foregroundStyle(.secondary)
+        }
+      }
+      Spacer(minLength: 0)
+      Button {
+        Task { await model.reconnect() }
+      } label: {
+        Group {
+          if model.reconnecting { ProgressView() } else { Image(systemName: "arrow.clockwise") }
+        }.frame(width: 44, height: 44).contentShape(Rectangle())
+      }.accessibilityLabel("Reconnect").accessibilityIdentifier("reconnect")
+        .disabled(model.reconnecting || model.fixtureMode)
+      Button {
+        settings = true
+      } label: {
+        Image(systemName: "slider.horizontal.3").frame(width: 44, height: 44)
+          .contentShape(Rectangle())
+      }.accessibilityLabel("Connection settings")
+    }.buttonStyle(.plain).padding(12).modifier(ScanGlassPanel())
+  }
   private var captureControls: some View {
-    VStack(spacing: 14) {
-      if let message = model.message { Text(message).font(Brand.font(14)).foregroundStyle(.orange) }
-      Text("Start with a document.").font(Brand.font(26, .semibold))
-      Text("Take a photo or choose an image.").font(Brand.font(14)).foregroundStyle(
-        .white.opacity(0.7))
+    VStack(spacing: 10) {
+      if let message = model.message {
+        Text(message).font(Brand.font(14)).foregroundStyle(Brand.slate)
+      }
+      Text("Start with a document.").font(Brand.font(24, .semibold))
+      Text("Take a photo or choose an image.").font(Brand.font(14)).foregroundStyle(.secondary)
       HStack {
         PhotosPicker(selection: $picked, matching: .images, photoLibrary: .shared()) {
           VStack(spacing: 6) {
             Image(systemName: "photo.on.rectangle").font(.system(size: 21))
             Text(importing ? "Opening…" : "Import").font(Brand.font(12))
-          }.frame(maxWidth: .infinity, minHeight: 66)
-        }.buttonStyle(GlassControlButton()).disabled(importing)
+          }.frame(maxWidth: .infinity, minHeight: 66).contentShape(Rectangle())
+        }.buttonStyle(.plain).disabled(importing)
         Button {
           if model.fixtureMode { model.captured(fixtureImage()) } else { camera.capture() }
         } label: {
-          Circle().fill(.white).padding(6).overlay(Circle().stroke(.white, lineWidth: 2)).frame(
-            width: 78, height: 78)
-        }.disabled((!camera.available && !model.fixtureMode) || camera.takingPhoto || importing)
+          Circle().fill(.white).padding(7)
+            .overlay(Circle().stroke(Brand.slate.opacity(0.7), lineWidth: 2))
+            .frame(width: 78, height: 78)
+        }.buttonStyle(.plain)
+          .disabled((!camera.available && !model.fixtureMode) || camera.takingPhoto || importing)
           .accessibilityLabel("Capture document").accessibilityIdentifier("capture")
         Color.clear.frame(maxWidth: .infinity, maxHeight: 66)
-      }.tint(.white).padding(.top, 8)
-    }.foregroundStyle(.white).padding(.horizontal, 22).padding(.top, 24).padding(.bottom, 16)
+      }.padding(.top, 8)
+    }.padding(22).modifier(ScanGlassPanel())
   }
   private func updateCamera() {
     if scenePhase == .active && model.phase == .capture && !model.fixtureMode {
