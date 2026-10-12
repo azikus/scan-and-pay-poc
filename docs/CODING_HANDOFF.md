@@ -1,5 +1,8 @@
 # Coding handoff — continue here
 
+**Google verification — 13 October:** Markus requested fixing Google Document AI. Both exact runtime authentication/processor-version preflights passed, followed by the first actual processing dispatch for each Google profile on the previously approved invoice: OCR 7.059s / Invoice Parser 8.207s, both completed with incomplete review drafts. No code/credential replacement was needed; the precise earlier authentication failure remains unknown. Two dispatches / EUR0.30 holds fit existing caps and preserve eight reservations/EUR0.80 mobile headroom. Ledger now 2,342 reservations / 2,340 dispatched / EUR369.60 holds; caps remain 2,350 / EUR370.40. Every prior ledger row, selection, identity and private configuration was verified unchanged. AWS access-key authentication also passed as `scanpay-local`; no AWS processing ran. See [GOOGLE_VERIFICATION_2026-10-13.md](GOOGLE_VERIFICATION_2026-10-13.md).
+
+
 **Latest scope — 13 October:** Markus requested complete Fireworks removal and removal of Cohere Aya Vision. Their adapters, provider registration, admin labels, credential placeholders and six presets are removed; the private live catalogue has **31 enabled/configured profiles**. Existing ledger rows, selected exact profile, backend identity, budget caps and all remaining profile metadata were verified unchanged after an idle restart. No paid inference ran. Claude Haiku 4.5’s dated provider_unavailable result is an availability/connection failure, not evidence of unsuccessful Anthropic setup; Haiku 5.5 succeeded with the same provider access. The old baseline remains independently versioned alongside 5.5. This supersedes previous all-37-enabled scope; dated results below remain historical evidence.
 
 

@@ -1,5 +1,8 @@
 # LLM expansion — current scope, 13 October 2026
 
+**Google verification — 13 October:** Markus requested fixing Google Document AI. Both exact runtime authentication/processor-version preflights passed, followed by the first actual processing dispatch for each Google profile on the previously approved invoice: OCR 7.059s / Invoice Parser 8.207s, both completed with incomplete review drafts. No code/credential replacement was needed; the precise earlier authentication failure remains unknown. Two dispatches / EUR0.30 holds fit existing caps and preserve eight reservations/EUR0.80 mobile headroom. Ledger now 2,342 reservations / 2,340 dispatched / EUR369.60 holds; caps remain 2,350 / EUR370.40. Every prior ledger row, selection, identity and private configuration was verified unchanged. AWS access-key authentication also passed as `scanpay-local`; no AWS processing ran. See [GOOGLE_VERIFICATION_2026-10-13.md](GOOGLE_VERIFICATION_2026-10-13.md).
+
+
 Markus requested broader models in a separate worktree, then requested complete Fireworks removal and removal of Cohere Aya Vision. The implementation remains on `codex/llm-provider-expansion` in [PR #9](https://github.com/azikus/scan-and-pay-poc/pull/9). The original checkout’s separate iOS/presentation work is preserved.
 
 ## Available models
