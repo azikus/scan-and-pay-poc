@@ -19,12 +19,15 @@ from backend.errors import ProviderError, ServiceError
 from backend.images import prepare_image
 from backend.models import Hints, Options
 from backend.profiles import registry, resolve
+from backend.providers import MistralAdapter, OpenAIAdapter
 from backend.runtime import Context, Runtime
 from backend.store import Store, request_digest
 from backend.tests.conftest import upload
 from backend.tests.fakes import FixtureAdapter
 from backend.tests.test_api import client_for, finish
 from backend.tests.test_compact import example_v5
+from backend.tests.test_providers import definition as starter_definition
+from backend.tests.test_providers import mistral_response, openai_response
 
 pytestmark = pytest.mark.data_policy
 
@@ -449,3 +452,45 @@ def test_hybrid_european_egress_and_mid_job_revocation(settings, png, revoke_sec
             assert len(calls) == 2
         stages = result["runs"][0]["diagnostics"]["stages"]
         assert all(s["verified_processing_region"] == "eea_switzerland" for s in stages)
+
+
+@pytest.mark.parametrize("provider", ["openai", "mistral"])
+@pytest.mark.parametrize("mismatch", [False, True])
+def test_starter_adapters_check_actual_model_and_destination(settings, png, uk, provider, mismatch):
+    original = starter_definition(provider)
+    model = original.metadata.model or original.metadata.processor
+    option = approved_option(provider, "vision" if provider == "openai" else "ocr")
+    option.config.data_approval.model = "other-model" if mismatch else model
+    metadata = original.metadata.model_copy(deep=True)
+    if mismatch:
+        if provider == "openai":
+            metadata.model = "other-model"
+        else:
+            metadata.processor = "other-model"
+    definition = replace(original, metadata=metadata, config=option.config)
+    settings.openai_key = settings.mistral_key = SecretStr("synthetic-key")
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        assert request.url.host == data_policy.EUROPEAN_ENDPOINTS[provider]
+        assert json.loads(request.content)["model"] == model
+        return httpx.Response(
+            200, json=openai_response(uk) if provider == "openai" else mistral_response()
+        )
+
+    adapter = (OpenAIAdapter if provider == "openai" else MistralAdapter)(
+        settings, httpx.MockTransport(handler)
+    )
+    with client_for(settings, {definition.metadata.id: definition}, {provider: adapter}) as client:
+        result = finish(client, upload(client, png, profiles=[definition.metadata.id]))
+        if mismatch:
+            assert result["state"] == "failed"
+            assert result["runs"][0]["error"]["code"] == "data_policy_blocked"
+            assert counts(settings) == (0, 0)
+            assert not calls
+            assert not result["runs"][0]["diagnostics"]["stages"]
+        else:
+            assert result["state"] == "completed", result["runs"][0]["error"]
+            assert counts(settings) == (1, 1)
+            assert len(calls) == 1

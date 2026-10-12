@@ -8,7 +8,7 @@ Markus authorized the repository import, reconciliation of documentation and com
 
 ## Separate privacy PR — 12 October
 
-Markus authorized a separate PR implementing European content processing and no-training enforcement. [EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md) owns the gate and activation requirements. Preserve the active PoC and private configuration; the new source blocks global/unreviewed profiles when deployed. Supplier account approvals, training-control verification and a reviewed idle deployment remain separate from this source PR. No paid calls, runtime restart, iOS edits or automatic merge are part of this request.
+Markus authorized a separate PR implementing European content processing and no-training enforcement. [EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md) owns the gate and activation requirements. Preserve the active PoC and private configuration; the new source blocks global/unreviewed profiles when deployed. Supplier account approvals, training-control verification and a reviewed idle deployment remain separate from this source PR. Markus subsequently authorized review/testing before merge and clarified that acceptance includes live European provider calls after privacy controls are verified. Keep PR #7 unmerged until that acceptance is complete or Markus changes this gate. Offline/native/presentation checks pass; account-specific approval and current training controls remain unverified. No inference, runtime restart or iOS source change has been made in this privacy task.
 
 ## What comes next
 

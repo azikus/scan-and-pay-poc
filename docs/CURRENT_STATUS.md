@@ -12,7 +12,7 @@ This file supersedes prospective wording and operational snapshots in the dated 
 
 ## Authorized privacy follow-up — 12 October
 
-Markus requested a separate PR for European content processing and no-training enforcement. See [EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md) for the mandatory gate, supported routes, verification and remaining provider/account approvals. This work changes source only: the current service, selection, credentials, ledger and device state remain untouched. Deploying this code will block unreviewed/global profiles until eligible new profiles are verified; the presentation's dated results remain unchanged.
+Markus requested a separate PR for European content processing and no-training enforcement. See [EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md) for the mandatory gate, supported routes, verification and remaining provider/account approvals. PR #7 remains unmerged while the user-requested live acceptance awaits verified provider controls. Source review and all 738 backend/evaluation, 23 native unit/recovery and 2 UI tests pass. This work has changed source only: the current service, selection, credentials, ledger and device state remain untouched. Deploying this code will block unreviewed/global profiles until eligible new profiles are verified; the presentation's dated results remain unchanged.
 
 ## Current private state
 
