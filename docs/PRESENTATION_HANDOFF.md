@@ -1,5 +1,8 @@
 # Presentation handoff — Scan and Pay PoC
 
+**Current handoff — 12 October 2026:** the initial deck was created and revised with Markus on 9 October and now lives in [presentation/](../presentation/README.md). Continue that approved 25-slide deck; do not restart audience/template discovery unless the brief changes. English slides, Croatian notes and a 19–20 minute talk including the live demo are established. [PRESENTATION_CONTENT.md](PRESENTATION_CONTENT.md) is generated from its HTML source; [PRESENTATION_EVIDENCE.md](PRESENTATION_EVIDENCE.md) records revisions and sources. Read [CURRENT_STATUS.md](CURRENT_STATUS.md) for current budget/selection/device facts. The remainder is the original 9 October source pack, with dated scope and operating snapshots retained as history.
+
+
 Prepared for Markus to start a new presentation chat, 9 October 2026. This is a source pack and working brief, not a presentation or permission to implement later features. Read [coding handoff](CODING_HANDOFF.md), [roadmap](ROADMAP.md), [confirmation-sheet checkpoint](CONFIRMATION_SHEETS.md) and [connection setup](CONNECTION_SETUP.md) for current authority. Use [the copyable prompt](PRESENTATION_PROMPT.md) in the next chat.
 
 ## 1. What the next chat should accomplish

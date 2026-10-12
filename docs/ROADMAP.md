@@ -1,26 +1,26 @@
 # Delivery roadmap
 
-## Agreed next milestones — 9 October 2026
+## Agreed milestones — status reconciled 12 October 2026
 
 Markus explicitly approved this sequence. These five **next milestones** supersede the old execution order; historical M1–M8 identifiers below remain unchanged so earlier evidence stays traceable. Development milestones may span multiple sessions. Agree the detailed work for each when it starts.
 
 | Next milestone | Scope and completion checkpoint | Status |
 | --- | --- | --- |
-| 1 — Initial presentation | Create the presentation **together with Markus** from the working PoC and retained measured results. Agree audience, story, format and demo; distinguish delivered functionality, evidence and remaining work. | Next; not started |
+| 1 — Initial presentation | Create the presentation **together with Markus** from the working PoC and retained measured results. Agree audience, story, format and demo; distinguish delivered functionality, evidence and remaining work. | Delivered 9 October; 25-slide source imported into `presentation/` |
 | 2 — iOS improvements and real-invoice testing | Complete the remaining agreed iOS work and verify it with real invoices, review/edit/recovery scenarios and device networking. Record actual mobile timing when measured. | Planned after 1 |
 | 3 — Backend/admin improvements and integration testing | Complete the remaining agreed backend/admin work and verify the iOS → backend → admin journey, extraction/review semantics and failure handling. Preserve evidence and version changes. | Planned after 2 |
 | 4 — Android app and both-platform testing | Implement Android against the shared contract, then complete testing across iOS, Android, backend and admin. **This is the final development milestone.** | Planned after 3 |
 | 5 — Comprehensive final presentation and website HTML | Create a fuller final presentation plus embeddable HTML explaining functionality, workflow, architecture, measured results and limitations using sanitized material. Agree the site's embedding constraints before authoring. | Planned after development |
 
-**Approved updates before milestone 1:** the extracted-field review/confirmation sheets merged in PR #4. Markus subsequently approved the admin Connection panel and automatic backend network-listener updates; see [connection setup](CONNECTION_SETUP.md). These bounded follow-ups and their supporting tests/docs do not begin the later iOS/backend milestones. The initial presentation is the next prompt/chat; no deck, Android or website implementation now.
+**Approved updates before milestone 1:** the extracted-field review/confirmation sheets merged in PR #4. Markus subsequently approved the admin Connection panel and automatic backend network-listener updates; see [connection setup](CONNECTION_SETUP.md). These bounded follow-ups and their supporting tests/docs do not begin the later iOS/backend milestones. The initial deck has since been delivered. Its repository import does not begin later iOS/backend, Android or website implementation.
 
-The presentation chat starts from [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md); [PRESENTATION_PROMPT.md](PRESENTATION_PROMPT.md) is the copyable opening prompt. The handoff is ready for Markus to start that chat when ready.
+Continue the existing deck using [presentation/README.md](../presentation/README.md), [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md) and the revised [continuation prompt](PRESENTATION_PROMPT.md).
 
-The original iOS/admin checkpoint is accepted and merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2); the root backend/frontend/ios/android reorganization merged in [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3). Android contains a README only. The current admin selection is Mistral Small; historical OpenAI selection and benchmark results remain dated evidence.
+The original iOS/admin checkpoint is accepted and merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2); the root backend/frontend/ios/android reorganization merged in [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3). Android contains a README only. Read [CURRENT_STATUS.md](CURRENT_STATUS.md) for the current selection snapshot; all benchmark selections/results remain dated evidence.
 
 ## Authority and preservation
 
-The checked PR/merge workflow covers the sheets and the newly approved connection follow-up. The milestone sequence is agreed, but is not permission to begin later development or run paid experiments now. Retain the original ledger (2,204 dispatches / €336.75 held at this checkpoint), current selection, pending drafts, credentials and private evidence. No new paid calls, completed evaluation reruns, force push or public publication. Read [coding handoff](CODING_HANDOFF.md) for current scope and [mobile checkpoint](MOBILE_CHECKPOINT.md) for prior acceptance.
+The sheets and connection follow-up are merged. Markus authorized the presentation source import, documentation reconciliation and commit/push on 12 October. The milestone sequence is agreed, but is not permission to begin later development or run paid experiments now. Retain the original ledger, current selection, pending drafts, credentials and private evidence. [CURRENT_STATUS.md](CURRENT_STATUS.md) records the latest snapshot and authorized mobile allowance. No new paid calls, completed evaluation reruns, force push or public publication. Read [coding handoff](CODING_HANDOFF.md) for current scope and [mobile checkpoint](MOBILE_CHECKPOINT.md) for prior acceptance.
 
 ## Historical delivery record — original M1–M8
 
