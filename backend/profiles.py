@@ -387,6 +387,7 @@ def validate_limits(image: PreparedImage, definitions: list[Definition]) -> None
             longest = max(image.identity.width, image.identity.height)
             violation = (
                 (option.provider == "mistral" and size > 20_000_000)
+                or (option.provider == "fireworks" and encoded_size >= 10_000_000)
                 or (option.provider == "aws" and (size > 10_000_000 or longest > 10000))
                 or (
                     option.provider == "anthropic" and (encoded_size > 10_000_000 or longest > 8000)

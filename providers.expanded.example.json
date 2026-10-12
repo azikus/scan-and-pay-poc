@@ -1,0 +1,192 @@
+{
+  "options": {
+    "openai-luna-expanded": {
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.openai.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4",
+      "reasoning": "none"
+    },
+    "openai-sol-expanded": {
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.openai.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4",
+      "reasoning": "low"
+    },
+    "openai-astra-expanded": {
+      "provider": "openai",
+      "model": "gpt-6-astra",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.openai.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4",
+      "reasoning": "low"
+    },
+    "gemini-flash-expanded": {
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "generativelanguage.googleapis.com",
+        "enabled": false
+      },
+      "protocol_version": "6",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    },
+    "gemini-pro-expanded": {
+      "provider": "gemini",
+      "model": "gemini-3.1-pro-preview",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "generativelanguage.googleapis.com",
+        "enabled": false
+      },
+      "protocol_version": "6",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    },
+    "anthropic-haiku-expanded": {
+      "provider": "anthropic",
+      "model": "claude-haiku-5-5",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.anthropic.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4",
+      "reasoning": "adaptive"
+    },
+    "anthropic-sonnet-expanded": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-5-5",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.anthropic.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4",
+      "reasoning": "adaptive"
+    },
+    "anthropic-opus-expanded": {
+      "provider": "anthropic",
+      "model": "claude-opus-5-5",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.anthropic.com",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4",
+      "reasoning": "adaptive"
+    },
+    "mistral-medium-expanded": {
+      "provider": "mistral",
+      "model": "mistral-medium-3-5",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.mistral.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    },
+    "mistral-large-expanded": {
+      "provider": "mistral",
+      "model": "mistral-large-4",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.mistral.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    },
+    "mistral-ministral-expanded": {
+      "provider": "mistral",
+      "model": "ministral-8b-2512",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.mistral.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    },
+    "together-kimi-expanded": {
+      "provider": "together",
+      "model": "moonshotai/Kimi-K3",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.together.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    },
+    "together-minimax-expanded": {
+      "provider": "together",
+      "model": "MiniMaxAI/MiniMax-M3",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.together.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    },
+    "fireworks-kimi-expanded": {
+      "provider": "fireworks",
+      "model": "accounts/fireworks/models/kimi-k2p5",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.fireworks.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
+    }
+  }
+}

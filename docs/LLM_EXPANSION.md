@@ -1,0 +1,61 @@
+# LLM expansion — 12 October 2026
+
+Markus requested broader LLM coverage and more choices from existing providers in a separate worktree. Implementation is isolated on `codex/llm-provider-expansion`, based on the merged presentation checkpoint `75c8cd0`. The separate uncommitted iOS work remains in its original checkout. No inference, runtime restart, private configuration change, selection change, subscription or deployment is part of this task.
+
+## What was missing
+
+The retained direct-image comparison covers OpenAI GPT-4.1 mini, Gemini Flash-Lite, Mistral Small, Claude Haiku, Together Qwen and xAI Grok. These are six model choices, not exhaustive coverage of those suppliers. Stronger controls, newer small models and additional model families are worthwhile candidates; documentation cannot establish which reads our invoices best or fastest.
+
+The existing option registry already supports multiple independently versioned models per provider. The admin automatically lists enabled/configured profiles, with no seven-profile hard limit. New generic labels show the actual hosting provider even when two hosts serve the same model family. Existing drafts and accepted uploads continue to retain their original profile snapshots.
+
+## Prepared choices
+
+[providers.expanded.example.json](../providers.expanded.example.json) contains **14 disabled profiles**, using the existing compact typed extraction, partial-field and recipient-role policies:
+
+| Recipient | Model IDs | Purpose |
+| --- | --- | --- |
+| OpenAI | `gpt-6-luna`, `gpt-6.1-sol`, `gpt-6-astra` | Efficient current model, balanced control, stronger control |
+| Google Gemini | `gemini-3.8-flash`, `gemini-3.1-pro-preview` | Broader Flash and Pro coverage |
+| Anthropic | `claude-haiku-5-5`, `claude-sonnet-5-5`, `claude-opus-5-5` | Current small, medium and stronger choices |
+| Mistral | `ministral-8b-2512`, `mistral-medium-3-5`, `mistral-large-4` | Smaller hosted model, medium control, larger control |
+| Together | `moonshotai/Kimi-K3`, `MiniMaxAI/MiniMax-M3` | Two previously uncovered vision model families through an existing recipient |
+| Fireworks | `accounts/fireworks/models/kimi-k2p5` | New hosted recipient; separate Kimi model/version |
+
+This is a candidate menu, not a ranking or measured benchmark. Gemini Pro is a preview; Mistral Large 4 is a public preview. Several model identifiers are provider aliases rather than immutable snapshots. Confirm any available snapshot and returned-model identity before live acceptance; model drift cannot be frozen by the local profile hash alone.
+
+Our proposed first evaluation priorities are Kimi/MiniMax for family diversity, Gemini Flash and Claude Sonnet for plausible speed/quality tradeoffs, then Mistral Medium/Large and OpenAI Sol/Astra as stronger controls. These priorities are an engineering judgment, not measured performance. Keep the historical exact tested profiles alongside new IDs rather than editing them.
+
+GLM, DeepSeek, Llama, Cohere Aya and direct Alibaba/Moonshot access are potential later candidates. Do not classify a text-only endpoint as direct vision merely because its family has a multimodal variant. Together's current documented vision table lists Qwen 3.5 9B, Kimi K3 and MiniMax M3; it does not establish image support for its listed GLM/DeepSeek chat endpoints. The current OCR→LLM implementation deliberately supports only OpenAI interpretation, so adding text-only families would require a separate hybrid extension. OpenRouter routing would also require explicitly frozen recipients and fallback handling before invoice use.
+
+## Adapter behavior
+
+Fireworks uses fixed `api.fireworks.ai` and `/inference/v1/chat/completions`, with `FIREWORKS_API_KEY` in root `.env`. It sends the canonical PNG as an inline base64 image and copies the schema into the prompt, using Fireworks' documented JSON-schema envelope. Images whose base64 encoding is at least 10 MB are rejected before dispatch. No new SDK dependency is needed.
+
+Each profile retains a single bounded inference attempt, no redirect, retry, tools or fallback. Usage uses the existing token accounting path; absent tariffs remain unknown. Every draft requires review. Returned model changes, malformed output, refusal and truncated output remain explicit failures.
+
+Current Claude models can return thinking blocks. New profiles explicitly set `reasoning: adaptive`; only those profiles may ignore known `thinking`/`redacted_thinking` blocks while parsing text. Tool and unknown blocks still fail. Older Claude profiles preserve their prior behavior. OpenAI Sol/Astra use supported `low` reasoning, Luna uses `none`; Gemini and Together presets leave model-specific thinking controls at provider defaults. An 8,000-token output ceiling and 90-second stage timeout may need separately versioned tuning after live compatibility checks.
+
+## Making models selectable
+
+The worktree has no private credentials, ledger or scan data. Do not start it against the live database. The presets deliberately have no account approval, tariff, cost ceiling or default selection.
+
+After reviewing this implementation, prepare an additive private configuration from the existing `.local/providers.json`: copy chosen entries from the expanded example into `options` under their new IDs, preserving every existing option, hybrid, budget plan and default. Reuse a provider's existing key through root `.env`; Fireworks needs its own key. Check account model access, terms, processing region and current pricing per choice, record the checks in that option's `config`, set an appropriate conservative `max_call_eur`, and supply an exact tariff only where accounting is understood. Then enable the chosen options. Do not copy approval/price values blindly from another model.
+
+The authenticated `/v1/profiles` response reports unavailable reasons until these checks are supplied. Once enabled/configured in an approved idle runtime update, each choice appears under admin **Method → Model / provider → Use for next scan**. Choosing a profile performs no inference. Existing drafts keep their original selections. Adding choices does not extend the cumulative allowance, and an agent experiment still needs a newly authorized bounded full-corpus plan; the interrupted 9 October comparison stays stopped. xAI's documented unresolved accounting limitation stays unchanged.
+
+## Sources checked
+
+Official documentation checked on 12 October; account availability, residency and tariff activation were not checked and no live model request was made.
+
+- [OpenAI model catalogue](https://developers.openai.com/api/docs/models), [Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol), [Astra](https://developers.openai.com/api/docs/models/gpt-6-astra), [Luna](https://developers.openai.com/api/docs/models/gpt-6-luna).
+- [Gemini Flash](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash), [Gemini Pro preview](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview).
+- [Claude overview](https://platform.claude.com/docs/en/models/overview), [Sonnet](https://platform.claude.com/docs/en/models/sonnet-5-5/overview), [Haiku](https://platform.claude.com/docs/en/models/haiku-5-5/overview), [Opus](https://platform.claude.com/docs/en/models/opus-5-5/overview).
+- [Mistral catalogue](https://docs.mistral.ai/models), [Medium](https://docs.mistral.ai/models/mistral-medium-3-5-26-04), [Large](https://docs.mistral.ai/models/mistral-large-4-0), [Ministral](https://docs.mistral.ai/models/ministral-3-8b-25-12).
+- [Together serverless catalogue](https://docs.together.ai/docs/serverless/models).
+- [Fireworks vision](https://docs.fireworks.ai/guides/querying-vision-language-models), [structured output](https://docs.fireworks.ai/structured-responses/structured-response-formatting).
+
+## Verification
+
+Completed in this isolated worktree: **720 offline tests passed**; domain/orchestration **96.09% statement / 91.43% branch coverage** (operational CLI/export/reporting entry points separately excluded by the existing gate). Ruff lint/format, strict mypy on 43 source files, JavaScript syntax, provider-aware admin label assertions, diff checks and contract regeneration passed. Generated contracts are unchanged. The suite blocks socket connections and uses synthetic mock transports/temp databases. Run it from the worktree with `python -m pytest` so the shared editable environment imports this checkout.
+
+Tests cover all 14 presets through configured profile selection and one mocked extraction; Fireworks authentication/path/schema and pre-dispatch image boundary; new-recipient refusal/error/truncation/model/usage handling; opt-in Claude thinking and tool rejection; disabled presets and preservation of existing profile snapshots. Synthetic responses demonstrate application compatibility, not real API availability, invoice accuracy or latency. The original checkout's pending iOS files, private state and historical evidence were not edited.

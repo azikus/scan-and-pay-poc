@@ -54,6 +54,8 @@ def vision_request(
         for variant in box["anyOf"]:
             if variant.get("type") == "array":
                 variant["items"].update(minimum=0, maximum=1)
+    if provider == "fireworks":
+        instructions += "\nJSON schema:\n" + json.dumps(schema)
     if provider == "anthropic":
         if option.protocol_version in {"2", "3", "4", "5", "6"} and option.schema_mode == "native":
 
@@ -111,6 +113,8 @@ def vision_request(
                 }
             ],
         }
+        if option.reasoning == "adaptive":
+            anthropic_body["thinking"] = {"type": "adaptive"}
         if option.schema_mode == "prompt_json":
             anthropic_body["system"] += (
                 "\nReturn only JSON, without markdown fences, matching this schema:\n"
@@ -186,7 +190,7 @@ def vision_request(
     if provider == "together" and option.reasoning is not None:
         extra["chat_template_kwargs"] = {"enable_thinking": option.reasoning != "none"}
     return (
-        "/v1/chat/completions",
+        "/inference/v1/chat/completions" if provider == "fireworks" else "/v1/chat/completions",
         {"Authorization": "Bearer " + key},
         {
             "model": model,
@@ -207,20 +211,27 @@ def vision_request(
             ],
             "response_format": {
                 "type": "json_schema",
-                "json_schema": {"name": "payment_extraction", "strict": True, "schema": schema},
+                "json_schema": {
+                    "name": "payment_extraction",
+                    **({} if provider == "fireworks" else {"strict": True}),
+                    "schema": schema,
+                },
             },
         },
     )
 
 
-def vision_text(body: dict[str, Any], provider: str) -> tuple[str, str | None]:
+def vision_text(
+    body: dict[str, Any], provider: str, *, adaptive_thinking: bool = False
+) -> tuple[str, str | None]:
     if provider == "anthropic":
         if body.get("stop_reason") == "refusal":
             raise ProviderError("provider_refusal")
         parts = body["content"]
-        if body["stop_reason"] != "end_turn" or any(p["type"] != "text" for p in parts):
+        allowed = {"text", "thinking", "redacted_thinking"} if adaptive_thinking else {"text"}
+        if body["stop_reason"] != "end_turn" or any(p["type"] not in allowed for p in parts):
             raise ProviderError("invalid_provider_output")
-        return "".join(p["text"] for p in parts), body.get("model")
+        return "".join(p["text"] for p in parts if p["type"] == "text"), body.get("model")
     if provider == "gemini":
         if body.get("promptFeedback", {}).get("blockReason"):
             raise ProviderError("provider_refusal")

@@ -218,7 +218,9 @@ class ExtendedAdapter:
                     body, _ = await request("POST", path, headers=headers, json=payload)
                     assert stage is not None
                     record_usage(body, stage, option)
-                    text, model = vision_text(body, provider)
+                    text, model = vision_text(
+                        body, provider, adaptive_thinking=option.reasoning == "adaptive"
+                    )
                     if (
                         option.protocol_version in {"3", "4", "5", "6"}
                         and option.schema_mode == "prompt_json"

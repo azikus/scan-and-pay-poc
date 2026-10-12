@@ -1,5 +1,7 @@
 # Coding handoff — continue here
 
+**Separate provider work — 12 October:** Markus requested broader LLM/model support in an isolated worktree. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for scope, disabled presets and verification. This authorizes offline implementation; preserve live configuration, selection and ledger, and do not resume the interrupted comparison.
+
 ## Current scope — 12 October 2026
 
 Read [CURRENT_STATUS.md](CURRENT_STATUS.md) first. Application PRs #2–#5 are merged. The initial presentation was delivered and revised with Markus on 9 October; it is now maintained in [presentation/](../presentation/README.md). Earlier instructions to start a presentation chat or treat the deck as unstarted are historical.

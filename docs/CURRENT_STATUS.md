@@ -1,5 +1,7 @@
 # Current project status — 12 October 2026
 
+**Separate provider work — 12 October:** Markus requested broader LLM/model support in an isolated worktree. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for scope, disabled presets and verification. This authorizes offline implementation; preserve live configuration, selection and ledger, and do not resume the interrupted comparison.
+
 This file supersedes prospective wording and operational snapshots in the dated 8–9 October handoffs. Historical experiment evidence remains unchanged.
 
 ## Code and presentation
