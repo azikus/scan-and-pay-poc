@@ -1,5 +1,8 @@
 # LLM expansion — current scope, 13 October 2026
 
+**Current provider request status — 13 October:** 31 enabled/configured profiles remain after Fireworks/Aya removal. Latest processing evidence: **27 profiles completed without API errors**, **two retain last-request failures** (Haiku 4.5 availability/connection error; Mistral Large 4 timeout), and **two AWS profiles have verified authentication but untested processing**. Google OCR and Invoice processing now pass. Incomplete drafts are successful requests requiring review, not API failures. See [API_CONNECTION_STATUS.md](API_CONNECTION_STATUS.md) for every current profile. No new inference/runtime/configuration change is part of this documentation closeout.
+
+
 **Google verification — 13 October:** Markus requested fixing Google Document AI. Both exact runtime authentication/processor-version preflights passed, followed by the first actual processing dispatch for each Google profile on the previously approved invoice: OCR 7.059s / Invoice Parser 8.207s, both completed with incomplete review drafts. No code/credential replacement was needed; the precise earlier authentication failure remains unknown. Two dispatches / EUR0.30 holds fit existing caps and preserve eight reservations/EUR0.80 mobile headroom. Ledger now 2,342 reservations / 2,340 dispatched / EUR369.60 holds; caps remain 2,350 / EUR370.40. Every prior ledger row, selection, identity and private configuration was verified unchanged. AWS access-key authentication also passed as `scanpay-local`; no AWS processing ran. See [GOOGLE_VERIFICATION_2026-10-13.md](GOOGLE_VERIFICATION_2026-10-13.md).
 
 
@@ -17,7 +20,7 @@ Markus requested broader models in a separate worktree, then requested complete 
 | Mistral | `ministral-8b-2512`, `mistral-medium-2604`, `mistral-large-4` |
 | Together | `moonshotai/Kimi-K3`, `MiniMaxAI/MiniMax-M3` |
 
-Example presets deliberately contain no credentials or approval/tariff values and default to disabled. The original private runtime has **31 enabled/configured profiles** after removing the five Fireworks profiles and Aya. Restored Google Document AI, AWS Textract, Azure, Mindee, Mistral annotations, Grok, OCR/rules, legacy profiles and the OCR→OpenAI hybrid remain present. AWS was explicitly skipped in the last paid batch; expiry of its login remains a separate access issue.
+Example presets deliberately contain no credentials or approval/tariff values and default to disabled. The original private runtime has **31 enabled/configured profiles** after removing the five Fireworks profiles and Aya. Restored Google Document AI, AWS Textract, Azure, Mindee, Mistral annotations, Grok, OCR/rules, legacy profiles and the OCR→OpenAI hybrid remain present. AWS was explicitly skipped in the last paid batch; access-key authentication now passes, while processing remains untested.
 
 Fireworks and Cohere adapter branches, provider registration, admin labels, example credential placeholders and presets are removed entirely. DeepSeek, GLM and Llama therefore have no current profile after removal of their Fireworks host. Together’s Kimi K3 remains a separate provider choice. Existing raw responses, drafts, snapshots and ledger rows remain private and unchanged; retired-provider results remain accessible as historical evidence. Existing external provider keys were not revoked or published.
 
