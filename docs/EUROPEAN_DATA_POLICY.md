@@ -1,6 +1,14 @@
 # European hosting and model-training controls
 
-Checked on **12 October 2026**. This document records provider options and verification steps. PR #7 is documentation only: application routing and profile availability remain unchanged, with no new regional approval checks or blocking behavior.
+Checked on **12 October 2026**. This document records provider options and account setup. The backend supports explicitly configured European OpenAI and Mistral endpoints while preserving global integrations. It does not require proof of European account eligibility, a no-training attestation, or a known verified processing region before accepting a profile.
+
+## Backend behavior
+
+OpenAI model options accept `api.openai.com`, `eu.api.openai.com` and the already supported starter endpoint `us.api.openai.com`. Mistral model options and starter OCR accept `api.mistral.ai` and `api.eu.mistral.ai`. The operator selects the endpoint explicitly; defaults, saved selection and existing configurations are unchanged. The normal checks for supported endpoints, credentials and profile readiness still apply.
+
+Missing or unknown account approval does **not** block a scan locally. A missing `verified_processing_region` remains unknown in diagnostics and does not disable the profile. No European approval gate, approval-expiry check or policy-specific rejection is installed. Existing global OpenAI profiles continue to work without regional approval. If an operator chooses an EU endpoint, the provider can still reject requests for account or model reasons; the backend reports that provider response without silently changing endpoints.
+
+OpenAI requests retain `store=false`. Training preferences are managed by provider account settings and terms; the backend cannot enable an account opt-out through an invented request flag. Account requirements below are operational documentation, not backend admission rules.
 
 ## What leaves the device
 
@@ -31,7 +39,7 @@ No-training and retention are separate controls. A provider may retain content f
 1. Identify the exact organization/project, API product, model and operation receiving images or OCR text. Include both stages of a hybrid method.
 2. Obtain the applicable processing agreement and regional eligibility confirmation. Define the required geography explicitly: EU member states, EEA, and EFTA are different boundaries.
 3. Review training/data-sharing settings in that account and save dated evidence privately. Record retention separately.
-4. If adopting a regional route, configure its supported endpoint and compatible account/project explicitly. Confirm adapter support before changing an existing profile; this document does not add endpoint support or migrate configurations.
+4. If adopting a regional route, configure its supported endpoint and compatible account/project explicitly. Confirm adapter support before changing an existing profile; this PR adds the regional hostname support described above but does not migrate configurations.
 5. Check model availability, then use a synthetic invoice for functional verification. Record the actual destination, exact model, timestamp, request identifier where available and any fallback or redirect. A successful response establishes functionality, not independent proof of physical server location.
 6. Recheck settings and terms when accounts, keys, models or provider features change. Regional processing claims do not cover every category of operational metadata or automatically establish legal compliance.
 

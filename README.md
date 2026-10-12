@@ -63,6 +63,10 @@ The following are individual CLI syntax examples from completed Milestone 1, not
 
 The CLI prints the accepted scan ID and a safe summary, polls by default, and saves the complete result under `.local/client/`. Use the actual returned `scan-…` ID for `get` and `delete`. A failed upload is never automatically retried. Reuse its original key and bytes/options to recover acceptance; a new key intentionally creates a new run. `--no-wait` returns after acceptance. Compare also accepts `--profiles all_enabled`.
 
+## European endpoints and training controls
+
+OpenAI and Mistral profiles support explicitly configured European endpoints alongside their existing global endpoints. Missing account approval or an unknown verified region does not block a profile locally. Provider account requirements, training opt-outs and dated checks are documented in [European hosting and model-training controls](docs/EUROPEAN_DATA_POLICY.md).
+
 ## Offline verification
 
 ```sh

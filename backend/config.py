@@ -40,6 +40,11 @@ PROVIDER_HOSTS = {
     "aws": None,
     "mindee": "api-v2.mindee.net",
 }
+# These are supported destinations, not assertions of account eligibility.
+REGIONAL_PROVIDER_HOSTS = {
+    "openai": {"api.openai.com", "eu.api.openai.com", "us.api.openai.com"},
+    "mistral": {"api.mistral.ai", "api.eu.mistral.ai"},
+}
 OPERATIONS = {
     "openai": {"vision"},
     "mistral": {"vision", "ocr", "annotations"},
@@ -149,7 +154,9 @@ class ModelOption(Model):
         host = PROVIDER_HOSTS[self.provider]
         if self.config is None:
             self.config = ProviderConfig(endpoint_host=host or "unconfigured.invalid")
-        if host and self.config.endpoint_host != host:
+        if host and self.config.endpoint_host not in REGIONAL_PROVIDER_HOSTS.get(
+            self.provider, {host}
+        ):
             raise ValueError("Unsupported provider endpoint")
         if not host and self.config.endpoint_host != "unconfigured.invalid":
             patterns = {
@@ -216,7 +223,7 @@ class ProfileConfig(Model):
             "us.api.openai.com",
         }:
             raise ValueError("Unsupported OpenAI endpoint")
-        if self.mistral.endpoint_host != "api.mistral.ai":
+        if self.mistral.endpoint_host not in REGIONAL_PROVIDER_HOSTS["mistral"]:
             raise ValueError("Unsupported Mistral endpoint")
         return self
 
