@@ -174,14 +174,30 @@ def test_partial_failure_preserves_artifacts_and_only_releases_unsent_stage(sett
             assert list((settings.data_dir / "jobs" / result["scan_id"]).glob("*.document.json"))
 
 
-def test_atomic_budget_requires_both_calls_before_any_dispatch(settings, png):
+def test_hybrid_dispatches_both_stages_above_legacy_limits(settings, png):
     definition = configured_hybrid(settings)
     settings.max_calls = 1
+    settings.smoke_budget_eur = Decimal("0")
+    calls = []
+
+    def handler(request):
+        calls.append(request.url.path)
+        body = (
+            {"model": "synthetic", "pages": [{"markdown": "Amount due: GBP 20.00"}]}
+            if request.url.path == "/v1/ocr"
+            else response()
+        )
+        return httpx.Response(200, json=body)
+
     with client_for(
-        settings, {"hybrid-test": definition}, {"hybrid": HybridAdapter(settings)}
+        settings,
+        {"hybrid-test": definition},
+        {"hybrid": HybridAdapter(settings, httpx.MockTransport(handler))},
     ) as client:
-        assert upload(client, png, profiles=["hybrid-test"]).status_code == 422
-        assert ledger(settings) == []
+        run = finish(client, upload(client, png, profiles=["hybrid-test"]))["runs"][0]
+        assert run["state"] == "completed", run["error"]
+        assert calls == ["/v1/ocr", "/v1/responses"]
+        assert ledger(settings) == [(1, 200000), (1, 300000)]
 
 
 def test_restart_retains_dispatched_stage_and_cannot_dispatch_twice(settings, png):

@@ -1,5 +1,8 @@
 # Provider API status — 13 October 2026
 
+**Main integration — 13 October:** Latest `main` is merged into this provider branch, retaining PR #8’s glass/hotspot/Send changes and PR #7’s European endpoint support and approved removal of local spending/cumulative-call enforcement. Legacy budget-plan/cost records below remain historical evidence; they do not control admission in the updated source. This integration does not restart the live service, alter private configuration/selection or authorize provider retries.
+
+
 The current criterion is whether an API request completes, independently of extraction completeness or correctness. **31 profiles remain enabled/configured across 10 providers:** 27 completed their latest tested request without API errors, two retain an unresolved last-request failure, and two AWS profiles have verified authentication but untested processing. Fireworks and Cohere Aya were removed at Markus’s request; their historical results remain recorded separately.
 
 ## Remaining request failures
@@ -57,6 +60,6 @@ AWS’s `scanpay` SDK profile now uses the access key that Markus configured. Re
 
 ## Preservation and validation
 
-Current read-only snapshot: **2,342 reservations, 2,340 dispatched / EUR369.60 held**. Caps remain **2,350 reservations / EUR370.40**, leaving eight reservations / EUR0.80 in the existing mobile allowance. Holds are not actual provider bills. Selected profile remains `openai-mini-image-roles-v3@2-5094b6dc13ef5718`; there were no active jobs at the documentation snapshot.
+Current read-only snapshot: **2,342 reservations, 2,340 dispatched / EUR369.60 held**. Legacy plan metadata remains **2,350 reservations / EUR370.40**, with the historical eight-reservation/EUR0.80 difference. The merged source does not enforce these figures; this source integration does not restart the active process. Holds are not actual provider bills. Selected profile remains `openai-mini-image-roles-v3@2-5094b6dc13ef5718`; there were no active jobs at the documentation snapshot.
 
-This documentation update made no inference calls, runtime/configuration changes or ledger edits. Original private evidence stays ignored. Source checks remain the prior **715 passing offline tests**, **96.07% statement / 91.37% branch coverage**; no code changed or tests reran for this update. Do not automatically retry failed profiles, resume stopped historical comparisons or extend caps.
+This documentation update made no inference calls, runtime/configuration changes or ledger edits. Original private evidence stays ignored. The earlier status-only update used the 715-test checkpoint. After integrating latest main, the combined source passed **730 offline backend/evaluation tests**, **96.09% statement / 91.41% branch coverage**, and **27 native unit/recovery plus four synthetic UI tests**. Static, schema, packaging and presentation checks passed. No paid calls ran during integration. Do not automatically retry failed profiles, resume stopped historical comparisons or change private accounting records.

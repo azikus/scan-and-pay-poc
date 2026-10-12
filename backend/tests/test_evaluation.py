@@ -151,7 +151,17 @@ def test_cost_report_includes_failed_unknown_costs_and_never_scores(tmp_path):
     assert (tmp_path / "report/costs.csv").exists()
 
 
-def test_batch_halts_on_protocol_rejection_before_next_image(tmp_path, png):
+@pytest.mark.parametrize(
+    "code,status,stops",
+    [
+        ("invalid_provider_output", 400, True),
+        ("provider_quota", 429, True),
+        ("budget_exceeded", None, False),
+    ],
+)
+def test_batch_stops_on_provider_errors_but_not_legacy_local_limits(
+    tmp_path, png, code, status, stops
+):
     import httpx
 
     from evaluation.batch import new_batch, run_batch, save
@@ -186,8 +196,8 @@ def test_batch_halts_on_protocol_rejection_before_next_image(tmp_path, png):
                     {
                         "state": "failed",
                         "profile_version": "v",
-                        "error": {"code": "invalid_provider_output"},
-                        "diagnostics": {"stages": [{"usage": {"http_status": 400}}]},
+                        "error": {"code": code},
+                        "diagnostics": {"stages": [{"usage": {"http_status": status}}]},
                     }
                 ],
             },
@@ -195,9 +205,11 @@ def test_batch_halts_on_protocol_rejection_before_next_image(tmp_path, png):
 
     with httpx.Client(base_url="http://test", transport=httpx.MockTransport(handler)) as client:
         state = run_batch(tmp_path, manifest, path, client)
-    assert len(calls) == 1
-    assert [r["state"] for r in state["rows"]] == ["failed", "not_run"]
-    assert not state["complete"]
+    assert len(calls) == (1 if stops else 2)
+    assert [r["state"] for r in state["rows"]] == (
+        ["failed", "not_run"] if stops else ["failed", "failed"]
+    )
+    assert state["complete"] is not stops
 
 
 def test_cost_tariff_uses_immutable_run_snapshot_not_changed_configuration(tmp_path):

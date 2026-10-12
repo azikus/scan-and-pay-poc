@@ -97,8 +97,6 @@ def registry(settings: Settings) -> dict[str, Definition]:
             "account_access_checked_at",
             "data_terms_checked_at",
             "data_terms_note",
-            "pricing_checked_at",
-            "max_call_eur",
         ):
             if getattr(config, name) is None:
                 missing.append(name)
@@ -180,8 +178,6 @@ def registry(settings: Settings) -> dict[str, Definition]:
             "account_access_checked_at",
             "data_terms_checked_at",
             "data_terms_note",
-            "pricing_checked_at",
-            "max_call_eur",
         ):
             if getattr(config, name) is None:
                 missing.append(name)

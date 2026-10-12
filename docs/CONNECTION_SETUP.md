@@ -9,7 +9,7 @@ Implementation and checked merge: [PR #5](https://github.com/azikus/scan-and-pay
 ## Use it
 
 1. On the Mac, open `http://127.0.0.1:8000/admin`, sign in with the existing token and expand **Connection** above Next scan. This loopback URL remains usable when Wi-Fi changes.
-2. Copy the displayed **Wi-Fi / hotspot address**. In the iOS app, tap the sliders icon on capture, open **Connection**, enter the full base URL in **Wi-Fi address**, and tap **Reconnect**. Keep the existing access token. A link-local/USB address, when available, belongs in **USB address**.
+2. Connect the Mac to the iPhone’s **Personal Hotspot**. Copy the displayed **Mac address**. In the app, tap the sliders icon, open **Connection → Hotspot**, enter the full base URL in **Mac address**, and tap **Reconnect**. Keep the existing access token. There is one saved hotspot address; USB and cloud alternatives were removed on 12 October.
 3. When the Mac changes network, the backend updates its listeners automatically. The admin updates the displayed addresses. If the phone's saved URL changed, copy the new one and reconnect; automatic phone discovery is not included.
 
 On 9 October the current hotspot base URL is `http://172.20.10.2:8000`; the admin is that URL plus `/admin`. Addresses can change. The physical iPhone previously authenticated over this same-iPhone hotspot at **09:13:12 CEST**, with old USB failing and hotspot Wi-Fi succeeding. Evidence: `.local/hotspot-check-2026-10-09/phone-hotspot-check.json`. This is a real phone check, separate from the automated listener-change tests below.
@@ -34,7 +34,7 @@ The existing private `.local/mobile-live-2026-10-09/serve.py` delegates to this 
 - New listeners share the original Uvicorn application/lifespan, request state and backend runtime. Removing a listener stops new connections at that address without restarting jobs or explicitly closing accepted requests. Losing the underlying physical network can still break a phone's connection; existing app recovery remains responsible for that.
 - `GET /v1/admin/connection` is authenticated and read-only, with no-store responses. It reports `automatic`, refresh interval, last successful check, listening URLs/interface identifiers/kinds and warnings. It exposes no token or provider secret. The unauthenticated admin shell contains no addresses.
 - The admin's Connection section is collapsed initially. It refreshes through the existing polling cycle, removes outdated URLs, reports errors and clears values on disconnect. Network probing runs in the launcher, not on each HTTP read.
-- No iOS source or signing change is needed: the existing address fields, secure token and Reconnect flow are reused. No automatic phone discovery, QR pairing, firewall modification, Wi-Fi switching, inference, subscription or payment integration is introduced.
+- At the original 9 October checkpoint no iOS source or signing change was needed. The 12 October follow-up simplifies those fields to a single hotspot address (see [current iOS notes](IOS_GLASS_AND_MOTION.md)). No automatic phone discovery, QR pairing, firewall modification, Wi-Fi switching, inference, subscription or payment integration is introduced.
 
 ## Verification
 
