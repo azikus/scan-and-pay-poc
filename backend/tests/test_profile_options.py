@@ -80,14 +80,12 @@ def test_extended_provider_dimensions_rejected_before_dispatch(settings, png, pr
     assert e.value.error.code == "provider_input_limit"
 
 
-def test_documented_budget_plan_preserves_defaults_and_project_limit(settings):
-    from backend.config import BudgetPlan
+@pytest.mark.parametrize("calls,amount", [(0, "0"), (-1, "-1"), (10001, "501")])
+def test_legacy_plan_and_per_call_values_have_no_spending_limits(calls, amount):
+    from backend.config import BudgetPlan, ProviderConfig
 
-    assert settings.max_calls == 12
-    assert settings.smoke_budget_eur == Decimal("30")
-    plan = BudgetPlan(
-        reference=".local/bounded-plan.json", cumulative_call_cap=167, cumulative_hold_eur="29.05"
-    )
-    assert plan.cumulative_call_cap == 167
-    with pytest.raises(ValidationError):
-        BudgetPlan(reference="plan", cumulative_call_cap=2000, cumulative_hold_eur="501")
+    plan = BudgetPlan(reference="legacy", cumulative_call_cap=calls, cumulative_hold_eur=amount)
+    assert plan.cumulative_call_cap == calls
+    assert plan.cumulative_hold_eur == Decimal(amount)
+    config = ProviderConfig(endpoint_host="api.openai.com", max_call_eur=amount)
+    assert config.max_call_eur == Decimal(amount)

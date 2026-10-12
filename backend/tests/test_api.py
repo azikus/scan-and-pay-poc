@@ -167,7 +167,6 @@ def test_shutdown_interrupts_and_active_delete_rejected(settings, definitions, a
         "provider_unavailable",
         "unsupported_language",
         "invalid_provider_output",
-        "budget_exceeded",
     ],
 )
 def test_safe_provider_errors(settings, definitions, adapters, png, code):

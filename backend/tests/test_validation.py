@@ -1,6 +1,5 @@
 import json
 from dataclasses import replace
-from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -91,8 +90,6 @@ def test_registry_configured_enabled_and_versions(settings):
         account_access_checked_at="2026-10-02",
         data_terms_checked_at="2026-10-02",
         data_terms_note="Synthetic configuration test",
-        pricing_checked_at="2026-10-02",
-        max_call_eur=Decimal("1"),
     )
     settings.providers.openai = config
     settings.openai_key = SecretStr("local-fixture-key")
@@ -125,14 +122,12 @@ def test_resolver_invalid_and_mixed_profiles(settings, definitions):
         resolve(Options(mode="extract", profiles=["not-known"]), "image/png", definitions)
 
 
-def test_config_refuses_endpoints_bad_tokens_and_excess_budget():
+def test_config_refuses_endpoints_and_bad_tokens():
     for provider in ("openai", "mistral"):
         with pytest.raises(ValidationError):
             ProfileConfig(**{provider: ProviderConfig(endpoint_host="attacker.invalid")})
     with pytest.raises(ValidationError):
         Settings(token=SecretStr("short"))
-    with pytest.raises(ValidationError):
-        Settings(token=SecretStr("x" * 32), smoke_budget_eur=Decimal("31"))
 
 
 def test_env_config_without_network(tmp_path, monkeypatch):

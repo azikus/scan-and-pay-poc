@@ -10,6 +10,12 @@ This file supersedes prospective wording and operational snapshots in the dated 
 - The 12 October repository import places editable HTML, theme, motion, reviewed assets and reproducible build/serve/export tooling under [presentation/](../presentation/README.md). The normal build excludes the real invoice gallery; a separate ignored local edition preserves it. The original external deck is untouched.
 - [PRESENTATION_CONTENT.md](PRESENTATION_CONTENT.md) is generated from the HTML source. [PRESENTATION_EVIDENCE.md](PRESENTATION_EVIDENCE.md) records authoring sources and revisions. Both belong in Git alongside the deck. No later application development is part of this import.
 
+## Source follow-up — 12 October
+
+PR #7 supports operator-selected European OpenAI/Mistral endpoints while keeping global profiles usable without verified regional approval. Supplier controls and dated checks are documented in [EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md). Markus explicitly approved removal of local spending/cumulative-call enforcement and accepted its risk. This source no longer requires a matching financial plan or pricing/ceiling metadata for readiness or request admission. Existing private records and profile serialization are retained. Authentication, queue capacity and idempotent recovery still apply. These changes are in the PR; the running service and its private configuration have not been redeployed by this revision. The operational snapshot below is dated history, not a limit imposed by the updated source.
+
+Source verification: **705 offline backend/evaluation tests pass**, with **96.05% statement / 91.28% branch** domain coverage. Ruff lint/format, strict mypy, unchanged generated API contracts, admin JavaScript syntax and package builds pass. Regressions cover missing cost metadata, comparisons and both hybrid stages above prior limits, legacy configuration compatibility, preserved existing records and evaluation continuation. Production source has no reads of the old cumulative limits or local-limit rejection/stop conditions. No provider inference, service restart or deployment ran for this revision.
+
 ## Current private state
 
 Read-only snapshot on 12 October: **2,273 dispatched reservations / €351.95 held**. The current cumulative limits are **2,286 calls / €353.25**, leaving at most **13 calls / €1.30** at this snapshot, within the **€500 project cap**. These conservative holds are not actual provider bills; method-specific stage counts and ceilings determine how many scans fit.

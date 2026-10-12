@@ -14,7 +14,7 @@ from backend.store import private_write, utcnow
 from evaluation.corpus import validate_manifest
 
 TERMINAL = {"completed", "partially_completed", "failed", "interrupted"}
-STOP = {"provider_auth", "provider_quota", "budget_exceeded"}
+STOP = {"provider_auth", "provider_quota"}
 
 
 def save(path: Path, value: Any) -> None:

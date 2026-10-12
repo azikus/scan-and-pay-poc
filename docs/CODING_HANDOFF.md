@@ -1,5 +1,9 @@
 # Coding handoff — continue here
 
+## Latest source follow-up — 12 October
+
+Markus authorized PR #7 to support explicitly configured European OpenAI/Mistral endpoints without blocking profiles for missing regional account approval. Supplier eligibility and training controls are documented in [EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md). He subsequently explicitly approved removing local spending and cumulative-call enforcement, including configuration-plan matching and pricing/ceiling prerequisites. Legacy configuration and retained accounting records remain compatible, but they do not control request admission. Authentication, explicit operator enablement, queue capacity, supported destinations and one-attempt/idempotency behavior remain. This supersedes earlier financial-limit instructions for this source change. Keep the actual service and private selection intact; the source revision does not deploy itself or authorize restarting interrupted evaluations.
+
 ## Current scope — 12 October 2026
 
 Read [CURRENT_STATUS.md](CURRENT_STATUS.md) first. Application PRs #2–#5 are merged. The initial presentation was delivered and revised with Markus on 9 October; it is now maintained in [presentation/](../presentation/README.md). Earlier instructions to start a presentation chat or treat the deck as unstarted are historical.

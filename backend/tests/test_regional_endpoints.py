@@ -1,7 +1,6 @@
 """Regional routing works without a backend account-approval attestation."""
 
 import json
-from decimal import Decimal
 
 import httpx
 import pytest
@@ -30,8 +29,6 @@ def configured_option(settings, provider, host, operation):
             account_access_checked_at="2026-10-12",
             data_terms_checked_at="2026-10-12",
             data_terms_note="Synthetic fixture; no regional approval claimed.",
-            pricing_checked_at="2026-10-12",
-            max_call_eur=Decimal("1"),
         ),
     )
     settings.providers = ProfileConfig.model_validate(settings.providers.model_dump())

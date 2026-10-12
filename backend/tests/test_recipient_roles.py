@@ -103,25 +103,16 @@ def test_role_prompt_cannot_be_attached_to_unsupported_operation(operation, prot
         )
 
 
-def test_larger_cumulative_history_still_requires_explicit_bounded_plan(settings):
-    plan = BudgetPlan(
-        reference=".local/new-full-corpus-plan.json",
-        cumulative_call_cap=2043,
-        cumulative_hold_eur="391.10",
-    )
-    assert plan.cumulative_call_cap == 2043
-    for calls, money in [(10001, "391.10"), (2043, "500.01")]:
-        with pytest.raises(ValidationError):
-            BudgetPlan(reference="synthetic", cumulative_call_cap=calls, cumulative_hold_eur=money)
+@pytest.mark.parametrize("with_plan", [False, True])
+def test_legacy_runtime_limits_need_no_plan_or_matching_values(settings, with_plan):
     data = settings.model_dump()
-    data.update(max_calls=2043, smoke_budget_eur=Decimal("391.10"))
-    with pytest.raises(ValidationError):
-        Settings.model_validate(data)
-    data["providers"]["budget_plan"] = plan.model_dump()
-    assert Settings.model_validate(data).max_calls == 2043
-    data["max_calls"] = 2044
-    with pytest.raises(ValidationError):
-        Settings.model_validate(data)
+    data.update(max_calls=10001, smoke_budget_eur=Decimal("501"))
+    if with_plan:
+        data["providers"]["budget_plan"] = BudgetPlan(
+            reference="legacy", cumulative_call_cap=1, cumulative_hold_eur="0"
+        ).model_dump()
+    assert Settings.model_validate(data).max_calls == 10001
+    assert Settings.model_validate(data).smoke_budget_eur == Decimal("501")
 
 
 @pytest.mark.parametrize("version", ["5", "6"])
