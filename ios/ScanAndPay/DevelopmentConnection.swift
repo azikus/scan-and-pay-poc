@@ -22,9 +22,10 @@
     }
     @MainActor func apply(to model: ScanSession) async {
       do {
-        let cable = addresses.first(where: ScanSession.isCable) ?? ""
-        let wifi = addresses.first(where: { !ScanSession.isCable($0) }) ?? ""
-        try model.configureRoutes(cable: cable, wifi: wifi, token: token)
+        guard let address = addresses.first(where: ScanSession.isHotspotAddress) else {
+          throw ClientFailure("Missing hotspot address.")
+        }
+        try model.configureHotspot(address: address, token: token)
         await model.reconnect()
         let report: [String: Any] = [
           "selected_address": model.address, "attempts": model.connectionAttempts,

@@ -308,34 +308,52 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertNil(model.pending)
     XCTAssertTrue(mac.requests.isEmpty)
   }
-  func testReconnectTriesCableFirstAndDoesNotUpload() async throws {
+  func testHotspotMigrationPreservesWiFiAndDropsAlternatives() throws {
+    let name = "hotspot-migration-" + UUID().uuidString
+    let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
+    defer { defaults.removePersistentDomain(forName: name) }
+    defaults.set("http://169.254.1.2:8000", forKey: "backendURL")
+    defaults.set("http://169.254.1.2:8000", forKey: "backendCableURL")
+    defaults.set("http://172.20.10.2:8000", forKey: "backendWiFiURL")
+    let model = ScanSession(fixtureMode: true, defaults: defaults)
+    XCTAssertEqual(model.hotspotAddress, "http://172.20.10.2:8000")
+    XCTAssertEqual(model.address, model.hotspotAddress)
+    XCTAssertNil(defaults.string(forKey: "backendCableURL"))
+    XCTAssertNil(defaults.string(forKey: "backendWiFiURL"))
+    XCTAssertEqual(ScanSession(fixtureMode: true, defaults: defaults).address, model.address)
+    defaults.removeObject(forKey: "backendHotspotURL")
+    defaults.set("https://example.com", forKey: "backendURL")
+    XCTAssertTrue(ScanSession(fixtureMode: true, defaults: defaults).address.isEmpty)
+    XCTAssertFalse(ScanSession.isHotspotAddress("http://169.254.1.2:8000"))
+    XCTAssertFalse(ScanSession.isHotspotAddress("https://example.com"))
+  }
+  func testReconnectUsesOnlyHotspotAndDoesNotUpload() async throws {
     let (model, mac, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
-    model.cableAddress = "http://169.254.1.2:8000"
-    model.wifiAddress = "http://192.168.1.2:8000"
+    model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
-    XCTAssertEqual(model.address, model.cableAddress)
-    XCTAssertEqual(model.connectionStatus, "Connected via USB")
-    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["169.254.1.2"])
+    XCTAssertEqual(model.address, model.hotspotAddress)
+    XCTAssertEqual(model.connectionStatus, "Connected via hotspot")
+    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["172.20.10.2"])
     XCTAssertTrue(
       mac.requests.allSatisfy { $0.httpMethod == "GET" && $0.url?.path == "/v1/profiles" })
     XCTAssertEqual(model.phase, .preview)
     XCTAssertNotNil(model.image)
     XCTAssertNil(model.pending)
   }
-  func testReconnectFallsBackToWiFiAndFailureKeepsAddress() async throws {
+  func testReconnectFailureDoesNotTryPreviousAddress() async throws {
     let (model, mac, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
-    model.cableAddress = "http://169.254.1.2:8000"
-    model.wifiAddress = "http://192.168.1.2:8000"
-    mac.blockedHosts = ["169.254.1.2"]
+    model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
-    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["169.254.1.2", "192.168.1.2"])
-    XCTAssertEqual(model.connectionStatus, "Connected via Wi-Fi")
-    XCTAssertEqual(model.address, model.wifiAddress)
-    mac.blockedHosts.insert("192.168.1.2")
+    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["172.20.10.2"])
+    XCTAssertEqual(model.connectionStatus, "Connected via hotspot")
+    XCTAssertEqual(model.address, model.hotspotAddress)
+    mac.blockedHosts.insert("172.20.10.2")
+    model.address = "http://169.254.1.2:8000"
     await model.reconnect()
-    XCTAssertEqual(model.address, model.wifiAddress)
+    XCTAssertEqual(model.address, "http://169.254.1.2:8000")
+    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["172.20.10.2", "172.20.10.2"])
     XCTAssertTrue(model.connectionStatus?.hasPrefix("Couldn’t reconnect") == true)
     XCTAssertFalse(model.reconnecting)
     XCTAssertTrue(mac.requests.allSatisfy { $0.httpMethod == "GET" })
@@ -352,11 +370,10 @@ private final class FakeMac: @unchecked Sendable {
     try await wait { model.phase == .recovery }
     let frozen = try XCTUnwrap(model.pending)
     let before = mac.requests.count
-    model.cableAddress = "http://169.254.1.2:8000"
-    model.wifiAddress = "http://192.168.1.2:8000"
+    model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
     let saved = try XCTUnwrap(PendingStore.read(from: file))
-    XCTAssertEqual(saved.address, model.cableAddress)
+    XCTAssertEqual(saved.address, model.hotspotAddress)
     XCTAssertEqual(saved.key, frozen.key)
     XCTAssertEqual(saved.image, frozen.image)
     XCTAssertEqual(saved.options, frozen.options)
@@ -379,7 +396,7 @@ private final class FakeMac: @unchecked Sendable {
     model.send()
     try await wait { model.phase == .recovery }
     let key = model.pending?.key
-    model.cableAddress = "http://169.254.1.2:8000"
+    model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
     XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 1)
     XCTAssertNil(model.pending?.scanID)
@@ -389,6 +406,6 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(
       mac.requests.filter { $0.httpMethod == "POST" }.last?.value(
         forHTTPHeaderField: "Idempotency-Key"), key)
-    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.last?.url?.host, "169.254.1.2")
+    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.last?.url?.host, "172.20.10.2")
   }
 }

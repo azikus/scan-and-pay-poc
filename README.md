@@ -16,7 +16,7 @@ The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and
 
 **Presentation:** the approved 25-slide reveal.js deck now lives in [presentation/](presentation/README.md), with local build/serve instructions, an offline audience export and separate private invoice assets. The initial deck is delivered; its [content](docs/PRESENTATION_CONTENT.md) and [evidence](docs/PRESENTATION_EVIDENCE.md) are versioned alongside it. **Next:** agree the remaining iOS improvements/testing, then backend/admin work, Android and both-platform testing, and the comprehensive final presentation/embeddable HTML. See [current status](docs/CURRENT_STATUS.md), [coding handoff](docs/CODING_HANDOFF.md) and [roadmap](docs/ROADMAP.md).
 
-**iOS polish (12 October):** native Liquid Glass controls and capture/crop transitions are implemented, with accessibility and iOS 18 fallbacks. The physical iPhone authenticated over the hotspot; see [UI and connectivity notes](docs/IOS_GLASS_AND_MOTION.md).
+**iOS polish (12 October):** native Liquid Glass controls and capture/crop transitions are implemented, with accessibility and iOS 18 fallbacks. Connectivity is now limited to one saved hotspot address and Reconnect. The physical iPhone authenticated over the hotspot; see [UI and connectivity notes](docs/IOS_GLASS_AND_MOTION.md).
 
 ## Repository layout
 

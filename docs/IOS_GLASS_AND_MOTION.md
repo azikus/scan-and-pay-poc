@@ -12,28 +12,25 @@ Markus requested native Liquid Glass, screen transitions (especially cropping), 
 
 ## Current connectivity
 
-| Option | Current client support | Dependency |
-| --- | --- | --- |
-| iPhone Personal Hotspot | Verified on the physical phone on 12 October | Mac connected to that hotspot; backend/Mac awake |
-| Shared Wi-Fi | Saved private IP or `.local` hostname | Both devices can reach each other; some guest networks isolate clients |
-| USB | Saved link-local URL, attempted first when configured | An actual working network interface over the cable; plugging in alone does not guarantee one |
-| Hosted HTTPS backend | URL validation and authenticated requests already support it | A deployed compatible backend, valid HTTPS and token; setup UI currently calls this the Wi-Fi address |
+**Latest decision:** Markus requested only the working iPhone Personal Hotspot solution. The app now has one **Hotspot → Mac address** field and Reconnect checks that address only. USB configuration/fallback and hosted endpoint selection are removed from the current setup. Existing saved local Wi-Fi addresses migrate to the hotspot setting; obsolete USB/Wi-Fi keys are removed. Public HTTPS and link-local URLs are rejected by the new setting. Low-level URL support remains for safely recovering existing saved drafts, without offering other connection methods.
 
-No automatic phone discovery is implemented. The Mac launcher follows eligible physical local IPv4 addresses. The phone retains editable addresses and Reconnect. Drafts are tied to the backend identity, so a new cloud server will not silently take over an existing draft.
+The app cannot identify whether a private address belongs to a hotspot or another local network. It accepts a private IPv4 address or `.local` hostname; connect the Mac to this iPhone’s Personal Hotspot before using it. There is no automatic phone discovery. The Mac launcher still follows local interface changes, and the admin hides link-local/USB choices. Draft identity checks, frozen requests and saved confirmation values remain intact.
 
-On 12 October, the running backend authenticated over loopback and `http://172.20.10.2:8000`. The phone was configured for this hotspot route and reported **Wi-Fi connected at 21:04:02 UTC / 22:04:02 London time**. This was an authenticated profile read, not an invoice submission. Its diagnostic contains only connection information at `.local/ios-glass-2026-10-12/phone-hotspot-check.json`. Phone invoice/draft files were not copied or cleared. This setup selects the hotspot alone; a USB URL can be added again in Connection settings when needed.
+On 12 October, the running backend authenticated over loopback and `http://172.20.10.2:8000`. The phone was configured for this hotspot route and reported **Wi-Fi connected at 21:04:02 UTC / 22:04:02 London time**. This was an authenticated profile read, not an invoice submission. Its diagnostic contains only connection information at `.local/ios-glass-2026-10-12/phone-hotspot-check.json`. Phone invoice/draft files were not copied or cleared. This dated verification preceded the hotspot-only UI simplification.
 
 Addresses may change after reconnecting. Use the admin Connection panel to obtain the current URL and update the phone when necessary. Keep the Mac awake during the demo. The existing backend process and private state remain in place.
 
-## Hosting recommendation
+## Hosting deferred
 
-Use the verified hotspot for now. For independent phone use without the Mac, Railway is the simpler candidate for the next hosting task: it documents FastAPI deployment and persistent volumes. This app needs a single API/worker owner and durable storage for SQLite, images and provider artifacts. Use a persistent volume, not an ephemeral container filesystem. Railway volumes currently cannot be combined with replicas. [FastAPI deployment](https://docs.railway.com/guides/fastapi), [volume reference](https://docs.railway.com/volumes/reference).
+Keep using the hotspot and local Mac backend. The earlier Railway/Hostinger assessment is deferred; no hosting account, subscription, endpoint, data migration or deployment was created. Revisit hosting as a separate task if independent phone use is needed.
 
-Hostinger is also possible via a Linux VPS. Its published Python support is VPS-only and self-managed, so we would own system updates, service/container management, TLS, backups and monitoring. [Hostinger language/framework support](https://www.hostinger.com/support/which-programming-languages-and-frameworks-are-supported-at-hostinger/).
+## Hotspot-only follow-up verification
 
-Before deploying, choose the account/region, prepare persistent paths and provider credentials, use a Linux-compatible Uvicorn entrypoint (not the macOS network launcher), and review the shared local token/admin exposure for the hosted environment. Treat any data migration and retained scans explicitly. Hosting charges are separate from provider-call allowances. No hosting account, subscription, public endpoint, data migration or deployment was created in this task.
+- All **24 native unit/recovery tests passed** on iOS 26.2, including saved-address migration, removal of old route keys, no fallback after a failed check, preservation of frozen confirmations and rejection of a different backend.
+- The signed update was installed and opened on the physical iPhone. It reported a single successful **hotspot** attempt at **21:31:30 UTC / 22:31:30 London time** on 12 October, using `http://172.20.10.2:8000`. Private diagnostic: `.local/hotspot-only-2026-10-12/phone-check.json`.
+- Swift formatting, JavaScript syntax and diff checks passed. The running admin serves the updated asset without a backend restart. This follow-up made no inference call and did not change budgets, provider selection or saved draft contents.
 
-## Verification
+## Earlier Liquid Glass verification
 
 - The iOS 26.2 iPhone 16 Pro simulator passed all **23 native unit/recovery tests and both existing UI tests**, including JSON wrapping, editable fields, confirmation/reset and saved-value behavior. Synthetic review/confirmation/capture screenshots were inspected.
 - The new crop regression test compiles. Its automated execution and the additional iOS 18 run were blocked before test startup by Xcode simulator service-hub/runner errors. These are not recorded as passing tests. A clean simulator restart allowed direct UI verification of capture → crop → Rotate → Reset crop → Use crop → Edit crop on iOS 26.2; controls re-enabled after rotation and the image stayed in bounds. Screenshot: `manual-crop.png`. Direct iOS 18.6 inspection also verified rotation and the material fallback. A primary-action contrast issue was corrected and visually rechecked in `manual-ios18-final.png`.

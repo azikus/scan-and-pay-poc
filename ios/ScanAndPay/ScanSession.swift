@@ -15,8 +15,7 @@ import SwiftUI
   @Published var saving = false
   @Published var complete = false
   @Published var address = ""
-  @Published var cableAddress = ""
-  @Published var wifiAddress = ""
+  @Published var hotspotAddress = ""
   @Published private(set) var reconnecting = false
   @Published private(set) var connectionStatus: String?
   private(set) var connectionAttempts = [[String: String]]()
@@ -36,11 +35,15 @@ import SwiftUI
     self.clientSession = clientSession
     self.pendingFile = pendingFile
     self.fixtureMode = fixtureMode
-    address = defaults.string(forKey: "backendURL") ?? ""
-    cableAddress =
-      defaults.string(forKey: "backendCableURL") ?? (Self.isCable(address) ? address : "")
-    wifiAddress =
-      defaults.string(forKey: "backendWiFiURL") ?? (Self.isCable(address) ? "" : address)
+    // Migrate the working Wi-Fi URL, never the former USB or hosted route.
+    hotspotAddress =
+      ["backendHotspotURL", "backendWiFiURL", "backendURL"]
+      .compactMap { defaults.string(forKey: $0) }.first(where: Self.isHotspotAddress) ?? ""
+    address = hotspotAddress
+    defaults.set(hotspotAddress, forKey: "backendHotspotURL")
+    defaults.set(address, forKey: "backendURL")
+    defaults.removeObject(forKey: "backendCableURL")
+    defaults.removeObject(forKey: "backendWiFiURL")
     if !fixtureMode, let stored = PendingStore.read(from: pendingFile),
       let image = UIImage(data: stored.image)
     {
@@ -94,21 +97,27 @@ import SwiftUI
     self.token = token
     defaults.set(address, forKey: "backendURL")
   }
-  static func isCable(_ address: String) -> Bool {
-    URL(string: address)?.host?.hasPrefix("169.254.") == true
+  // The app cannot identify the Wi-Fi SSID. Accept a local Mac address, with one
+  // saved endpoint for the Personal Hotspot workflow; no USB/cloud fallback.
+  static func isHotspotAddress(_ address: String) -> Bool {
+    guard let url = URL(string: address), url.scheme == "http", let host = url.host else {
+      return false
+    }
+    let octets = host.split(separator: ".").compactMap { Int($0) }
+    return host.hasSuffix(".local")
+      || (octets.count == 4 && octets.allSatisfy { (0...255).contains($0) }
+        && (octets[0] == 10 || octets[0] == 192 && octets[1] == 168
+          || octets[0] == 172 && (16...31).contains(octets[1])))
   }
-  func configureRoutes(cable: String, wifi: String, token: String) throws {
+  func configureHotspot(address: String, token: String) throws {
     guard !processing, !saving, !reconnecting else { return }
-    let cable = cable.trimmingCharacters(in: .whitespacesAndNewlines)
-    let wifi = wifi.trimmingCharacters(in: .whitespacesAndNewlines)
-    let routes = [cable, wifi].filter { !$0.isEmpty }
-    guard let first = routes.first else { throw ClientFailure("Enter a Mac address.") }
-    for route in routes { _ = try BackendClient(address: route, token: token) }
-    try configure(address: routes.contains(address) ? address : first, token: token)
-    cableAddress = cable
-    wifiAddress = wifi
-    defaults.set(cable, forKey: "backendCableURL")
-    defaults.set(wifi, forKey: "backendWiFiURL")
+    let address = address.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard Self.isHotspotAddress(address) else {
+      throw ClientFailure("Enter the Mac’s local HTTP address from the admin Connection panel.")
+    }
+    try configure(address: address, token: token)
+    hotspotAddress = address
+    defaults.set(address, forKey: "backendHotspotURL")
     connectionStatus = nil
   }
   func reconnect() async {
@@ -125,13 +134,8 @@ import SwiftUI
       clientSession
       ?? URLSession(configuration: config, delegate: NoRedirects(), delegateQueue: nil)
     defer { if clientSession == nil { probe.invalidateAndCancel() } }
-    var seen = Set<String>()
-    let routes = [
-      ("USB", cableAddress), ("Wi-Fi", wifiAddress),
-      (Self.isCable(address) ? "USB" : "Wi-Fi", address),
-    ]
-    .filter { !$0.1.isEmpty && seen.insert($0.1).inserted }
-    var lastError = "Enter the Mac addresses in Connection settings."
+    let routes = Self.isHotspotAddress(hotspotAddress) ? [("hotspot", hotspotAddress)] : []
+    var lastError = "Enter the Mac’s hotspot address in Connection settings."
     for (label, route) in routes {
       guard identity == generation, !Task.isCancelled else {
         connectionStatus = nil

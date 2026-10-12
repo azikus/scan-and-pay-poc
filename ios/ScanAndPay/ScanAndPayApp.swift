@@ -561,11 +561,10 @@ struct CheckboxToggle: ToggleStyle {
 struct ConnectionSettings: View {
   @ObservedObject var model: ScanSession
   @Environment(\.dismiss) private var dismiss
-  @State private var cable = ""
-  @State private var wifi = ""
+  @State private var hotspot = ""
   @State private var token = ""
   @State private var message: String?
-  private func save() throws { try model.configureRoutes(cable: cable, wifi: wifi, token: token) }
+  private func save() throws { try model.configureHotspot(address: hotspot, token: token) }
   var body: some View {
     NavigationStack {
       Form {
@@ -585,15 +584,12 @@ struct ConnectionSettings: View {
             .accessibilityIdentifier("reconnect-settings")
           if let status = model.connectionStatus { Text(status).font(.subheadline) }
         } footer: {
-          Text("Tries USB first, then Wi-Fi.")
+          Text("Connect the Mac to this iPhone’s Personal Hotspot.")
         }
-        Section("Mac addresses") {
-          TextField("USB address", text: $cable).keyboardType(.URL)
+        Section("Hotspot") {
+          TextField("Mac address", text: $hotspot).keyboardType(.URL)
             .textInputAutocapitalization(.never).autocorrectionDisabled()
-            .accessibilityIdentifier("usb-address")
-          TextField("Wi-Fi address", text: $wifi).keyboardType(.URL)
-            .textInputAutocapitalization(.never).autocorrectionDisabled()
-            .accessibilityIdentifier("wifi-address")
+            .accessibilityIdentifier("hotspot-address")
           SecureField("Access token", text: $token).textInputAutocapitalization(.never)
         }.disabled(model.reconnecting)
         if let message { Text(message).foregroundStyle(.orange) }
@@ -609,8 +605,7 @@ struct ConnectionSettings: View {
         ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
       }
     }.onAppear {
-      cable = model.cableAddress
-      wifi = model.wifiAddress
+      hotspot = model.hotspotAddress
       token = model.token
     }
   }

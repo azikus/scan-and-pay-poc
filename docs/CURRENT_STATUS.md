@@ -4,7 +4,7 @@ This file supersedes prospective wording and operational snapshots in the dated 
 
 ## Latest follow-up
 
-Markus requested the bounded iOS Liquid Glass/motion update and hotspot/hosting assessment. See [implementation and connection evidence](IOS_GLASS_AND_MOTION.md). This begins iOS polish without starting cloud deployment, new inference, Android or the final website milestone.
+Markus requested the bounded iOS Liquid Glass/motion update and hotspot/hosting assessment. See [implementation and connection evidence](IOS_GLASS_AND_MOTION.md). Markus then narrowed connectivity to the working hotspot only: one saved Mac address, no USB fallback or hosted endpoint selection. This begins iOS polish without starting cloud deployment, new inference, Android or the final website milestone.
 
 ## Code and presentation
 
@@ -26,7 +26,7 @@ A separately authorized comparison run on 9 October was stopped at Markus's expl
 
 ## Device and runtime
 
-The managed launcher is `.venv/bin/scanpay-serve`; the private `serve.py` delegates to it. It follows local interface changes automatically while keeping a single backend owner. The app uses saved editable URLs, not automatic discovery. Do not restart an active extraction job or launch a second owner against the same database.
+The managed launcher is `.venv/bin/scanpay-serve`; the private `serve.py` delegates to it. It follows local interface changes automatically while keeping a single backend owner. The app now uses one saved editable hotspot address, not automatic discovery. The hotspot-only build authenticated on the physical iPhone at 21:31:30 UTC on 12 October using `http://172.20.10.2:8000`; 24 offline native unit/recovery tests passed. Do not restart an active extraction job or launch a second owner against the same database.
 
 Physical-phone checks on 9 October verified USB at 11:17:20 UTC, hotspot Wi-Fi at 11:21:41 UTC, and ordinary Wi-Fi at 18:18:55 UTC. The last saved phone URL was `http://192.168.1.134:8000`. These are dated successful checks, not a guarantee of today's connectivity or IP address. Evidence is under `.local/phone-reconnect-2026-10-09/` and `.local/phone-wifi-reconnect-w0txfh0w/`. The later idle restart applied the authorized allowance; loopback and Wi-Fi authenticated reads returned 200.
 
