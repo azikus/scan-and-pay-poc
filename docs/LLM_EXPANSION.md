@@ -17,7 +17,7 @@ The existing option registry already supports multiple independently versioned m
 | OpenAI | `gpt-6-luna`, `gpt-6.1-sol`, `gpt-6-astra` | Efficient current model, balanced control, stronger control |
 | Google Gemini | `gemini-3.8-flash`, `gemini-3.1-pro-preview` | Broader Flash and Pro coverage |
 | Anthropic | `claude-haiku-5-5`, `claude-sonnet-5-5`, `claude-opus-5-5` | Current small, medium and stronger choices |
-| Mistral | `ministral-8b-2512`, `mistral-medium-3-5`, `mistral-large-4` | Smaller hosted model, medium control, larger control |
+| Mistral | `ministral-8b-2512`, `mistral-medium-2604`, `mistral-large-4` | Smaller hosted model, medium control, larger control |
 | Together | `moonshotai/Kimi-K3`, `MiniMaxAI/MiniMax-M3` | Two previously uncovered vision model families through an existing recipient |
 | Fireworks | `accounts/fireworks/models/kimi-k2p5` | New hosted recipient; separate Kimi model/version |
 
@@ -59,3 +59,9 @@ Official documentation checked on 12 October; account availability, residency an
 Completed in this isolated worktree: **720 offline tests passed**; domain/orchestration **96.09% statement / 91.43% branch coverage** (operational CLI/export/reporting entry points separately excluded by the existing gate). Ruff lint/format, strict mypy on 43 source files, JavaScript syntax, provider-aware admin label assertions, diff checks and contract regeneration passed. Generated contracts are unchanged. The suite blocks socket connections and uses synthetic mock transports/temp databases. Run it from the worktree with `python -m pytest` so the shared editable environment imports this checkout.
 
 Tests cover all 14 presets through configured profile selection and one mocked extraction; Fireworks authentication/path/schema and pre-dispatch image boundary; new-recipient refusal/error/truncation/model/usage handling; opt-in Claude thinking and tool rejection; disabled presets and preservation of existing profile snapshots. Synthetic responses demonstrate application compatibility, not real API availability, invoice accuracy or latency. The original checkout's pending iOS files, private state and historical evidence were not edited.
+
+## Access activation authorized — 12 October
+
+Markus subsequently requested the missing-access list and enabling models from existing providers. Read-only authenticated metadata checks succeeded for all 13 new choices on OpenAI, Gemini, Anthropic, Mistral and Together. Fireworks requires its own `FIREWORKS_API_KEY` in the original root `.env`; no key needs replacing for the other providers. Metadata access does not establish successful invoice extraction, remaining provider credit or account-specific throughput. Mistral Medium uses its listed dated ID `mistral-medium-2604` instead of the moving family alias.
+
+Private additive configuration, pricing records, authorization amendment and backups live under the original checkout's `.local/llm-expansion-2026-10-12/`. Activation is limited to explicit mobile Sends within the existing 2,286 calls / EUR353.25 limits. New profiles remain `live_validated: false`; the original selected GPT-4.1 mini profile/version and existing option snapshots stay intact. This authorizes an idle backend restart from this worktree's source with the original private state, not a branch merge or model experiment. Never archive this worktree while the private launcher refers to it. The managed runtime activation result will be recorded after verification.

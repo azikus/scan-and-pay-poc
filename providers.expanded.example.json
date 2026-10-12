@@ -112,7 +112,7 @@
     },
     "mistral-medium-expanded": {
       "provider": "mistral",
-      "model": "mistral-medium-3-5",
+      "model": "mistral-medium-2604",
       "operation": "vision",
       "config": {
         "endpoint_host": "api.mistral.ai",
