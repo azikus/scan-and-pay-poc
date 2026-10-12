@@ -4,13 +4,19 @@ Markus requested native Liquid Glass, screen transitions (especially cropping), 
 
 ## UI changes
 
-**Scan-screen refinement:** Markus clarified that Liquid Glass should replace the large black scan-screen backgrounds, not only style individual buttons. Capture now shows the camera edge to edge behind a floating light glass header and capture/import panel. These use native iOS 26 glass, regular material on older systems, and opaque light surfaces with Reduce Transparency. Controls inside each panel remain plain to avoid stacking glass layers. The original dark Azikus mark is used on the light header. Crop and document-review backgrounds remain unchanged; capture pixels and upload behavior are unchanged.
+**Scan-screen refinement:** Markus clarified that Liquid Glass should replace the large black scan-screen backgrounds, not only style individual buttons. Capture now shows the camera edge to edge behind a floating light glass header and capture/import panel. These use native iOS 26 glass, regular material on older systems, and opaque light surfaces with Reduce Transparency. Controls inside each panel remain plain to avoid stacking glass layers. The original dark Azikus mark is used on the light header. The subsequent whole-flow refinement below extends this treatment beyond capture; capture pixels and upload behavior are unchanged.
 
 - Native iOS 26 `glassEffect` on secondary controls and tinted primary actions. iOS 18–25 uses material secondary controls and a solid ice-blue primary action. Reduce Transparency uses solid surfaces. The Azikus artwork and existing Hanken Grotesk fallback remain unchanged.
 - Capture/crop/document transitions use a brief spring with a shared document frame between crop and preview. Review/confirmation retain native sheet presentation. Processing fields animate into the ready review.
 - Crop rotation animates one quarter-turn, fits the rotated image inside its canvas, then commits the same pixel-preserving rotation. Actions wait until that transition finishes. Reset eases back to the full image; a rule-of-thirds guide appears while adjusting the crop.
 - Reduce Motion replaces spatial transitions with a short fade and performs crop rotation/reset immediately. Existing shimmer and completion reduced-motion behavior remains.
 - Extraction, confirmation, persistence, idempotency, review rules and payment simulation are unchanged. Nothing is sent before explicit Send.
+
+## Glass throughout the flow
+
+Markus then requested the same treatment everywhere, specifically Adjust image and Ready to send. Both now use the shared glass panels and a soft, image-derived backdrop instead of black chrome. The actual document remains sharp and fitted within the available space; the crop mask still darkens only the excluded pixels. Crop handles gain a slate outline for contrast on white paper. Rotation, crop coordinates, pixel output and gestures are unchanged.
+
+Review and Pay confirmation use glass header/action panels with legible fields between them. Connection settings, JSON navigation and the image viewer use the light backdrop and native navigation controls; the selectable JSON text retains an opaque readable surface. Completion uses the same light/glass palette and existing celebration, with reduced-motion behavior intact. The app uses a consistent light appearance. iOS 26 uses native glass, earlier iOS uses regular material, and Reduce Transparency uses solid panels without the blurred document backdrop.
 
 ## Current connectivity
 
@@ -25,6 +31,13 @@ Addresses may change after reconnecting. Use the admin Connection panel to obtai
 ## Hosting deferred
 
 Keep using the hotspot and local Mac backend. The earlier Railway/Hostinger assessment is deferred; no hosting account, subscription, endpoint, data migration or deployment was created. Revisit hosting as a separate task if independent phone use is needed.
+
+## Whole-flow glass verification
+
+- **27 tests passed** on iOS 26.2: 24 native unit/recovery tests and all three UI flows. Coverage includes saved-address migration, frozen recovery, crop rotation/reset/retake, JSON, field editing and confirmation/reset.
+- Inspected synthetic iOS 26.2 screenshots of Adjust image, review, confirmation and completion; manually checked Adjust image → Ready to send on iOS 18.6 to verify the fallback and sharp document rendering.
+- Signed build passed; the app was installed and opened on the physical iPhone. Its authenticated hotspot check succeeded at **21:41:33 UTC / 22:41:33 London time** on 12 October. Existing phone data stayed in place; no agent invoice submission or budget/configuration change.
+- Evidence is private under `.local/glass-flow-2026-10-12/`, including the test log, exported screenshots and narrow connection diagnostic. Swift lint and diff checks pass.
 
 ## Scan-panel follow-up verification
 

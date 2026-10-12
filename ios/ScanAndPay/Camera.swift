@@ -168,8 +168,9 @@ struct ManualCrop: View {
       HStack {
         Text("Adjust image").font(Brand.font(24, .semibold))
         Spacer()
-        Button("Retake", action: retake).buttonStyle(GlassControlButton()).tint(Brand.ice)
-      }.padding(.horizontal, 22)
+        Button("Retake", action: retake).buttonStyle(.plain).frame(minHeight: 44)
+      }.padding(.horizontal, 18).padding(.vertical, 10).modifier(GlassPanel())
+        .padding(.horizontal, 16)
       GeometryReader { geo in
         let factor = min(geo.size.width / image.size.width, geo.size.height / image.size.height)
         let size = CGSize(width: image.size.width * factor, height: image.size.height * factor)
@@ -183,7 +184,7 @@ struct ManualCrop: View {
                 x: crop.minX * size.width, y: crop.minY * size.height,
                 width: crop.width * size.width, height: crop.height * size.height))
           }.fill(.black.opacity(0.55), style: FillStyle(eoFill: true)).allowsHitTesting(false)
-          Rectangle().stroke(Brand.ice, lineWidth: 1).contentShape(Rectangle()).frame(
+          Rectangle().stroke(Brand.slate, lineWidth: 1).contentShape(Rectangle()).frame(
             width: crop.width * size.width, height: crop.height * size.height
           ).position(x: crop.midX * size.width, y: crop.midY * size.height)
             .gesture(
@@ -212,9 +213,11 @@ struct ManualCrop: View {
           ForEach(0..<4) { corner in
             let right = corner % 2 == 1
             let bottom = corner >= 2
-            RoundedRectangle(cornerRadius: 4).fill(Brand.ice).frame(width: 18, height: 18).frame(
-              width: 44, height: 44
-            ).contentShape(Rectangle())
+            RoundedRectangle(cornerRadius: 4).fill(Brand.ice)
+              .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Brand.slate, lineWidth: 1.5))
+              .frame(width: 18, height: 18).frame(
+                width: 44, height: 44
+              ).contentShape(Rectangle())
               .position(
                 x: (right ? crop.maxX : crop.minX) * size.width,
                 y: (bottom ? crop.maxY : crop.minY) * size.height
@@ -245,21 +248,24 @@ struct ManualCrop: View {
           .position(
             x: geo.size.width / 2, y: geo.size.height / 2)
       }.padding(.horizontal, 24)
-      Text("Drag the corners to keep all payment details.").font(Brand.font(13)).foregroundStyle(
-        .white.opacity(0.75))
-      HStack {
-        Button {
-          rotate()
-        } label: {
-          Label("Rotate", systemImage: "rotate.right")
-        }
-        Spacer()
-        Button("Reset crop") {
-          withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.88)) {
-            crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+      VStack(spacing: 10) {
+        Text("Drag the corners to keep all payment details.")
+          .font(Brand.font(13)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+        HStack {
+          Button {
+            rotate()
+          } label: {
+            Label("Rotate", systemImage: "rotate.right").frame(minHeight: 44)
           }
-        }
-      }.buttonStyle(GlassControlButton()).tint(Brand.ice).padding(.horizontal, 24)
+          Spacer()
+          Button("Reset crop") {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.88)) {
+              crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+            }
+          }.frame(minHeight: 44)
+        }.buttonStyle(.plain).font(Brand.font(15, .semibold))
+      }.padding(.horizontal, 18).padding(.vertical, 12).modifier(GlassPanel())
+        .padding(.horizontal, 16)
       if let error { Text(error).foregroundStyle(.orange) }
       Button {
         if let result = image.cropped(to: crop) {
@@ -270,7 +276,8 @@ struct ManualCrop: View {
       } label: {
         Text("Use crop").frame(maxWidth: .infinity)
       }.buttonStyle(PrimaryButton()).padding(.horizontal, 22).accessibilityIdentifier("use-crop")
-    }.padding(.vertical, 14).background(Brand.ink).foregroundStyle(.white)
+    }.padding(.top, 8).padding(.bottom, 14).background(DocumentBackdrop(image: image))
+      .foregroundStyle(Brand.ink).tint(Brand.ink)
       .disabled(rotating)
   }
   private func rotate() {

@@ -1,5 +1,7 @@
 # Project guidance
 
+- Latest UI direction, 12 October: Markus requested Liquid Glass throughout the mobile flow, explicitly including Adjust image and Ready to send. Use shared light glass panels/image-derived backgrounds, keeping document pixels, editable fields and JSON readable. Preserve hotspot-only connectivity and all scan/recovery behavior. See docs/IOS_GLASS_AND_MOTION.md.
+
 - Latest connectivity scope, 12 October: Markus requested only the working iPhone Personal Hotspot solution. Client settings now use one saved local Mac address, with no USB fallback or cloud endpoint selection; admin hides link-local choices. Migrate existing local Wi-Fi settings and preserve draft/confirmation recovery. Hosting is deferred. See docs/IOS_GLASS_AND_MOTION.md and docs/CONNECTION_SETUP.md. This supersedes older multi-route instructions below.
 
 

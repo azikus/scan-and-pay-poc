@@ -32,7 +32,7 @@ struct ControlSurface: ViewModifier {
     }
   }
 }
-struct ScanGlassPanel: ViewModifier {
+struct GlassPanel: ViewModifier {
   @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
   func body(content: Content) -> some View {
     let shape = RoundedRectangle(cornerRadius: 30, style: .continuous)
@@ -44,6 +44,23 @@ struct ScanGlassPanel: ViewModifier {
       content.background(.regularMaterial, in: shape)
         .overlay(shape.strokeBorder(.white.opacity(0.5), lineWidth: 0.5))
     }
+  }
+}
+/// A soft image-derived backdrop; the foreground document always stays sharp.
+struct DocumentBackdrop: View {
+  var image: UIImage? = nil
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  var body: some View {
+    GeometryReader { geo in
+      ZStack {
+        Brand.ice
+        if let image, !reduceTransparency {
+          Image(uiImage: image).resizable().scaledToFill()
+            .frame(width: geo.size.width, height: geo.size.height).clipped()
+            .blur(radius: 45).opacity(0.22)
+        }
+      }.frame(width: geo.size.width, height: geo.size.height).clipped()
+    }.ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
   }
 }
 struct GlassControlButton: ButtonStyle {
@@ -106,14 +123,15 @@ struct ScanHome: View {
   var body: some View {
     NavigationStack {
       ZStack {
-        (model.phase == .capture ? Brand.ice : Brand.ink).ignoresSafeArea()
+        DocumentBackdrop(image: model.originalImage ?? model.image)
         content
-          .environment(\.colorScheme, model.phase == .capture ? .light : .dark)
+          .environment(\.colorScheme, .light)
           .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 16)))
       }.animation(
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.46, dampingFraction: 0.9),
         value: screen
       )
+      .preferredColorScheme(.light)
       .toolbar(.hidden, for: .navigationBar)
       .sheet(isPresented: $settings) { ConnectionSettings(model: model) }
 
@@ -123,6 +141,7 @@ struct ScanHome: View {
         )
         .presentationDetents([.fraction(0.42), .fraction(0.68), .large], selection: $detent)
         .presentationDragIndicator(.visible).presentationCornerRadius(30)
+        .presentationBackground(.regularMaterial)
         .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.68)))
         .interactiveDismissDisabled()
       }
@@ -182,13 +201,13 @@ struct ScanHome: View {
       ManualCrop(image: image, namespace: documentMotion, use: model.cropped, retake: model.reset)
         .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 18)))
     } else {
-      VStack(spacing: 0) {
+      VStack(spacing: 16) {
         HStack(spacing: 12) {
           Text(model.phase == .preview ? "Ready to send" : "Your document")
             .font(Brand.font(23, .semibold))
           Spacer()
           if model.phase == .preview {
-            Button("Edit crop", action: model.editCrop).buttonStyle(GlassControlButton())
+            Button("Edit crop", action: model.editCrop).buttonStyle(.plain).frame(minHeight: 44)
           } else {
             Button {
               imageViewer = true
@@ -196,7 +215,8 @@ struct ScanHome: View {
               Label("Image", systemImage: "arrow.up.left.and.arrow.down.right")
             }.font(Brand.font(14))
           }
-        }.foregroundStyle(.white).tint(Brand.ice).padding(.horizontal, 22).padding(.vertical, 12)
+        }.foregroundStyle(Brand.ink).tint(Brand.ink).padding(.horizontal, 18).padding(.vertical, 12)
+          .modifier(GlassPanel()).padding(.horizontal, 16)
         ZStack {
           if let image = model.image {
             Image(uiImage: image).resizable().scaledToFit()
@@ -206,7 +226,7 @@ struct ScanHome: View {
                 if model.phase != .preview { imageViewer = true }
               }
           }
-        }.frame(maxWidth: .infinity, maxHeight: .infinity).background(Brand.slate.opacity(0.3))
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
         if model.phase == .preview {
           VStack(spacing: 12) {
             if let message = model.message {
@@ -221,9 +241,11 @@ struct ScanHome: View {
             Button("Clear scan") { discard = true }
             Spacer()
             if model.response != nil { Button("JSON") { json = true } }
-          }.font(Brand.font(14)).tint(Brand.ice).padding(22)
+          }.font(Brand.font(14)).tint(Brand.ink).frame(minHeight: 44).padding(16)
+            .modifier(GlassPanel()).padding(16)
         }
-      }.id(screen).transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: -12)))
+      }.padding(.top, 8).id(screen).transition(
+        reduceMotion ? .opacity : .opacity.combined(with: .offset(y: -12)))
     }
   }
   private var captureScreen: some View {
@@ -260,7 +282,7 @@ struct ScanHome: View {
                 }
               }.buttonStyle(.bordered)
             }
-          }.padding(24).modifier(ScanGlassPanel())
+          }.padding(24).modifier(GlassPanel())
           Spacer(minLength: 0)
         }
         captureControls
@@ -294,7 +316,7 @@ struct ScanHome: View {
         Image(systemName: "slider.horizontal.3").frame(width: 44, height: 44)
           .contentShape(Rectangle())
       }.accessibilityLabel("Connection settings")
-    }.buttonStyle(.plain).padding(12).modifier(ScanGlassPanel())
+    }.buttonStyle(.plain).padding(12).modifier(GlassPanel())
   }
   private var captureControls: some View {
     VStack(spacing: 10) {
@@ -321,7 +343,7 @@ struct ScanHome: View {
           .accessibilityLabel("Capture document").accessibilityIdentifier("capture")
         Color.clear.frame(maxWidth: .infinity, maxHeight: 66)
       }.padding(.top, 8)
-    }.padding(22).modifier(ScanGlassPanel())
+    }.padding(22).modifier(GlassPanel())
   }
   private func updateCamera() {
     if scenePhase == .active && model.phase == .capture && !model.fixtureMode {
@@ -379,7 +401,7 @@ struct ReviewSheet: View {
         } label: {
           Image(systemName: "ellipsis").font(.system(size: 20)).frame(width: 20, height: 44)
         }.buttonStyle(GlassControlButton()).accessibilityLabel("Scan options")
-      }.padding(.horizontal, 22).padding(.top, 24)
+      }.padding(18).modifier(GlassPanel()).padding(.horizontal, 14).padding(.top, 14)
       ScrollView {
         VStack(alignment: .leading, spacing: 17) {
           if let status = model.connectionStatus {
@@ -433,10 +455,9 @@ struct ReviewSheet: View {
           }.buttonStyle(PrimaryButton()).disabled(
             !model.checked || model.draft?.canConfirm != true || model.saving || model.reconnecting
           ).accessibilityIdentifier("pay")
-        }.padding(.horizontal, 22).padding(.top, 10).padding(.bottom, 12).background(
-          Color(uiColor: .systemBackground))
+        }.padding(18).modifier(GlassPanel()).padding(.horizontal, 14).padding(.bottom, 12)
       }
-    }.background(Color(uiColor: .systemBackground)).tint(.primary)
+    }.background(DocumentBackdrop()).tint(.primary)
       .sheet(
         isPresented: $payConfirmation,
         onDismiss: {
@@ -454,7 +475,7 @@ struct ReviewSheet: View {
               payConfirmation = false
             }
           ).presentationDetents([.large]).presentationDragIndicator(.visible)
-            .presentationCornerRadius(30)
+            .presentationCornerRadius(30).presentationBackground(.regularMaterial)
         }
       }
       .sheet(isPresented: $showJSON) {
@@ -626,17 +647,18 @@ struct ConnectionSettings: View {
           SecureField("Access token", text: $token).textInputAutocapitalization(.never)
         }.disabled(model.reconnecting)
         if let message { Text(message).foregroundStyle(.orange) }
-      }.navigationTitle("Connection").toolbar {
-        ToolbarItem(placement: .confirmationAction) {
-          Button("Save") {
-            do {
-              try save()
-              dismiss()
-            } catch { message = error.localizedDescription }
-          }.disabled(model.reconnecting)
+      }.scrollContentBackground(.hidden).background(DocumentBackdrop())
+        .navigationTitle("Connection").toolbar {
+          ToolbarItem(placement: .confirmationAction) {
+            Button("Save") {
+              do {
+                try save()
+                dismiss()
+              } catch { message = error.localizedDescription }
+            }.disabled(model.reconnecting)
+          }
+          ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
         }
-        ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
-      }
     }.onAppear {
       hotspot = model.hotspotAddress
       token = model.token
@@ -662,9 +684,10 @@ struct JSONOutput: View {
         )
         .accessibilityIdentifier("json-content")
 
-      }.navigationTitle("Structured output").navigationBarTitleDisplayMode(.inline).toolbar {
-        Button("Done") { dismiss() }
-      }
+      }.background(DocumentBackdrop()).navigationTitle("Structured output")
+        .navigationBarTitleDisplayMode(.inline).toolbar {
+          Button("Done") { dismiss() }
+        }
     }
   }
 }
@@ -680,7 +703,7 @@ struct DocumentViewer: View {
             width: UIScreen.main.bounds.width * zoom
           ).accessibilityLabel("Captured document")
         }
-      }.background(Brand.ink).toolbar {
+      }.background(DocumentBackdrop(image: image)).toolbar {
         ToolbarItem(placement: .topBarLeading) { Button("Done") { dismiss() } }
         ToolbarItem(placement: .topBarTrailing) {
           Button(zoom == 1 ? "Zoom in" : "Fit") { zoom = zoom == 1 ? 2.5 : 1 }

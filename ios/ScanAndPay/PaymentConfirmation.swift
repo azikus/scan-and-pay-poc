@@ -13,7 +13,7 @@ struct PaymentConfirmation: View {
         Spacer()
         Button(action: cancel) { Image(systemName: "xmark").frame(width: 44, height: 44) }
           .buttonStyle(GlassControlButton()).accessibilityLabel("Cancel payment")
-      }.padding(.bottom, 28)
+      }.padding(14).modifier(GlassPanel()).padding(.bottom, 24)
       Text("Confirm payment").font(Brand.font(30, .semibold))
       ScrollView {
         VStack(alignment: .leading, spacing: 22) {
@@ -68,8 +68,8 @@ struct PaymentConfirmation: View {
           maxWidth: .infinity, minHeight: 48
         )
         .accessibilityIdentifier("cancel-pay")
-      }.padding(.top, 18)
-    }.padding(24).background(Color(uiColor: .systemBackground)).tint(.primary)
+      }.padding(16).modifier(GlassPanel()).padding(.top, 18)
+    }.padding(24).background(DocumentBackdrop()).tint(.primary)
   }
 }
 
@@ -98,20 +98,20 @@ struct CompletionCelebration: View {
   @State private var draw = false
   var body: some View {
     ZStack {
-      Brand.ink.ignoresSafeArea()
+      DocumentBackdrop()
       VStack(spacing: 32) {
         Spacer()
         ZStack {
           if !reduceMotion {
             ForEach(0..<2) { index in
-              Circle().stroke(Brand.ice.opacity(burst ? 0 : 0.65), lineWidth: 1.5)
+              Circle().stroke(Brand.slate.opacity(burst ? 0 : 0.45), lineWidth: 1.5)
                 .frame(width: 150, height: 150).scaleEffect(burst ? 2.4 + Double(index) * 0.3 : 0.8)
                 .animation(.easeOut(duration: 1.35).delay(Double(index) * 0.16), value: burst)
             }
             ForEach(0..<32) { index in
               let angle = Double(index) * .pi * 2 / 32
               let distance = burst ? 120.0 + Double((index * 17) % 70) : 40
-              Capsule().fill(index.isMultiple(of: 3) ? Color.white : Brand.ice)
+              Capsule().fill(index.isMultiple(of: 3) ? Brand.slate : Color.white)
                 .frame(
                   width: index.isMultiple(of: 3) ? 4 : 3, height: index.isMultiple(of: 3) ? 12 : 6
                 )
@@ -121,19 +121,19 @@ struct CompletionCelebration: View {
                 .animation(.easeOut(duration: 1.4).delay(Double(index % 4) * 0.04), value: burst)
             }
           }
-          Circle().fill(Brand.ice).frame(width: 144, height: 144)
+          Color.clear.frame(width: 144, height: 144).modifier(GlassPanel())
             .scaleEffect(reveal ? 1 : reduceMotion ? 1 : 0.65)
             .shadow(color: Brand.ice.opacity(0.15), radius: 45)
           CompletionCheck().trim(from: 0, to: draw ? 1 : 0)
             .stroke(Brand.ink, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
             .frame(width: 75, height: 75)
         }.frame(height: 210).accessibilityHidden(true)
-        Text("Complete").font(Brand.font(42, .semibold)).foregroundStyle(.white)
+        Text("Complete").font(Brand.font(42, .semibold)).foregroundStyle(Brand.ink)
           .opacity(reveal ? 1 : 0).offset(y: reveal || reduceMotion ? 0 : 12)
           .accessibilityIdentifier("complete")
         Spacer()
-        Button("Scan another", action: dismiss).font(Brand.font(17, .semibold))
-          .foregroundStyle(Brand.ice).frame(minHeight: 48).padding(.bottom, 34)
+        Button("Scan another", action: dismiss).buttonStyle(GlassControlButton())
+          .foregroundStyle(Brand.ink).frame(minHeight: 48).padding(.bottom, 34)
           .accessibilityIdentifier("scan-another")
       }
     }.task {
