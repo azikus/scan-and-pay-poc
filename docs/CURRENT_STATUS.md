@@ -1,6 +1,6 @@
 # Current project status — 12 October 2026
 
-**Separate provider work — 12 October:** Markus requested broader LLM/model support in an isolated worktree. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for scope, disabled presets and verification. Markus subsequently authorized activation for existing providers: 13 new options are enabled with read-only account checks; Fireworks remains disabled awaiting its key. The private launcher runs this worktree against the original private state. Default/ledger/caps are unchanged; do not resume the interrupted comparison.
+**Separate provider work — 12 October:** Markus requested broader LLM/model support in an isolated worktree. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for scope, disabled presets and verification. Markus subsequently authorized activation for existing providers: 14 new options are enabled with read-only account checks, including Fireworks Kimi K3 after its key was supplied; the original Fireworks Kimi K2.5 preset remains disabled because it lacks serverless availability. The private launcher runs this worktree against the original private state. Default/ledger/caps are unchanged; do not resume the interrupted comparison.
 
 This file supersedes prospective wording and operational snapshots in the dated 8–9 October handoffs. Historical experiment evidence remains unchanged.
 

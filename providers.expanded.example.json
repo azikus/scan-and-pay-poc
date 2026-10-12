@@ -187,6 +187,19 @@
       "max_output_tokens": 8000,
       "field_policy": "partial_v1",
       "interpretation_policy": "draft_v4"
+    },
+    "fireworks-kimi3-expanded": {
+      "provider": "fireworks",
+      "model": "accounts/fireworks/models/kimi-k3",
+      "operation": "vision",
+      "config": {
+        "endpoint_host": "api.fireworks.ai",
+        "enabled": false
+      },
+      "protocol_version": "5",
+      "max_output_tokens": 8000,
+      "field_policy": "partial_v1",
+      "interpretation_policy": "draft_v4"
     }
   }
 }

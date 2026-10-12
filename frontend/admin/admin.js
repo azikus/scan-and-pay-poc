@@ -11,7 +11,7 @@ const methodDescriptions = {
   managed_ocr_rules:'OCR reads the image, then local rules extract the payment fields.',
   managed_ocr_llm:'OCR reads the image, then an LLM extracts the payment fields from the text and layout.'
 };
-const modelNames = {'gpt-4.1-mini-2025-04-14':'OpenAI · GPT-4.1 mini','gemini-3.5-flash-lite':'Google · Gemini 3.5 Flash-Lite','mistral-small-2603':'Mistral · Small 2603','claude-haiku-4-5-20251001':'Anthropic · Claude Haiku 4.5','Qwen/Qwen3.5-9B':'Together · Qwen 3.5 9B','mistral-ocr-4-1':'Mistral OCR 4.1'};
+const modelNames = {'gpt-4.1-mini-2025-04-14':'OpenAI · GPT-4.1 mini','gemini-3.5-flash-lite':'Google · Gemini 3.5 Flash-Lite','mistral-small-2603':'Mistral · Small 2603','claude-haiku-4-5-20251001':'Anthropic · Claude Haiku 4.5','Qwen/Qwen3.5-9B':'Together · Qwen 3.5 9B','mistral-ocr-4-1':'Mistral OCR 4.1','accounts/fireworks/models/kimi-k3':'Fireworks · Kimi K3'};
 const providerNames = {openai:'OpenAI',gemini:'Google',mistral:'Mistral',anthropic:'Anthropic',together:'Together',xai:'xAI',fireworks:'Fireworks'};
 const namedModel = (value,provider) => provider?`${providerNames[provider]||provider} · ${modelNames[value]?.split(' · ').at(-1)||value}`:modelNames[value]||value;
 const methodName = value => methodNames[value] || value || 'Method unavailable';
