@@ -83,3 +83,7 @@ Activation evidence, metadata responses and the pre-change profile/state snapsho
 ## PR verification — 12 October
 
 Final branch verification before PR creation: **721 offline tests passed**, domain/orchestration **96.09% statement / 91.43% branch coverage**, Ruff lint/format and strict mypy passed, JavaScript syntax/label checks passed, generated contracts remained unchanged, and diff checks passed. This source-only PR does not include private activation configuration or evidence and does not claim successful invoice extraction with the new models.
+
+## Paid invoice follow-up — 12 October
+
+Markus requested a paid single-invoice run across all enabled LLMs and approved the corrected allowance after the documented source-image mistake. The completed run attempted all 19 direct-image models once: 13 successful drafts, four incomplete drafts and two timeouts. See [live smoke evidence](LLM_LIVE_SMOKE_2026-10-12.md) for timing, the limited reviewed field, all 26 accounted calls including seven earlier non-invoice calls, and preserved private state. No timeout retry or historical batch resumption is authorized by this completed run.

@@ -1,5 +1,7 @@
 # Coding handoff — continue here
 
+**Latest paid LLM follow-up — 12 October:** the user-requested single-invoice run is complete; see [LLM_LIVE_SMOKE_2026-10-12.md](LLM_LIVE_SMOKE_2026-10-12.md). All 19 enabled direct-image models were attempted once, with 13 successful drafts, four incomplete drafts and two timeouts; seven earlier mistaken non-invoice calls are separately accounted. Original rows/selection preserved. Latest snapshot: 2,303 / EUR358.95 held, caps 2,312 / EUR359.85, leaving nine calls / EUR0.90 for explicit mobile Sends. No new agent run/retry or historical comparison resumption is authorized.
+
 **Separate provider work — 12 October:** Markus requested broader LLM/model support in an isolated worktree. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for scope, disabled presets and verification. Markus subsequently authorized activation for existing providers: 14 new options are enabled with read-only account checks, including Fireworks Kimi K3 after its key was supplied; the original Fireworks Kimi K2.5 preset remains disabled because it lacks serverless availability. The private launcher runs this worktree against the original private state. Default/ledger/caps are unchanged; do not resume the interrupted comparison.
 
 ## Current scope — 12 October 2026
