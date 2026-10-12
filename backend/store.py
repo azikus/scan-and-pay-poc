@@ -439,7 +439,7 @@ class Store:
                 )
 
     def reconcile(self, run: Run) -> None:
-        # Preserve dispatched EUR holds even on known USD estimates: no implicit FX.
+        # Preserve EUR holds even on known USD estimates: no implicit FX or forgiveness.
         with self.connection() as db:
             if run.error is not None and run.error.code == "data_policy_blocked":
                 self.release_undispatched(db, run.id)
