@@ -6,15 +6,10 @@ struct PaymentConfirmation: View {
   let confirm: () -> Void
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      HStack {
-        Image(systemName: "arrow.up.right").font(.system(size: 24, weight: .medium))
-          .frame(width: 56, height: 56).background(Brand.ice, in: Circle()).foregroundStyle(
-            Brand.ink)
-        Spacer()
+      ScreenHeader(subtitle: "Confirm payment") {
         Button(action: cancel) { Image(systemName: "xmark").frame(width: 44, height: 44) }
-          .buttonStyle(GlassControlButton()).accessibilityLabel("Cancel payment")
-      }.padding(14).modifier(GlassPanel()).padding(.bottom, 24)
-      Text("Confirm payment").font(Brand.font(30, .semibold))
+          .accessibilityLabel("Cancel payment")
+      }.padding(.bottom, 12)
       ScrollView {
         VStack(alignment: .leading, spacing: 22) {
           if let amount = draft.amountField {
@@ -100,6 +95,8 @@ struct CompletionCelebration: View {
     ZStack {
       DocumentBackdrop()
       VStack(spacing: 32) {
+        ScreenHeader(subtitle: "Scan complete") { EmptyView() }
+          .padding(.horizontal, 16).padding(.top, 8)
         Spacer()
         ZStack {
           if !reduceMotion {

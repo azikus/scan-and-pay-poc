@@ -20,6 +20,8 @@ No scan request leaves the app before Send. The client verifies the advertised e
 
 ## Appearance and motion
 
+Every screen shares the Azikus mark and **Scan & Pay** title, with a subtitle for the current screen or processing state. Header actions move to a separate row at accessibility text sizes.
+
 The scan screen uses an edge-to-edge camera preview with floating light Liquid Glass header and capture panels, replacing its black header/footer. Adjust image, Ready to send, review, confirmation and completion share the glass treatment; settings, JSON navigation and the image viewer use the same light appearance. Documents and JSON remain sharp and readable. Native Liquid Glass controls are used on iOS 26, with material/solid accessibility fallbacks on older systems. Capture, crop and preview transition together; crop rotation/reset animate and the image carries between crop and preview. Reduce Motion avoids spatial animation. See [behavior, hotspot verification](../docs/IOS_GLASS_AND_MOTION.md).
 
 ## Review and JSON

@@ -165,12 +165,9 @@ struct ManualCrop: View {
   @State private var error: String?
   var body: some View {
     VStack(spacing: 20) {
-      HStack {
-        Text("Adjust image").font(Brand.font(24, .semibold))
-        Spacer()
-        Button("Retake", action: retake).buttonStyle(.plain).frame(minHeight: 44)
-      }.padding(.horizontal, 18).padding(.vertical, 10).modifier(GlassPanel())
-        .padding(.horizontal, 16)
+      ScreenHeader(subtitle: "Adjust image") {
+        Button("Retake", action: retake).frame(minHeight: 44)
+      }.padding(.horizontal, 16)
       GeometryReader { geo in
         let factor = min(geo.size.width / image.size.width, geo.size.height / image.size.height)
         let size = CGSize(width: image.size.width * factor, height: image.size.height * factor)

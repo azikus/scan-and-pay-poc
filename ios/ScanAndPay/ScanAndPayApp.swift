@@ -46,6 +46,53 @@ struct GlassPanel: ViewModifier {
     }
   }
 }
+/// Shared identity and screen context, with space for each screen's actions.
+struct ScreenHeader<Actions: View>: View {
+  let subtitle: String
+  let detail: String?
+  let actions: Actions
+  @Environment(\.dynamicTypeSize) private var typeSize
+  init(subtitle: String, detail: String? = nil, @ViewBuilder actions: () -> Actions) {
+    self.subtitle = subtitle
+    self.detail = detail
+    self.actions = actions()
+  }
+  private var identity: some View {
+    HStack(spacing: 10) {
+      Image("AzikusMarkDark").resizable().scaledToFit()
+        .frame(width: 24, height: 24).padding(7).accessibilityLabel("Azikus")
+      VStack(alignment: .leading, spacing: 3) {
+        Text("Scan & Pay").font(Brand.font(21, .semibold))
+        Text(subtitle).font(Brand.font(13)).foregroundStyle(Brand.slate)
+          .fixedSize(horizontal: false, vertical: true)
+        if let detail {
+          Text(detail).font(Brand.font(12)).foregroundStyle(Brand.slate)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+      }
+    }.layoutPriority(1)
+  }
+  var body: some View {
+    Group {
+      if typeSize.isAccessibilitySize {
+        VStack(alignment: .leading, spacing: 8) {
+          identity
+          HStack {
+            Spacer(minLength: 0)
+            actions
+          }
+        }
+      } else {
+        HStack(spacing: 10) {
+          identity
+          Spacer(minLength: 0)
+          actions
+        }
+      }
+    }.font(Brand.font(15, .semibold)).foregroundStyle(Brand.ink).tint(Brand.ink)
+      .buttonStyle(.plain).padding(12).modifier(GlassPanel())
+  }
+}
 /// A soft image-derived backdrop; the foreground document always stays sharp.
 struct DocumentBackdrop: View {
   var image: UIImage? = nil
@@ -202,10 +249,7 @@ struct ScanHome: View {
         .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 18)))
     } else {
       VStack(spacing: 16) {
-        HStack(spacing: 12) {
-          Text(model.phase == .preview ? "Ready to send" : "Your document")
-            .font(Brand.font(23, .semibold))
-          Spacer()
+        ScreenHeader(subtitle: model.phase == .preview ? "Ready to send" : "Your document") {
           if model.phase == .preview {
             Button("Edit crop", action: model.editCrop).buttonStyle(.plain).frame(minHeight: 44)
           } else {
@@ -215,8 +259,7 @@ struct ScanHome: View {
               Label("Image", systemImage: "arrow.up.left.and.arrow.down.right")
             }.font(Brand.font(14))
           }
-        }.foregroundStyle(Brand.ink).tint(Brand.ink).padding(.horizontal, 18).padding(.vertical, 12)
-          .modifier(GlassPanel()).padding(.horizontal, 16)
+        }.padding(.horizontal, 16)
         ZStack {
           if let image = model.image {
             Image(uiImage: image).resizable().scaledToFit()
@@ -290,18 +333,10 @@ struct ScanHome: View {
     }.foregroundStyle(Brand.ink).tint(Brand.ink)
   }
   private var captureHeader: some View {
-    HStack(spacing: 10) {
-      Image("AzikusMarkDark").resizable().scaledToFit().frame(width: 24, height: 24).padding(7)
-      VStack(alignment: .leading, spacing: 3) {
-        Text("Scan & Pay").font(Brand.font(21, .semibold))
-        if let status = model.connectionStatus {
-          Text(status).font(Brand.font(12)).foregroundStyle(.secondary).lineLimit(2)
-        }
-        if model.fixtureMode {
-          Text("Synthetic preview").font(Brand.font(12)).foregroundStyle(.secondary)
-        }
-      }
-      Spacer(minLength: 0)
+    ScreenHeader(
+      subtitle: "Scan a document",
+      detail: model.fixtureMode ? "Synthetic preview" : model.connectionStatus
+    ) {
       Button {
         Task { await model.reconnect() }
       } label: {
@@ -316,7 +351,7 @@ struct ScanHome: View {
         Image(systemName: "slider.horizontal.3").frame(width: 44, height: 44)
           .contentShape(Rectangle())
       }.accessibilityLabel("Connection settings")
-    }.buttonStyle(.plain).padding(12).modifier(GlassPanel())
+    }
   }
   private var captureControls: some View {
     VStack(spacing: 10) {
@@ -383,15 +418,14 @@ struct ReviewSheet: View {
   @FocusState private var focused: String?
   var body: some View {
     VStack(spacing: 0) {
-      HStack {
-        Text(
+      ScreenHeader(
+        subtitle:
           model.processing
-            ? model.processingTitle
-            : model.phase == .review
-              ? "Review details"
-              : model.phase == .recovery ? "Connection interrupted" : "Couldn’t read details"
-        ).font(Brand.font(24, .semibold))
-        Spacer()
+          ? model.processingTitle
+          : model.phase == .review
+            ? "Review details"
+            : model.phase == .recovery ? "Connection interrupted" : "Couldn’t read details"
+      ) {
         Menu {
           Button("View image", action: openImage)
           if model.response != nil { Button("View JSON", action: openJSON) }
@@ -401,7 +435,7 @@ struct ReviewSheet: View {
         } label: {
           Image(systemName: "ellipsis").font(.system(size: 20)).frame(width: 20, height: 44)
         }.buttonStyle(GlassControlButton()).accessibilityLabel("Scan options")
-      }.padding(18).modifier(GlassPanel()).padding(.horizontal, 14).padding(.top, 14)
+      }.padding(.horizontal, 14).padding(.top, 14)
       ScrollView {
         VStack(alignment: .leading, spacing: 17) {
           if let status = model.connectionStatus {
@@ -648,16 +682,17 @@ struct ConnectionSettings: View {
         }.disabled(model.reconnecting)
         if let message { Text(message).foregroundStyle(.orange) }
       }.scrollContentBackground(.hidden).background(DocumentBackdrop())
-        .navigationTitle("Connection").toolbar {
-          ToolbarItem(placement: .confirmationAction) {
+        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+          ScreenHeader(subtitle: "Connection") {
+            Button("Done") { dismiss() }.frame(minWidth: 44, minHeight: 44)
             Button("Save") {
               do {
                 try save()
                 dismiss()
               } catch { message = error.localizedDescription }
-            }.disabled(model.reconnecting)
-          }
-          ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
+            }.frame(minWidth: 44, minHeight: 44).disabled(model.reconnecting)
+          }.padding(.horizontal, 16).padding(.top, 12)
         }
     }.onAppear {
       hotspot = model.hotspotAddress
@@ -684,9 +719,11 @@ struct JSONOutput: View {
         )
         .accessibilityIdentifier("json-content")
 
-      }.background(DocumentBackdrop()).navigationTitle("Structured output")
-        .navigationBarTitleDisplayMode(.inline).toolbar {
-          Button("Done") { dismiss() }
+      }.background(DocumentBackdrop()).toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+          ScreenHeader(subtitle: "Structured output") {
+            Button("Done") { dismiss() }.frame(minWidth: 44, minHeight: 44)
+          }.padding(.horizontal, 16).padding(.top, 12)
         }
     }
   }
@@ -703,12 +740,14 @@ struct DocumentViewer: View {
             width: UIScreen.main.bounds.width * zoom
           ).accessibilityLabel("Captured document")
         }
-      }.background(DocumentBackdrop(image: image)).toolbar {
-        ToolbarItem(placement: .topBarLeading) { Button("Done") { dismiss() } }
-        ToolbarItem(placement: .topBarTrailing) {
-          Button(zoom == 1 ? "Zoom in" : "Fit") { zoom = zoom == 1 ? 2.5 : 1 }
+      }.background(DocumentBackdrop(image: image)).toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+          ScreenHeader(subtitle: "Your document") {
+            Button(zoom == 1 ? "Zoom in" : "Fit") { zoom = zoom == 1 ? 2.5 : 1 }
+              .frame(minWidth: 44, minHeight: 44)
+            Button("Done") { dismiss() }.frame(minWidth: 44, minHeight: 44)
+          }.padding(.horizontal, 16).padding(.top, 8)
         }
-      }
     }
   }
 }

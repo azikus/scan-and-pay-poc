@@ -18,6 +18,10 @@ Markus then requested the same treatment everywhere, specifically Adjust image a
 
 Review and Pay confirmation use glass header/action panels with legible fields between them. Connection settings, JSON navigation and the image viewer use the light backdrop and native navigation controls; the selectable JSON text retains an opaque readable surface. Completion uses the same light/glass palette and existing celebration, with reduced-motion behavior intact. The app uses a consistent light appearance. iOS 26 uses native glass, earlier iOS uses regular material, and Reduce Transparency uses solid panels without the blurred document backdrop.
 
+## Shared branded header
+
+Markus requested the Azikus logo and Scan & Pay title on each screen, with a changing subtitle. A shared `ScreenHeader` now displays the supplied dark Azikus mark, **Scan & Pay**, and the current context: Scan a document, Adjust image, Ready to send, Your document, the current processing/recovery message, Review details, Confirm payment, Connection, Structured output or Scan complete. Capture keeps its connection status (or synthetic-preview marker) as a separate detail below the subtitle. Existing actions remain in the header, with a separate action row at accessibility text sizes. This is a presentation change only.
+
 ## Current connectivity
 
 **Latest decision:** Markus requested only the working iPhone Personal Hotspot solution. The app now has one **Hotspot → Mac address** field and Reconnect checks that address only. USB configuration/fallback and hosted endpoint selection are removed from the current setup. Existing saved local Wi-Fi addresses migrate to the hotspot setting; obsolete USB/Wi-Fi keys are removed. Public HTTPS and link-local URLs are rejected by the new setting. Low-level URL support remains for safely recovering existing saved drafts, without offering other connection methods.
@@ -31,6 +35,12 @@ Addresses may change after reconnecting. Use the admin Connection panel to obtai
 ## Hosting deferred
 
 Keep using the hotspot and local Mac backend. The earlier Railway/Hostinger assessment is deferred; no hosting account, subscription, endpoint, data migration or deployment was created. Revisit hosting as a separate task if independent phone use is needed.
+
+## Branded-header verification
+
+- All **three UI flows passed** after the header change, covering capture, crop/preview, JSON, editing, confirmation and reset. Synthetic capture, crop and confirmation screenshots were visually checked for logo/title/subtitle layout. Swift lint and diff checks passed.
+- Signed build passed and was installed/opened on the physical iPhone. Its authenticated hotspot check succeeded at **21:48:14 UTC / 22:48:14 London time** on 12 October. No agent inference or saved-draft change.
+- Private evidence: `.local/branded-headers-2026-10-12/`. The earlier 24 native tests remain the unchanged domain/recovery baseline; this follow-up only reran the affected UI flows.
 
 ## Whole-flow glass verification
 
