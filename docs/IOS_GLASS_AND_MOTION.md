@@ -4,7 +4,7 @@ Markus requested native Liquid Glass, screen transitions (especially cropping), 
 
 ## UI changes
 
-**Scan-screen refinement:** Markus clarified that Liquid Glass should replace the large black scan-screen backgrounds, not only style individual buttons. Capture now shows the camera edge to edge behind a floating light glass header and capture/import panel. These use native iOS 26 glass, regular material on older systems, and opaque light surfaces with Reduce Transparency. Controls inside each panel remain plain to avoid stacking glass layers. The original dark Azikus mark is used on the light header. The subsequent whole-flow refinement below extends this treatment beyond capture; capture pixels and upload behavior are unchanged.
+**Scan-screen refinement:** Markus clarified that Liquid Glass should replace the large black scan-screen backgrounds, not only style individual buttons. The initial refinement showed the camera edge to edge behind floating glass panels; the later framing fix below replaces that zoomed layout with a fully visible camera frame between the panels. These use native iOS 26 glass, regular material on older systems, and opaque light surfaces with Reduce Transparency. Controls inside each panel remain plain to avoid stacking glass layers. The original dark Azikus mark is used on the light header. The subsequent whole-flow refinement below extends this treatment beyond capture; capture pixels and upload behavior are unchanged.
 
 - Native iOS 26 `glassEffect` on secondary controls and tinted primary actions. iOS 18–25 uses material secondary controls and a solid ice-blue primary action. Reduce Transparency uses solid surfaces. The Azikus artwork and existing Hanken Grotesk fallback remain unchanged.
 - Capture/crop/document transitions use a brief spring with a shared document frame between crop and preview. Review/confirmation retain native sheet presentation. Processing fields animate into the ready review.
@@ -17,6 +17,12 @@ Markus requested native Liquid Glass, screen transitions (especially cropping), 
 Markus then requested the same treatment everywhere, specifically Adjust image and Ready to send. Both now use the shared glass panels and a soft, image-derived backdrop instead of black chrome. The actual document remains sharp and fitted within the available space; the crop mask still darkens only the excluded pixels. Crop handles gain a slate outline for contrast on white paper. Rotation, crop coordinates, pixel output and gestures are unchanged.
 
 Review and Pay confirmation use glass header/action panels with legible fields between them. Connection settings, JSON navigation and the image viewer use the light backdrop and native navigation controls; the selectable JSON text retains an opaque readable surface. Completion uses the same light/glass palette and existing celebration, with reduced-motion behavior intact. The app uses a consistent light appearance. iOS 26 uses native glass, earlier iOS uses regular material, and Reduce Transparency uses solid panels without the blurred document backdrop.
+
+## Camera framing correction
+
+Markus reported that the live preview changed substantially after capture. The edge-to-edge preview used `resizeAspectFill`, which zoomed/cropped a photo-shaped stream into the much taller phone screen; Adjust image correctly displayed the entire captured image. The preview now uses `resizeAspect`, and its viewport sits between the glass header and capture controls so the whole frame is visible. Capture keeps the full-resolution photo; no automatic pixel crop was introduced to conceal the mismatch. Adjust image may display it at a different size because its controls take a different amount of space, but it no longer reveals edges hidden by an aspect-fill preview.
+
+Apple documents the preview layer’s [videoGravity](https://developer.apple.com/documentation/avfoundation/avcapturevideopreviewlayer/videogravity) display modes. This fix changes live framing/layout only; manual crop/rotation, saved drafts, Send and backend processing are unchanged.
 
 ## Shared branded header
 
@@ -35,6 +41,13 @@ Addresses may change after reconnecting. Use the admin Connection panel to obtai
 ## Hosting deferred
 
 Keep using the hotspot and local Mac backend. The earlier Railway/Hostinger assessment is deferred; no hosting account, subscription, endpoint, data migration or deployment was created. Revisit hosting as a separate task if independent phone use is needed.
+
+## Camera-framing verification
+
+- Signed build and all **three UI flows passed** after the framing change. The first narrowly selected run executed zero tests; it is not counted. The corrected full UI run is recorded in `ui-tests.log` and synthetic capture screenshots were inspected to confirm all edges remain outside the glass controls.
+- Installed/opened on the physical iPhone. The first hotspot read failed; both Mac endpoints subsequently returned 200 with the unchanged token, and the phone retry connected at **22:01:52 UTC / 23:01:52 London time** on 12 October. The agent did not restart the backend or submit an invoice.
+- A fresh real-camera capture remains for Markus to validate the live/still field of view; simulator results are not physical-camera acceptance. The full captured photo and manual crop behavior are preserved.
+- Private evidence: `.local/camera-framing-2026-10-12/`. Swift lint/diff checks passed. Unrelated workspace files were left untouched.
 
 ## Branded-header verification
 

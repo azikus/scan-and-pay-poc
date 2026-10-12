@@ -292,22 +292,16 @@ struct ScanHome: View {
     }
   }
   private var captureScreen: some View {
-    ZStack {
-      // The preview extends behind both glass panels and the device safe areas.
-      GeometryReader { geo in
-        ZStack {
-          Brand.ice
-          if model.fixtureMode {
-            Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(28)
-          } else if camera.available {
-            CameraPreview(session: camera.session)
-          }
-        }.frame(width: geo.size.width, height: geo.size.height).clipped()
-      }.ignoresSafeArea()
-      VStack(spacing: 16) {
-        captureHeader
-        Spacer(minLength: 0)
-        if !model.fixtureMode && !camera.available {
+    VStack(spacing: 16) {
+      captureHeader
+      // Keep the whole camera frame visible, with controls outside its bounds.
+      // This uses aspect-fit, just like the still shown by Adjust image.
+      ZStack {
+        if model.fixtureMode {
+          Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(.horizontal, 8)
+        } else if camera.available {
+          CameraPreview(session: camera.session).clipped()
+        } else {
           VStack(spacing: 16) {
             Image(systemName: "camera").font(.system(size: 38, weight: .light))
             Text(camera.denied ? "Allow camera access" : "Ready when you are")
@@ -326,11 +320,11 @@ struct ScanHome: View {
               }.buttonStyle(.bordered)
             }
           }.padding(24).modifier(GlassPanel())
-          Spacer(minLength: 0)
         }
-        captureControls
-      }.padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 12)
-    }.foregroundStyle(Brand.ink).tint(Brand.ink)
+      }.frame(maxWidth: .infinity, maxHeight: .infinity)
+      captureControls
+    }.padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 12)
+      .foregroundStyle(Brand.ink).tint(Brand.ink)
   }
   private var captureHeader: some View {
     ScreenHeader(

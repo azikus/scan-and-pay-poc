@@ -102,7 +102,11 @@ struct CameraPreview: UIViewRepresentable {
   func makeUIView(context: Context) -> Preview {
     let view = Preview()
     view.preview.session = session
-    view.preview.videoGravity = .resizeAspectFill
+    // Show the complete photo field of view; filling the tall phone screen
+    // hides edges that otherwise reappear after capture in Adjust image.
+    view.preview.videoGravity = .resizeAspect
+    view.backgroundColor = .clear
+    view.preview.backgroundColor = UIColor.clear.cgColor
     return view
   }
   func updateUIView(_ view: Preview, context: Context) {
