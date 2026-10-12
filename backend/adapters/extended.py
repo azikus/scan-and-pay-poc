@@ -55,15 +55,33 @@ def record_usage(body: dict[str, Any], stage: Stage, option: ModelOption) -> Non
 
     flatten(raw)
     tariff = option.tariff
+    if option.provider == "xai" and tariff.get("accounting") == "xai-ticks-v1":
+        ticks = raw.get("cost_in_usd_ticks")
+        if ticks is None:
+            return  # Never fall back to the older reasoning-incomplete estimate.
+        if type(ticks) is not int or ticks < 0:
+            raise ProviderError("invalid_provider_output")
+        stage.cost = Cost(
+            status="reported",
+            amount=format(Decimal(ticks) / 10_000_000_000, "f"),
+            currency="USD",
+            pricing_source="https://docs.x.ai/developers/cost-tracking",
+            priced_at=tariff["checked_at"],
+        )
+        return
     amount = None
     if tariff.get("unit") == "tokens":
         input_key, output_key = {
             "gemini": ("promptTokenCount", "candidatesTokenCount"),
             "anthropic": ("input_tokens", "output_tokens"),
             "openai": ("input_tokens", "output_tokens"),
+            "cohere": ("input_tokens", "output_tokens"),
         }.get(option.provider, ("prompt_tokens", "completion_tokens"))
-        if input_key in raw and output_key in raw:
-            incoming, outgoing = raw[input_key], raw[output_key]
+        billing = raw.get("billed_units", {}) if option.provider == "cohere" else raw
+        if not isinstance(billing, dict):
+            raise ProviderError("invalid_provider_output")
+        if input_key in billing and output_key in billing:
+            incoming, outgoing = billing[input_key], billing[output_key]
             if type(incoming) is not int or type(outgoing) is not int:
                 raise ProviderError("invalid_provider_output")
             # Conservative gross estimate: cached input charged at the full input rate.

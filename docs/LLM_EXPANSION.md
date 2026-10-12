@@ -1,6 +1,9 @@
 # LLM expansion — 12 October 2026
 
-Markus requested broader LLM coverage and more choices from existing providers in a separate worktree. Implementation is isolated on `codex/llm-provider-expansion`, based on the merged presentation checkpoint `75c8cd0`. The separate uncommitted iOS work remains in its original checkout. No inference, runtime restart, private configuration change, selection change, subscription or deployment is part of this task.
+**Latest all-catalogue scope — 12 October:** Markus subsequently requested “enable everything and run it, don’t disable anything”, supplied Cohere access and authorized a fresh one-invoice run. All **37 catalogue profiles across 12 providers** are enabled/configured in the original private runtime, including restored cloud/document services, Grok, Aya Vision, DeepSeek, GLM, Llama, Kimi K2.5 and both legacy profiles. Individual failures do not disable entries. See [ALL_CATALOGUE_LIVE_2026-10-12.md](ALL_CATALOGUE_LIVE_2026-10-12.md). The fresh plan permits up to 38 stage calls / EUR10.55 holds, cumulative caps 2,350 / EUR370.40. Completed 35 profiles: 12 success / 15 incomplete / 8 error; AWS’s two profiles were skipped at Markus’s request and remain enabled. Latest ledger: 2,340 reservations / 2,338 dispatched, EUR369.30 held; caps 2,350 / EUR370.40. Original rows, selection and identity preserved. Preserve actual selection, all ledger rows and stopped historical comparisons. No subscription, deployment or automatic retry is authorized. Earlier disabled/no-inference notes below describe prior checkpoints.
+
+
+Markus requested broader LLM coverage and more choices from existing providers in a separate worktree. Implementation is isolated on `codex/llm-provider-expansion`, based on the merged presentation checkpoint `75c8cd0`. The separate uncommitted iOS work remains in its original checkout. Subsequent explicit user instructions authorized additive private activation and bounded paid invoice runs, recorded below. Selection is preserved; no subscription or deployment was created.
 
 ## What was missing
 
@@ -10,7 +13,7 @@ The existing option registry already supports multiple independently versioned m
 
 ## Prepared choices
 
-[providers.expanded.example.json](../providers.expanded.example.json) originally supplied **14 disabled profiles**; it now retains those and adds the Kimi K3 preset described below. All example entries remain disabled and use the existing compact typed extraction, partial-field and recipient-role policies:
+[providers.expanded.example.json](../providers.expanded.example.json) now supplies **19 opt-in profiles**, including Kimi K3, DeepSeek, GLM, Llama and Cohere Aya. All example entries remain disabled and use the existing compact typed extraction, partial-field and recipient-role policies:
 
 | Recipient | Model IDs | Purpose |
 | --- | --- | --- |
@@ -19,13 +22,14 @@ The existing option registry already supports multiple independently versioned m
 | Anthropic | `claude-haiku-5-5`, `claude-sonnet-5-5`, `claude-opus-5-5` | Current small, medium and stronger choices |
 | Mistral | `ministral-8b-2512`, `mistral-medium-2604`, `mistral-large-4` | Smaller hosted model, medium control, larger control |
 | Together | `moonshotai/Kimi-K3`, `MiniMaxAI/MiniMax-M3` | Two previously uncovered vision model families through an existing recipient |
-| Fireworks | `accounts/fireworks/models/kimi-k2p5` | New hosted recipient; separate Kimi model/version |
+| Fireworks | Kimi K2.5/K3, DeepSeek V4.1 Flash, GLM 5.3 Flash, Llama 4 Maverick | Distinct hosted family/version profiles; availability failures retained |
+| Cohere | `c4ai-aya-vision-32b` | Aya Vision through Cohere v2 Chat |
 
 This is a candidate menu, not a ranking or measured benchmark. Gemini Pro is a preview; Mistral Large 4 is a public preview. Several model identifiers are provider aliases rather than immutable snapshots. Confirm any available snapshot and returned-model identity before live acceptance; model drift cannot be frozen by the local profile hash alone.
 
 Our proposed first evaluation priorities are Kimi/MiniMax for family diversity, Gemini Flash and Claude Sonnet for plausible speed/quality tradeoffs, then Mistral Medium/Large and OpenAI Sol/Astra as stronger controls. These priorities are an engineering judgment, not measured performance. Keep the historical exact tested profiles alongside new IDs rather than editing them.
 
-GLM, DeepSeek, Llama, Cohere Aya and direct Alibaba/Moonshot access are potential later candidates. Do not classify a text-only endpoint as direct vision merely because its family has a multimodal variant. Together's current documented vision table lists Qwen 3.5 9B, Kimi K3 and MiniMax M3; it does not establish image support for its listed GLM/DeepSeek chat endpoints. The current OCR→LLM implementation deliberately supports only OpenAI interpretation, so adding text-only families would require a separate hybrid extension. OpenRouter routing would also require explicitly frozen recipients and fallback handling before invoice use.
+GLM, DeepSeek and Llama now have distinct Fireworks presets; Cohere Aya Vision has its own provider adapter and preset. All four are configured/enabled in the private runtime and were attempted on the invoice; GLM/DeepSeek returned successful drafts, while Llama returned HTTP404 and Aya failed with provider_unavailable. Direct Alibaba/Moonshot access remains a possible later expansion. Do not classify a text-only endpoint as direct vision merely because its family has a multimodal variant. Together's current documented vision table lists Qwen 3.5 9B, Kimi K3 and MiniMax M3; it does not establish image support for its listed GLM/DeepSeek chat endpoints. The current OCR→LLM implementation deliberately supports only OpenAI interpretation, so adding text-only families would require a separate hybrid extension. OpenRouter routing would also require explicitly frozen recipients and fallback handling before invoice use.
 
 ## Adapter behavior
 

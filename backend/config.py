@@ -36,6 +36,7 @@ PROVIDER_HOSTS = {
     "xai": "api.x.ai",
     "together": "api.together.ai",
     "fireworks": "api.fireworks.ai",
+    "cohere": "api.cohere.com",
     "azure": None,
     "google_documentai": None,
     "aws": None,
@@ -49,6 +50,7 @@ OPERATIONS = {
     "xai": {"vision"},
     "together": {"vision"},
     "fireworks": {"vision"},
+    "cohere": {"vision"},
     "azure": {"ocr", "invoice"},
     "google_documentai": {"ocr", "invoice"},
     "aws": {"ocr", "invoice"},
@@ -60,6 +62,7 @@ KEY_ENV = {
     "xai": "XAI_API_KEY",
     "together": "TOGETHER_API_KEY",
     "fireworks": "FIREWORKS_API_KEY",
+    "cohere": "COHERE_API_KEY",
     "azure": "AZURE_DOCUMENT_INTELLIGENCE_KEY",
     "mindee": "MINDEE_V2_API_KEY",
 }
@@ -145,7 +148,11 @@ class ModelOption(Model):
             raise ValueError("Partial field recovery requires typed compact protocol 5/6")
         if self.operation not in OPERATIONS.get(self.provider, set()) or ".." in self.model:
             raise ValueError("Unsupported provider operation or model identifier")
-        if self.schema_mode == "prompt_json" and self.provider not in {"anthropic", "gemini"}:
+        if self.schema_mode == "prompt_json" and self.provider not in {
+            "anthropic",
+            "gemini",
+            "cohere",
+        }:
             raise ValueError("Prompt JSON transport is not implemented for this provider")
         if self.provider == "together" and self.reasoning not in {None, "none", "enabled"}:
             raise ValueError("Together thinking mode must be none or enabled")

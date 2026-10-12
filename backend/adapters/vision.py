@@ -150,6 +150,32 @@ def vision_request(
                 "generationConfig": generation,
             },
         )
+    if provider == "cohere":
+        cohere_body: dict[str, Any] = {
+            "model": model,
+            "max_tokens": limit,
+            "messages": [
+                {"role": "system", "content": instructions},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Extract the printed payment fields."},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": "data:image/png;base64," + encoded},
+                        },
+                    ],
+                },
+            ],
+        }
+        if option.schema_mode == "prompt_json":
+            cohere_body["messages"][0]["content"] += (
+                "\nReturn only JSON, without markdown fences, matching this schema:\n"
+                + json.dumps(schema)
+            )
+        else:
+            cohere_body["response_format"] = {"type": "json_object", "schema": schema}
+        return "/v2/chat", {"Authorization": "Bearer " + key}, cohere_body
     if provider == "openai":
         body: dict[str, Any] = {
             "model": model,
@@ -253,6 +279,18 @@ def vision_text(
         ):
             raise ProviderError("invalid_provider_output")
         return "".join(p["text"] for p in parts if p["type"] == "output_text"), body.get("model")
+    if provider == "cohere":
+        message = body["message"]
+        if message.get("refusal") or body.get("finish_reason") in {"ERROR_TOXIC", "error_toxic"}:
+            raise ProviderError("provider_refusal")
+        parts = message["content"]
+        if (
+            body["finish_reason"] not in {"COMPLETE", "complete"}
+            or message.get("tool_calls")
+            or any(p["type"] != "text" for p in parts)
+        ):
+            raise ProviderError("invalid_provider_output")
+        return "".join(p["text"] for p in parts), body.get("model")
     (choice,) = body["choices"]
     message = choice["message"]
     if message.get("refusal") or choice["finish_reason"] == "content_filter":

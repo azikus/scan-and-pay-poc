@@ -45,6 +45,13 @@ def llm_response(provider, text, model):
             "candidates": [{"finishReason": "STOP", "content": {"parts": [{"text": text}]}}],
             "usageMetadata": {"promptTokenCount": 100, "candidatesTokenCount": 20},
         }
+    if provider == "cohere":
+        return {
+            "model": model,
+            "finish_reason": "COMPLETE",
+            "message": {"content": [{"type": "text", "text": text}]},
+            "usage": {"billed_units": {"input_tokens": 100, "output_tokens": 20}},
+        }
     return {
         "model": model,
         "choices": [{"finish_reason": "stop", "message": {"content": text}}],
@@ -53,7 +60,7 @@ def llm_response(provider, text, model):
 
 
 @pytest.mark.parametrize(
-    "provider", ["anthropic", "gemini", "xai", "together", "fireworks", "mistral"]
+    "provider", ["anthropic", "gemini", "xai", "together", "fireworks", "cohere", "mistral"]
 )
 def test_extended_vision_actual_protocol_and_evidence(settings, png, uk, provider):
     definition = configured(settings, provider)
@@ -82,7 +89,7 @@ def test_extended_vision_actual_protocol_and_evidence(settings, png, uk, provide
 
 @pytest.mark.parametrize(
     "provider",
-    ["anthropic", "gemini", "xai", "together", "fireworks", "mistral", "azure", "mindee"],
+    ["anthropic", "gemini", "xai", "together", "fireworks", "cohere", "mistral", "azure", "mindee"],
 )
 @pytest.mark.parametrize(
     "status,code", [(401, "provider_auth"), (429, "provider_quota"), (500, "provider_unavailable")]
@@ -109,7 +116,8 @@ def test_extended_failures_redacted_once(settings, png, provider, status, code):
 
 
 @pytest.mark.parametrize(
-    "provider", ["anthropic", "gemini", "xai", "together", "fireworks", "mistral", "openai"]
+    "provider",
+    ["anthropic", "gemini", "xai", "together", "fireworks", "cohere", "mistral", "openai"],
 )
 @pytest.mark.parametrize(
     "kind", ["malformed", "refusal", "truncated", "changed_model", "negative_usage", "tool"]
@@ -131,6 +139,8 @@ def test_vision_abstains_on_invalid_output(settings, png, uk, provider, kind):
         body["stop_reason"] = "refusal" if kind == "refusal" else "max_tokens"
     elif provider == "gemini":
         body["candidates"][0]["finishReason"] = "SAFETY" if kind == "refusal" else "MAX_TOKENS"
+    elif provider == "cohere":
+        body["finish_reason"] = "ERROR_TOXIC" if kind == "refusal" else "MAX_TOKENS"
     elif provider == "openai":
         body["status"] = "incomplete"
     else:
