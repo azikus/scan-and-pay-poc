@@ -1,4 +1,18 @@
-# Current project status — 12 October 2026
+# Current project status — 13 October 2026
+
+## Combined integration verification — 13 October
+
+Markus requested latest `main` merged into this branch, checked, and PR #9 merged. Integrated base: `08de9e15c20e468ea87caf0a5df9132b845c8486` (PR #7), which includes PR #8’s native glass/hotspot/Send changes. Only AGENTS.md and CODING_HANDOFF.md conflicted; both scopes were retained. No application conflict required a code change.
+
+The combined source passed **730 offline backend/evaluation tests**, with domain/orchestration **96.09% statement / 91.41% branch coverage**. Ruff lint/format, strict mypy, coverage gate, unchanged generated API contracts, admin JavaScript syntax, resolved diff checks, wheel/sdist builds and package privacy checks passed. The 25-slide presentation build/check passed with notes/assets intact and private gallery excluded.
+
+On a newly created isolated iPhone 16 Pro / iOS 26.2 simulator, **27 unit/recovery tests and all four synthetic UI tests passed** (31 total, zero failures/skips). Swift formatting passed. Private native logs/result bundle are under this worktree’s `.local/merge-main-2026-10-13/`; no phone installation, live service restart, invoice inference or private configuration/selection change occurred. Main’s approved removal of local financial admission limits and European endpoint support are retained; legacy accounting records are unchanged.
+
+
+**Main integration — 13 October:** Latest `main` is merged into this provider branch, retaining PR #8’s glass/hotspot/Send changes and PR #7’s European endpoint support and approved removal of local spending/cumulative-call enforcement. Legacy budget-plan/cost records below remain historical evidence; they do not control admission in the updated source. This integration does not restart the live service, alter private configuration/selection or authorize provider retries.
+
+
+**Current provider request status — 13 October:** 31 enabled/configured profiles remain after Fireworks/Aya removal. Latest processing evidence: **27 profiles completed without API errors**, **two retain last-request failures** (Haiku 4.5 availability/connection error; Mistral Large 4 timeout), and **two AWS profiles have verified authentication but untested processing**. Google OCR and Invoice processing now pass. Incomplete drafts are successful requests requiring review, not API failures. See [API_CONNECTION_STATUS.md](API_CONNECTION_STATUS.md) for every current profile and [LLM_EXPANSION.md](LLM_EXPANSION.md) for implementation scope. No new inference/runtime/configuration change is part of this documentation closeout.
 
 This file supersedes prospective wording and operational snapshots in the dated 8–9 October handoffs. Historical experiment evidence remains unchanged.
 
@@ -26,7 +40,7 @@ Pre-merge integration: latest `main` at `fdfc3bb` (PR #8, Liquid Glass/hotspot a
 
 ## Current private state
 
-Read-only snapshot on 12 October: **2,273 dispatched reservations / €351.95 held**. The current cumulative limits are **2,286 calls / €353.25**, leaving at most **13 calls / €1.30** at this snapshot, within the **€500 project cap**. These conservative holds are not actual provider bills; method-specific stage counts and ceilings determine how many scans fit.
+Read-only snapshot on 13 October: **2,342 reservations, 2,340 dispatched / €369.60 held**. The retained legacy plan records **2,350 reservations / €370.40**, with a historical difference of **eight reservations / €0.80**. Updated source does not enforce these values; the existing process was not restarted during integration. These conservative holds are not actual provider bills; stage counts and legacy ceilings remain accounting metadata, not admission rules in the updated source.
 
 Markus explicitly requested another allowance on 9 October after exhausting the prior 2,266 / €351.25 limits. The extension added **20 API calls / €2.00**, with the plan, prior configuration, original budget rows and verification under `.local/mobile-allowance-extension-00_zmrsg/`. Its scope is explicit mobile Sends. It does not authorize agents to run experiments or automatically extend limits.
 

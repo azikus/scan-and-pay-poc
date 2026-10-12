@@ -147,10 +147,15 @@ class ModelOption(Model):
             raise ValueError("Partial field recovery requires typed compact protocol 5/6")
         if self.operation not in OPERATIONS.get(self.provider, set()) or ".." in self.model:
             raise ValueError("Unsupported provider operation or model identifier")
-        if self.schema_mode == "prompt_json" and self.provider not in {"anthropic", "gemini"}:
+        if self.schema_mode == "prompt_json" and self.provider not in {
+            "anthropic",
+            "gemini",
+        }:
             raise ValueError("Prompt JSON transport is not implemented for this provider")
         if self.provider == "together" and self.reasoning not in {None, "none", "enabled"}:
             raise ValueError("Together thinking mode must be none or enabled")
+        if self.provider == "anthropic" and self.reasoning not in {None, "adaptive"}:
+            raise ValueError("Anthropic thinking mode must be adaptive or omitted")
         host = PROVIDER_HOSTS[self.provider]
         if self.config is None:
             self.config = ProviderConfig(endpoint_host=host or "unconfigured.invalid")

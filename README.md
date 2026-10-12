@@ -122,3 +122,7 @@ A localhost service accepts one JPEG/PNG, persists a job and returns a payment d
 - `docs/`: current handoff and synthetic contract examples, without real bank details.
 
 Original source material also remains at `/Users/markusi/Developer/Azikus/Aircash/scan_pay_phase1`. The missing client screenshot is not a backend blocker. Ask for more photos only for specific test needs.
+
+## Additional LLM choices
+
+[LLM expansion](docs/LLM_EXPANSION.md) documents the separate provider work, Grok charge accounting and 13 opt-in example presets in `providers.expanded.example.json`. Multiple models from one provider remain independently versioned choices in the admin once configured and enabled. [Provider API status](docs/API_CONNECTION_STATUS.md) distinguishes completed requests, remaining API failures and untested processing.
