@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor final class ScanSession: ObservableObject {
   enum Phase: Equatable {
-    case capture, crop, preview, uploading, queued, reading, review, recovery, failed
+    case capture, crop, preview, preparing, uploading, queued, reading, review, recovery, failed
   }
   @Published var phase: Phase = .capture
   @Published var image: UIImage?
@@ -15,8 +15,7 @@ import SwiftUI
   @Published var saving = false
   @Published var complete = false
   @Published var address = ""
-  @Published var cableAddress = ""
-  @Published var wifiAddress = ""
+  @Published var hotspotAddress = ""
   @Published private(set) var reconnecting = false
   @Published private(set) var connectionStatus: String?
   private(set) var connectionAttempts = [[String: String]]()
@@ -28,19 +27,26 @@ import SwiftUI
   private let clientSession: URLSession?
   private let pendingFile: URL
   private let defaults: UserDefaults
+  private let encodeImage: (UIImage) async throws -> Data
   init(
     fixtureMode: Bool = false, clientSession: URLSession? = nil,
-    pendingFile: URL = PendingStore.file, defaults: UserDefaults = .standard
+    pendingFile: URL = PendingStore.file, defaults: UserDefaults = .standard,
+    encodeImage: @escaping (UIImage) async throws -> Data = ScanSession.encodePNG
   ) {
     self.defaults = defaults
     self.clientSession = clientSession
     self.pendingFile = pendingFile
     self.fixtureMode = fixtureMode
-    address = defaults.string(forKey: "backendURL") ?? ""
-    cableAddress =
-      defaults.string(forKey: "backendCableURL") ?? (Self.isCable(address) ? address : "")
-    wifiAddress =
-      defaults.string(forKey: "backendWiFiURL") ?? (Self.isCable(address) ? "" : address)
+    self.encodeImage = encodeImage
+    // Migrate the working Wi-Fi URL, never the former USB or hosted route.
+    hotspotAddress =
+      ["backendHotspotURL", "backendWiFiURL", "backendURL"]
+      .compactMap { defaults.string(forKey: $0) }.first(where: Self.isHotspotAddress) ?? ""
+    address = hotspotAddress
+    defaults.set(hotspotAddress, forKey: "backendHotspotURL")
+    defaults.set(address, forKey: "backendURL")
+    defaults.removeObject(forKey: "backendCableURL")
+    defaults.removeObject(forKey: "backendWiFiURL")
     if !fixtureMode, let stored = PendingStore.read(from: pendingFile),
       let image = UIImage(data: stored.image)
     {
@@ -76,7 +82,7 @@ import SwiftUI
       }
     #endif
   }
-  var processing: Bool { [.uploading, .queued, .reading].contains(phase) }
+  var processing: Bool { [.preparing, .uploading, .queued, .reading].contains(phase) }
   var confirmationValues: JSONValue? {
     if let body = pending?.confirmationBody {
       return try? JSONDecoder().decode(JSONValue.self, from: body)
@@ -84,8 +90,12 @@ import SwiftUI
     return draft?.confirmation
   }
   var processingTitle: String {
-    phase == .uploading
-      ? "Uploading image…" : phase == .queued ? "Waiting to read…" : "Reading payment details…"
+    switch phase {
+    case .preparing: return "Preparing image…"
+    case .uploading: return "Uploading image…"
+    case .queued: return "Waiting to read…"
+    default: return "Reading payment details…"
+    }
   }
   func configure(address: String, token: String) throws {
     _ = try BackendClient(address: address, token: token, session: clientSession)
@@ -94,21 +104,27 @@ import SwiftUI
     self.token = token
     defaults.set(address, forKey: "backendURL")
   }
-  static func isCable(_ address: String) -> Bool {
-    URL(string: address)?.host?.hasPrefix("169.254.") == true
+  // The app cannot identify the Wi-Fi SSID. Accept a local Mac address, with one
+  // saved endpoint for the Personal Hotspot workflow; no USB/cloud fallback.
+  static func isHotspotAddress(_ address: String) -> Bool {
+    guard let url = URL(string: address), url.scheme == "http", let host = url.host else {
+      return false
+    }
+    let octets = host.split(separator: ".").compactMap { Int($0) }
+    return host.hasSuffix(".local")
+      || (octets.count == 4 && octets.allSatisfy { (0...255).contains($0) }
+        && (octets[0] == 10 || octets[0] == 192 && octets[1] == 168
+          || octets[0] == 172 && (16...31).contains(octets[1])))
   }
-  func configureRoutes(cable: String, wifi: String, token: String) throws {
+  func configureHotspot(address: String, token: String) throws {
     guard !processing, !saving, !reconnecting else { return }
-    let cable = cable.trimmingCharacters(in: .whitespacesAndNewlines)
-    let wifi = wifi.trimmingCharacters(in: .whitespacesAndNewlines)
-    let routes = [cable, wifi].filter { !$0.isEmpty }
-    guard let first = routes.first else { throw ClientFailure("Enter a Mac address.") }
-    for route in routes { _ = try BackendClient(address: route, token: token) }
-    try configure(address: routes.contains(address) ? address : first, token: token)
-    cableAddress = cable
-    wifiAddress = wifi
-    defaults.set(cable, forKey: "backendCableURL")
-    defaults.set(wifi, forKey: "backendWiFiURL")
+    let address = address.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard Self.isHotspotAddress(address) else {
+      throw ClientFailure("Enter the Mac’s local HTTP address from the admin Connection panel.")
+    }
+    try configure(address: address, token: token)
+    hotspotAddress = address
+    defaults.set(address, forKey: "backendHotspotURL")
     connectionStatus = nil
   }
   func reconnect() async {
@@ -125,13 +141,8 @@ import SwiftUI
       clientSession
       ?? URLSession(configuration: config, delegate: NoRedirects(), delegateQueue: nil)
     defer { if clientSession == nil { probe.invalidateAndCancel() } }
-    var seen = Set<String>()
-    let routes = [
-      ("USB", cableAddress), ("Wi-Fi", wifiAddress),
-      (Self.isCable(address) ? "USB" : "Wi-Fi", address),
-    ]
-    .filter { !$0.1.isEmpty && seen.insert($0.1).inserted }
-    var lastError = "Enter the Mac addresses in Connection settings."
+    let routes = Self.isHotspotAddress(hotspotAddress) ? [("hotspot", hotspotAddress)] : []
+    var lastError = "Enter the Mac’s hotspot address in Connection settings."
     for (label, route) in routes {
       guard identity == generation, !Task.isCancelled else {
         connectionStatus = nil
@@ -225,19 +236,36 @@ import SwiftUI
     phase = .capture
   }
   func send() {
-    guard phase == .preview, pending == nil, !reconnecting, let image else { return }
+    guard phase == .preview else { return }
+    guard pending == nil else {
+      phase = .recovery
+      message = "Continue the saved scan before sending another image."
+      return
+    }
+    guard !reconnecting else {
+      message = "Checking the hotspot connection. Tap Send again when it finishes."
+      return
+    }
+    guard let image else {
+      message = "This image is unavailable. Retake the photo."
+      return
+    }
     if fixtureMode {
       loadFixture()
       return
     }
     do {
       let client = try BackendClient(address: address, token: token, session: clientSession)
-      guard let bytes = image.pngData() else { throw ClientFailure("Could not encode this image.") }
-      phase = .uploading
+      phase = .preparing
       message = nil
       let identity = generation
       task = Task {
         do {
+          try Task.checkCancellation()
+          let bytes = try await encodeImage(image)
+          try Task.checkCancellation()
+          guard identity == generation else { return }
+          phase = .uploading
           let selection = try await client.selection()
           let selected = selection.profile
           try Task.checkCancellation()
@@ -255,6 +283,19 @@ import SwiftUI
         } catch { fail(error, identity: identity) }
       }
     } catch { message = error.localizedDescription }
+  }
+  nonisolated static func encodePNG(_ image: UIImage) async throws -> Data {
+    let encoding = Task.detached(priority: .userInitiated) {
+      try Task.checkCancellation()
+      guard let bytes = image.pngData() else { throw ClientFailure("Could not encode this image.") }
+      try Task.checkCancellation()
+      return bytes
+    }
+    return try await withTaskCancellationHandler {
+      try await encoding.value
+    } onCancel: {
+      encoding.cancel()
+    }
   }
   func recover() {
     guard let pending, !processing, !saving, !reconnecting else { return }
