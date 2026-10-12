@@ -1,6 +1,6 @@
 # Coding handoff — continue here
 
-**Separate provider work — 12 October:** Markus requested broader LLM/model support in an isolated worktree. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for scope, disabled presets and verification. This authorizes offline implementation; preserve live configuration, selection and ledger, and do not resume the interrupted comparison.
+**Separate provider work — 12 October:** Markus requested broader LLM/model support in an isolated worktree. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for scope, disabled presets and verification. Markus subsequently authorized activation for existing providers: 13 new options are enabled with read-only account checks; Fireworks remains disabled awaiting its key. The private launcher runs this worktree against the original private state. Default/ledger/caps are unchanged; do not resume the interrupted comparison.
 
 ## Current scope — 12 October 2026
 
