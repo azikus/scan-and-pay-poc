@@ -71,7 +71,3 @@ Native mobile capture/review is designed before implementation, iOS first. The a
 The current diagram is editable documentation. Final findings and the [separate cost report](COST_REPORT_PLAN.md) are distinct deliverables.
 
 The user-requested private progress explainer is `reports/overview-2026-10-07/index.html`. It summarizes implementation and processing outcomes; the final findings report and attendee companion remain later deliverables.
-
-## European processing / no-training gate — 12 October follow-up
-
-[EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md) owns the mandatory `europe-no-training@1` gate for new deployments. It requires scoped, current evidence and approved content endpoints before acceptance and dispatch, including every hybrid recipient. Unverified profiles remain catalogued but unavailable; runtime selection does not override the gate. The running PoC/private config is preserved pending a reviewed deployment. Provider account controls and retention agreements require external verification; declarations alone are not proof.

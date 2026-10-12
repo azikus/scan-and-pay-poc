@@ -33,7 +33,6 @@ exclude = ["backend/tests"]
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
 asyncio_mode = "auto"
-markers = ["data_policy: exercise mandatory European/no-training gates without historical fixture bypass"]
 addopts = "-q"
 
 [tool.ruff]

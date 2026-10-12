@@ -12,7 +12,6 @@ from uuid import uuid4
 import httpx
 from pydantic import SecretStr
 
-from backend import data_policy
 from backend.adapters.vision import claims, vision_request, vision_text
 from backend.config import ModelOption, Settings
 from backend.document_observations import DocumentObservation
@@ -120,21 +119,6 @@ class ExtendedAdapter:
         config = option.config
         assert config is not None
         provider = option.provider
-        if (
-            config != context.definition.config
-            or provider != context.definition.metadata.provider
-            or option.model
-            != (context.definition.metadata.model or context.definition.metadata.processor)
-        ):
-            raise ProviderError("data_policy_blocked")
-        data_policy.require_definition(
-            context.definition, ["ocr_text", "layout"] if document else ["image"]
-        )
-        outbound_payloads = ["ocr_text", "layout"] if document else ["image"]
-        if data_policy.violations(
-            provider, option.model, option.operation, config, outbound_payloads
-        ):
-            raise ProviderError("data_policy_blocked")
         key = (
             getattr(self.settings, provider + "_key")
             if provider in {"openai", "mistral"}
@@ -158,9 +142,6 @@ class ExtendedAdapter:
                         path
                         if path.startswith("https://")
                         else f"https://{config.endpoint_host}{path}"
-                    )
-                    data_policy.require_destination(
-                        url, provider, option.model, option.operation, config, outbound_payloads
                     )
                     # Auth preparation happens before the first actual inference dispatch.
                     if stage is None:

@@ -63,10 +63,6 @@ The following are individual CLI syntax examples from completed Milestone 1, not
 
 The CLI prints the accepted scan ID and a safe summary, polls by default, and saves the complete result under `.local/client/`. Use the actual returned `scan-…` ID for `get` and `delete`. A failed upload is never automatically retried. Reuse its original key and bytes/options to recover acceptance; a new key intentionally creates a new run. `--no-wait` returns after acceptance. Compare also accepts `--profiles all_enabled`.
 
-## European processing and no-training
-
-New backend deployments enforce [europe-no-training@1](docs/EUROPEAN_DATA_POLICY.md). Only reviewed European routes with current account/model-specific no-training evidence can dispatch invoice images or OCR text. Unverified/global profiles are unavailable; there is no production bypass or global fallback. The current private configuration is not migrated automatically. Start with the disabled `providers.europe.example.json` and complete provider approvals before deployment.
-
 ## Offline verification
 
 ```sh

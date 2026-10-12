@@ -13,7 +13,6 @@ import httpx
 from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpenAI
 from pydantic import Field, ValidationError
 
-from backend import data_policy
 from backend.config import Settings
 from backend.errors import ProviderError
 from backend.images import sha256
@@ -127,14 +126,6 @@ class OpenAIAdapter:
         config = definition.config
         if config is None:
             raise ProviderError("provider_auth")
-        data_policy.require_destination(
-            f"https://{config.endpoint_host}/v1/responses",
-            "openai",
-            "gpt-6-luna",
-            "vision",
-            config,
-            ["image"],
-        )
         data_url = "data:image/png;base64," + base64.b64encode(context.image()).decode()
         request: dict[str, Any] = {
             "model": "gpt-6-luna",
@@ -279,14 +270,6 @@ class MistralAdapter:
         config = context.definition.config
         if config is None:
             raise ProviderError("provider_auth")
-        data_policy.require_destination(
-            f"https://{config.endpoint_host}/v1/ocr",
-            "mistral",
-            "mistral-ocr-4-1",
-            "ocr",
-            config,
-            ["image"],
-        )
         data = context.image()
         # Supplier image limit, also checked before job acceptance.
         if len(data) > 20_000_000:

@@ -10,10 +10,6 @@ This file supersedes prospective wording and operational snapshots in the dated 
 - The 12 October repository import places editable HTML, theme, motion, reviewed assets and reproducible build/serve/export tooling under [presentation/](../presentation/README.md). The normal build excludes the real invoice gallery; a separate ignored local edition preserves it. The original external deck is untouched.
 - [PRESENTATION_CONTENT.md](PRESENTATION_CONTENT.md) is generated from the HTML source. [PRESENTATION_EVIDENCE.md](PRESENTATION_EVIDENCE.md) records authoring sources and revisions. Both belong in Git alongside the deck. No later application development is part of this import.
 
-## Authorized privacy follow-up — 12 October
-
-Markus requested a separate PR for European content processing and no-training enforcement. See [EUROPEAN_DATA_POLICY.md](EUROPEAN_DATA_POLICY.md) for the mandatory gate, supported routes, verification and remaining provider/account approvals. PR #7 remains unmerged pending acceptance of the live check: Mistral Small/OCR returned usable incomplete drafts from the EU endpoint with training/Labs off; OpenAI was blocked without inference because supplier approval is absent. Source review and all 738 backend/evaluation, 23 native unit/recovery and 2 UI tests pass. Source review also tightened actual destination/model checks in the starter adapters. The live check made two Mistral EU calls and temporarily stopped/restored the idle backend owner; existing configuration, selection, credentials and device data were preserved. Deploying this code will block unreviewed/global profiles until eligible new profiles are verified; the presentation's dated results remain unchanged.
-
 ## Current private state
 
 Read-only snapshot on 12 October: **2,273 dispatched reservations / €351.95 held**. The current cumulative limits are **2,286 calls / €353.25**, leaving at most **13 calls / €1.30** at this snapshot, within the **€500 project cap**. These conservative holds are not actual provider bills; method-specific stage counts and ceilings determine how many scans fit.

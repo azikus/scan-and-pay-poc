@@ -3,49 +3,14 @@
 import json
 import os
 import re
-from datetime import date
 from decimal import Decimal
 from pathlib import Path
 from typing import Literal, Self
 
 from dotenv import load_dotenv
-from pydantic import (
-    Field,
-    SecretStr,
-    SerializerFunctionWrapHandler,
-    model_serializer,
-    model_validator,
-)
+from pydantic import Field, SecretStr, model_validator
 
 from backend.models import Model, Text
-
-
-class DataApproval(Model):
-    """Operator-reviewed evidence, scoped to one account, destination and model.
-
-    These declarations do not configure vendor controls or prove vendor compliance.
-    Keep supporting agreements/account screenshots private.
-    """
-
-    account_alias: Text
-    endpoint_host: Text
-    model: Text
-    operation: Literal["vision", "ocr", "invoice", "annotations"]
-    payload_classes: list[Literal["image", "ocr_text", "layout"]] = Field(min_length=1)
-    processing_boundary: Literal["eea_switzerland"] = "eea_switzerland"
-    no_training: bool = False
-    image_processing_approved: bool = False
-    checked_at: date
-    expires_at: date
-    region_evidence: Text
-    training_evidence: Text
-    retention_note: Text
-
-    @model_validator(mode="after")
-    def dated_review(self) -> Self:
-        if self.expires_at < self.checked_at:
-            raise ValueError("Data approval expires before its review")
-        return self
 
 
 class ProviderConfig(Model):
@@ -58,16 +23,6 @@ class ProviderConfig(Model):
     data_terms_checked_at: Text | None = None
     data_terms_note: Text | None = None
     pricing_checked_at: Text | None = None
-    data_approval: DataApproval | None = None
-
-    @model_serializer(mode="wrap")
-    def preserve_legacy_snapshot(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
-        data = handler(self)
-        # Unreviewed historical configs retain their original hashes/snapshots.
-        if self.data_approval is None:
-            data.pop("data_approval", None)
-        return dict(data)
-
     # Operator-supplied EUR ceiling includes taxes/FX/unknowns, not a claimed conversion.
     max_call_eur: Decimal | None = Field(default=None, gt=0, le=30, allow_inf_nan=False)
 
@@ -84,10 +39,6 @@ PROVIDER_HOSTS = {
     "google_documentai": None,
     "aws": None,
     "mindee": "api-v2.mindee.net",
-}
-REGIONAL_PROVIDER_HOSTS = {
-    "openai": {"api.openai.com", "eu.api.openai.com", "us.api.openai.com"},
-    "mistral": {"api.mistral.ai", "api.eu.mistral.ai"},
 }
 OPERATIONS = {
     "openai": {"vision"},
@@ -198,9 +149,7 @@ class ModelOption(Model):
         host = PROVIDER_HOSTS[self.provider]
         if self.config is None:
             self.config = ProviderConfig(endpoint_host=host or "unconfigured.invalid")
-        if host and self.config.endpoint_host not in REGIONAL_PROVIDER_HOSTS.get(
-            self.provider, {host}
-        ):
+        if host and self.config.endpoint_host != host:
             raise ValueError("Unsupported provider endpoint")
         if not host and self.config.endpoint_host != "unconfigured.invalid":
             patterns = {
@@ -267,7 +216,7 @@ class ProfileConfig(Model):
             "us.api.openai.com",
         }:
             raise ValueError("Unsupported OpenAI endpoint")
-        if self.mistral.endpoint_host not in REGIONAL_PROVIDER_HOSTS["mistral"]:
+        if self.mistral.endpoint_host != "api.mistral.ai":
             raise ValueError("Unsupported Mistral endpoint")
         return self
 
