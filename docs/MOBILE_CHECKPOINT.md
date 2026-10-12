@@ -1,5 +1,7 @@
 # Mobile and inspector checkpoint — 9 October 2026
 
+**Current continuation — 12 October 2026:** the initial presentation is delivered and its source is in [presentation/](../presentation/README.md). [CURRENT_STATUS.md](CURRENT_STATUS.md) owns the latest operational snapshot and authorized allowance. The dated checkpoints below retain their original values and verification evidence; they do not override the current handoff.
+
 **Latest connection follow-up:** [Connection setup](CONNECTION_SETUP.md) records the newly approved admin panel, automatic backend network updates and verified same-iPhone hotspot. Presentation is next; no new native code.
 
 **Preceding continuation:** [confirmation sheets](CONFIRMATION_SHEETS.md) records the separately authorized extracted-field review change and updated tests. [ROADMAP.md](ROADMAP.md) owns the newly agreed five milestones; [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md) and [PRESENTATION_PROMPT.md](PRESENTATION_PROMPT.md) prepare the next chat. No other implementation or deck creation now. The acceptance and verification below retain the preceding mobile/refactor checkpoint.

@@ -1,13 +1,11 @@
-# Start the initial presentation in a new chat
+# Continue the Scan and Pay presentation
 
-Copy the following into a chat using this repository:
+Copy into a chat using this repository:
 
-> Let's create the initial Scan and Pay presentation together. Work in `/Users/markusi/Developer/Azikus/scan-and-pay`.
+> Let's continue the existing Scan and Pay presentation. Read `AGENTS.md`, `docs/CURRENT_STATUS.md`, `docs/CODING_HANDOFF.md`, `docs/ROADMAP.md`, `presentation/README.md`, `docs/PRESENTATION_CONTENT.md` and `docs/PRESENTATION_EVIDENCE.md`.
 >
-> First read `AGENTS.md`, `docs/CODING_HANDOFF.md`, `docs/ROADMAP.md`, `docs/PRESENTATION_HANDOFF.md`, `docs/CONFIRMATION_SHEETS.md` and `docs/CONNECTION_SETUP.md`. The handoff is the comprehensive source pack: product journey, architecture, current admin choice, dated comparisons, scoring caveats, cost evidence, demo setup, limitations and private source locations. Inspect actual Git/PR state for the latest merged checkpoint.
+> The approved 25-slide reveal.js source is `presentation/index.html`, with English slides, Croatian speaker notes and approximately 19–20 minutes including the demo. Preserve its design and retained evidence unless I request changes. Build with `npm ci --ignore-scripts` and `npm run build` in `presentation/`, verify with `npm run check`, and preview with `npm start`. Regenerate the text companion with `npm run content` after edits. Use the presentation and Azikus brand guidance when changing the deck.
 >
-> Help me agree the audience, purpose, duration, language, format and demo plan, then build the initial presentation collaboratively. Use the Presentations and Azikus brand skills when authoring. Base claims on retained evidence; show what is implemented, measured and still planned. No inferred whole-invoice accuracy, production-readiness or camera-to-review timing claims.
+> The default edition excludes real invoice imagery. An explicit private local build can include the ignored gallery; never commit invoices, private screenshots/outputs, credentials or generated private exports. Do not publish the deck automatically.
 >
-> Our agreed sequence is: (1) this initial presentation; (2) remaining iOS improvements and real-invoice testing; (3) backend/admin improvements and integration testing; (4) Android plus testing across both platforms, the final development milestone; (5) a comprehensive final presentation and embeddable website HTML about functionality/results. Development can span multiple sessions. Do not implement these later milestones or build the final HTML now.
->
-> The confirmation sheets and the subsequently approved admin Connection/automatic backend network update were the two pre-presentation code exceptions. Same-iPhone hotspot authentication is verified; phone URLs are still entered explicitly. Preserve original extraction JSON, edits/recovery, private files, selected Mistral Small profile and existing ledger (2,204 dispatches / €336.75 held at the handoff). OpenAI's selection is a historical benchmark decision, not the current admin choice. No new paid calls, completed experiment reruns, force push, subscriptions or public publication. Use labelled synthetic demos or saved evidence for preparation; ask me to make an explicitly authorized live Send if needed. Keep invoices, banking data and credentials out of shared artifacts.
+> Keep current operating facts separate from historical benchmark results. Preserve the actual selected profile, live allowance, original ledger and device data. No new paid calls, completed evaluation reruns or resumption of the stopped 9 October experiment. The initial deck does not authorize later iOS/backend/Android work or the final website milestone.

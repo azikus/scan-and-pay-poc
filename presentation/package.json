@@ -1,0 +1,16 @@
+{
+  "name": "scan-and-pay-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:private": "node scripts/build.mjs --private",
+    "start": "node scripts/serve.mjs",
+    "start:private": "node scripts/serve.mjs --private",
+    "check": "node scripts/check.mjs",
+    "content": "node scripts/content.mjs"
+  },
+  "dependencies": { "reveal.js": "6.0.2" }
+}

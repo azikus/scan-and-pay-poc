@@ -1,5 +1,7 @@
 # Handoff verification
 
+**Current continuation — 12 October 2026:** the initial presentation is delivered and its source is in [presentation/](../presentation/README.md). [CURRENT_STATUS.md](CURRENT_STATUS.md) owns the latest operational snapshot and authorized allowance. The dated checkpoints below retain their original values and verification evidence; they do not override the current handoff.
+
 ## Current checkpoint — 9 October 2026
 
 Native iOS and the authenticated admin inspector are implemented, and Markus confirmed his real-invoice testing is complete. Current acceptance, scope and limitations are recorded in [mobile checkpoint](MOBILE_CHECKPOINT.md). Reorganization checks: **672 offline backend/evaluation tests; 95.92% statement / 91.15% branch coverage; 16 native unit/recovery and 2 simulator UI tests**, with lint/format/types/contracts/JS, installed-wheel serving and source-distribution rebuild checks passing. Signed device build and installation belong to the prior mobile checkpoint; this folder move leaves the installed phone app untouched.

@@ -4,9 +4,9 @@ Independent Azikus backend for turning one JPEG/PNG invoice image into an editab
 
 **Current checkpoint — 9 October 2026:** the native iOS capture/crop → Send → editable review → confirmation/reset flow and the authenticated admin inspector are implemented. Markus confirmed that his real-invoice iPhone testing is complete. This is PoC acceptance, not a production accuracy or measured end-to-end latency claim. See [mobile checkpoint](docs/MOBILE_CHECKPOINT.md), [mobile implementation](docs/MOBILE_IMPLEMENTATION.md) and [iOS setup](ios/README.md).
 
-The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. Seven tested profiles are enabled under the existing bounded mobile allowance. The persisted admin selection is currently **Mistral Small** (`mistral-small-image-roles-v3@2-b292ba761e512607`); pending drafts retain their original profile. OpenAI remains the historical Phase 2 baseline, described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
+The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. Seven tested profiles are enabled under the existing bounded mobile allowance. The latest persisted selection is recorded in [current status](docs/CURRENT_STATUS.md); pending drafts retain their original profile. The historical Phase 2 baseline is described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
 
-At this checkpoint, the original ledger contains **2,204 dispatched reservations / €336.75 held**. The unchanged mobile limits are 2,217 / €338.05; no paid calls are authorized for this connection update or presentation preparation. Private samples, labels, raw responses, reports and credentials remain outside Git. These holds are not actual billed charges.
+The latest operational snapshot, current bounded mobile allowance and selection are in [current status](docs/CURRENT_STATUS.md). Historical experiment holds and current allowances are distinct from actual provider bills. Private samples, labels, raw responses and credentials remain outside Git.
 
 The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). Repository reorganization is [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), with its checks recorded in the [reorganization handoff](docs/REPOSITORY_REORGANIZATION_HANDOFF.md).
 
@@ -14,7 +14,7 @@ The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and
 
 **Connection setup ([PR #5](https://github.com/azikus/scan-and-pay-poc/pull/5)):** expand **Connection** in the admin to copy the current Mac URL into the existing iOS Connection settings. The new `.venv/bin/scanpay-serve` launcher follows private local network changes without restarting the backend. Keep the Mac admin open at `http://127.0.0.1:8000/admin`. See [setup, verification and limits](docs/CONNECTION_SETUP.md).
 
-**Next:** create the initial presentation **together with Markus in a new chat**. The [comprehensive presentation handoff](docs/PRESENTATION_HANDOFF.md) contains functionality, architecture, dated results, caveats, source evidence and demo setup; use the [copyable new-chat prompt](docs/PRESENTATION_PROMPT.md). The agreed [milestones](docs/ROADMAP.md) then continue through iOS improvements/testing, backend/admin work/integration, Android as the final development step, and a comprehensive final presentation plus embeddable website HTML. The sheets and connection setup are the approved pre-presentation updates; no later milestone or presentation is started. Same-iPhone hotspot connectivity is verified; automatic phone discovery remains open. See [coding handoff](docs/CODING_HANDOFF.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md).
+**Presentation:** the approved 25-slide reveal.js deck now lives in [presentation/](presentation/README.md), with local build/serve instructions, an offline audience export and separate private invoice assets. The initial deck is delivered; its [content](docs/PRESENTATION_CONTENT.md) and [evidence](docs/PRESENTATION_EVIDENCE.md) are versioned alongside it. **Next:** agree the remaining iOS improvements/testing, then backend/admin work, Android and both-platform testing, and the comprehensive final presentation/embeddable HTML. See [current status](docs/CURRENT_STATUS.md), [coding handoff](docs/CODING_HANDOFF.md) and [roadmap](docs/ROADMAP.md).
 
 ## Repository layout
 
@@ -22,6 +22,7 @@ The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and
 - [frontend/](frontend/README.md): admin HTML/CSS/JavaScript and assets, served by the same FastAPI process and bundled into the Python wheel.
 - [ios/](ios/README.md): native app, XcodeGen specification, Xcode project and synthetic tests.
 - [android/](android/README.md): future-work README only.
+- [presentation/](presentation/README.md): editable reveal.js deck, reviewed assets and build/serve/export tooling.
 - `contracts/`, `docs/`, `evaluation/`: shared contracts, documentation and retained evaluation tooling.
 
 Python packaging/configuration stays at the root. Private `.env`, `.local/`, `samples/`, `results/` and historical `reference/` locations stay unchanged.
@@ -100,7 +101,7 @@ A localhost service accepts one JPEG/PNG, persists a job and returns a payment d
 - Preserve paired UK bank details, IBAN, Croatian model/poziv na broj, amount/currency and required references. Customer numbers are not bank routing.
 - Every draft requires review/confirmation. No silent banking-digit repairs, model-confidence guarantees or majority-vote truth.
 - Up to €500 and client-sample provider testing are authorized. Configure secrets locally; no automatic subscription purchases. Public use requires separate permission.
-- Native iOS is implemented. Presentation collaboration comes after repository cleanup; further mobile/backend improvements follow, with Android last. Final findings and the separate attendee display remain distinct deliverables.
+- Native iOS is implemented. The initial presentation is delivered; further mobile/backend improvements follow, with Android last. Final findings and the separate attendee display remain distinct deliverables.
 
 ## Existing material
 

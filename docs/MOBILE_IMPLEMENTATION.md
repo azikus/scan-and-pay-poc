@@ -1,5 +1,7 @@
 # Mobile implementation — 9 October 2026
 
+**Current continuation — 12 October 2026:** the initial presentation is delivered and its source is in [presentation/](../presentation/README.md). [CURRENT_STATUS.md](CURRENT_STATUS.md) owns the latest operational snapshot and authorized allowance. The dated checkpoints below retain their original values and verification evidence; they do not override the current handoff.
+
 ## Latest sheet update — 9 October 2026
 
 The review and Pay confirmation sheets now show every non-null extracted selected-payment/invoice field, grouped into Payment details and Invoice details. Untouched inferred/derived values and recipient-role fallbacks stay out of new mobile confirmations; explicit edits remain visible and marked Edited. Original JSON and already-frozen confirmation retries are preserved. See [CONFIRMATION_SHEETS.md](CONFIRMATION_SHEETS.md) for implementation, migration and verification (23 native unit/recovery tests and 2 UI tests). No backend/admin implementation changed.
