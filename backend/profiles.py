@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Literal
 
+from backend import data_policy
 from backend.config import ModelOption, ProviderConfig, Settings, option_resources
 from backend.errors import ServiceError
 from backend.images import PreparedImage
@@ -334,6 +335,14 @@ def registry(settings: Settings) -> dict[str, Definition]:
             parameters=hybrid_parameters,
             stages=parts,
         )
+    for definition in definitions.values():
+        failures = data_policy.definition_violations(definition)
+        if failures:
+            definition.metadata.configured = False
+            existing = definition.metadata.unavailable_reason
+            definition.metadata.unavailable_reason = "; ".join(
+                ([existing] if existing else []) + [data_policy.POLICY + ": " + "; ".join(failures)]
+            )
     return definitions
 
 
@@ -341,6 +350,9 @@ def resolve(
     options: Options, mime: str, definitions: dict[str, Definition]
 ) -> tuple[list[Definition], list[ExcludedProfile]]:
     def unavailable(d: Definition) -> str | None:
+        failures = data_policy.definition_violations(d)
+        if failures:
+            return data_policy.POLICY + ": " + "; ".join(failures)
         m = d.metadata
         if not m.implemented or not m.enabled or not m.configured:
             return m.unavailable_reason or "Profile unavailable"
@@ -359,6 +371,12 @@ def resolve(
         selected, excluded = [], []
         for profile_id in options.profiles:
             d = definitions.get(profile_id)
+            if d is not None and data_policy.definition_violations(d):
+                raise ServiceError(
+                    422,
+                    "data_policy_blocked",
+                    "Selected profile does not meet European processing and no-training requirements.",
+                )
             if d is None or unavailable(d):
                 raise ServiceError(
                     422,

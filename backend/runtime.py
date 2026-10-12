@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
+from backend import data_policy
 from backend.config import Settings
 from backend.errors import ProviderError
 from backend.models import (
@@ -77,6 +78,8 @@ class Context:
     def stage(
         self, method: str, *, external: bool, payloads: list[Any], input_hash: str | None = None
     ) -> Stage:
+        if external:
+            data_policy.require_definition(self.definition, payloads)
         config = self.definition.config
         stage = Stage(
             id="stage-" + uuid4().hex,
@@ -174,6 +177,7 @@ class Runtime:
             self.store.save(scan)
             context = Context(self.store, scan, run, definition)
             try:
+                data_policy.require_definition(definition)
                 if remaining <= 0:
                     raise ProviderError("provider_timeout")
                 async with asyncio.timeout(

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
+from backend import data_policy
 from backend.client_reviews import (
     ClientReview,
     ClientReviews,
@@ -195,6 +196,12 @@ class Store:
                 existing = self._existing(db, key, digest)
                 if existing:
                     return existing, False
+                if any(data_policy.definition_violations(d) for d in definitions):
+                    raise ServiceError(
+                        422,
+                        "data_policy_blocked",
+                        "European processing and no-training approval is required before acceptance.",
+                    )
                 active = db.execute(
                     "SELECT COUNT(*) FROM jobs WHERE state IN ('queued','running')"
                 ).fetchone()[0]
@@ -432,8 +439,10 @@ class Store:
                 )
 
     def reconcile(self, run: Run) -> None:
-        # Preserve EUR holds even on known USD estimates: no implicit FX or forgiveness.
+        # Preserve dispatched EUR holds even on known USD estimates: no implicit FX.
         with self.connection() as db:
+            if run.error is not None and run.error.code == "data_policy_blocked":
+                self.release_undispatched(db, run.id)
             costs = [
                 s.cost.model_dump() for s in run.diagnostics.stages if s.execution == "external"
             ]

@@ -16,6 +16,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException
 
+from backend import data_policy
 from backend.client_reviews import ClientReview, ClientReviews, SavedClientReview, ScanList
 from backend.config import Settings
 from backend.errors import ServiceError
@@ -151,6 +152,10 @@ def create_app(
         values = []
         for _, definition in sorted(request.app.state.definitions.items()):
             value = definition.metadata.model_copy(deep=True)
+            failures = data_policy.definition_violations(definition)
+            if failures:
+                value.configured = False
+                value.unavailable_reason = data_policy.POLICY + ": " + "; ".join(failures)
             value.live_validated = store.is_validated(value.id, value.version)
             values.append(value)
         selected = store.mobile_selection()
