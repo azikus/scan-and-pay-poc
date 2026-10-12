@@ -1,6 +1,21 @@
 import XCTest
 
 final class ScanAndPayUITests: XCTestCase {
+  func testSendRespondsAcrossItsVisibleSurface() {
+    for point in [CGVector(dx: 0.1, dy: 0.5), CGVector(dx: 0.5, dy: 0.85)] {
+      let app = XCUIApplication()
+      app.launchArguments = ["-synthetic-preview"]
+      app.launch()
+      app.buttons["capture"].tap()
+      app.buttons["use-crop"].tap()
+      let send = app.buttons["send-image"]
+      XCTAssertTrue(send.waitForExistence(timeout: 5))
+      send.coordinate(withNormalizedOffset: point).tap()
+      XCTAssertTrue(app.staticTexts["Review details"].waitForExistence(timeout: 5))
+      app.terminate()
+    }
+  }
+
   func testCaptureCropReviewAndReset() throws {
     let app = XCUIApplication()
     app.launchArguments = ["-synthetic-preview"]

@@ -18,6 +18,8 @@ Start the existing Mac backend with `.venv/bin/scanpay-serve` from the repositor
 
 No scan request leaves the app before Send. The client verifies the advertised exact profile/version, uploads one oriented PNG tagged `X-Scanpay-Client: mobile` and polls its scan ID; the app never calls a provider. [Current status](../docs/CURRENT_STATUS.md) records the latest authorized cumulative caps and dated ledger snapshot. Preserve the original ledger; do not raise limits automatically. Reconnect and UI checks make no paid calls.
 
+Send immediately shows **Preparing image…** while encoding the PNG off the UI thread. Repeated taps cannot submit a second scan. The preview image does not intercept touches before sending, and the full primary-button surface accepts taps. Failed preparation retains the image with an error; backgrounding before preparation finishes cancels submission. Permission prompts do not count as backgrounding. An unsent capture remains in memory only and must be retaken after an app relaunch.
+
 ## Appearance and motion
 
 Every screen shares the Azikus mark and **Scan & Pay** title, with a subtitle for the current screen or processing state. Header actions move to a separate row at accessibility text sizes.

@@ -83,7 +83,10 @@ private final class FakeMac: @unchecked Sendable {
 }
 
 @MainActor final class RecoveryTests: XCTestCase {
-  private func setup(empty: Bool = false, result: JSONValue? = nil) throws -> (
+  private func setup(
+    empty: Bool = false, result: JSONValue? = nil,
+    encodeImage: @escaping (UIImage) async throws -> Data = ScanSession.encodePNG
+  ) throws -> (
     ScanSession, FakeMac, URL
   ) {
     let source = try result ?? ScanAndPayTests().fixture()
@@ -103,7 +106,7 @@ private final class FakeMac: @unchecked Sendable {
       path: "pending.json")
     let model = ScanSession(
       clientSession: session, pendingFile: file,
-      defaults: UserDefaults(suiteName: UUID().uuidString)!)
+      defaults: UserDefaults(suiteName: UUID().uuidString)!, encodeImage: encodeImage)
     model.address = "http://127.0.0.1:8765"
     model.token = "synthetic-only"
     let image = UIGraphicsImageRenderer(size: CGSize(width: 20, height: 30)).image { c in
@@ -123,6 +126,58 @@ private final class FakeMac: @unchecked Sendable {
     }
     XCTFail("Expected session state was not reached", file: file, line: line)
   }
+  func testSendShowsProgressWhileEncodingAndIgnoresDuplicateTaps() async throws {
+    var resume: CheckedContinuation<Data, Error>?
+    var encodes = 0
+    let (model, mac, file) = try setup { _ in
+      encodes += 1
+      return try await withCheckedThrowingContinuation { resume = $0 }
+    }
+    defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+    let image = try XCTUnwrap(model.image)
+    model.send()
+    XCTAssertEqual(model.phase, .preparing)
+    XCTAssertTrue(model.processing)
+    XCTAssertEqual(model.processingTitle, "Preparing image…")
+    model.send()
+    try await wait { resume != nil }
+    XCTAssertEqual(encodes, 1)
+    XCTAssertTrue(mac.requests.isEmpty)
+    resume?.resume(returning: try XCTUnwrap(image.pngData()))
+    try await wait { model.phase == .review }
+    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 1)
+  }
+  func testBackgroundDuringEncodingDoesNotUploadLateResult() async throws {
+    var resume: CheckedContinuation<Data, Error>?
+    let (model, mac, file) = try setup { _ in
+      try await withCheckedThrowingContinuation { resume = $0 }
+    }
+    defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+    let bytes = try XCTUnwrap(model.image?.pngData())
+    model.send()
+    try await wait { resume != nil }
+    model.background()
+    model.foreground()
+    resume?.resume(returning: bytes)
+    try await Task.sleep(for: .milliseconds(100))
+    XCTAssertEqual(model.phase, .preview)
+    XCTAssertNotNil(model.image)
+    XCTAssertNil(model.pending)
+    XCTAssertTrue(mac.requests.isEmpty)
+  }
+  func testEncodingFailureKeepsImageAndExplainsRetry() async throws {
+    let (model, mac, file) = try setup { _ in
+      throw ClientFailure("Could not encode this image.")
+    }
+    defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+    model.send()
+    try await wait { model.phase == .preview }
+    XCTAssertEqual(model.message, "Could not encode this image.")
+    XCTAssertNotNil(model.image)
+    XCTAssertNil(model.pending)
+    XCTAssertTrue(mac.requests.isEmpty)
+  }
+
   func testUncertainUploadReusesKeyAndConfirmedEditsRemainSeparate() async throws {
     let (model, mac, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }

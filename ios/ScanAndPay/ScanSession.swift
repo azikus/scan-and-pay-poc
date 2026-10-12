@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor final class ScanSession: ObservableObject {
   enum Phase: Equatable {
-    case capture, crop, preview, uploading, queued, reading, review, recovery, failed
+    case capture, crop, preview, preparing, uploading, queued, reading, review, recovery, failed
   }
   @Published var phase: Phase = .capture
   @Published var image: UIImage?
@@ -27,14 +27,17 @@ import SwiftUI
   private let clientSession: URLSession?
   private let pendingFile: URL
   private let defaults: UserDefaults
+  private let encodeImage: (UIImage) async throws -> Data
   init(
     fixtureMode: Bool = false, clientSession: URLSession? = nil,
-    pendingFile: URL = PendingStore.file, defaults: UserDefaults = .standard
+    pendingFile: URL = PendingStore.file, defaults: UserDefaults = .standard,
+    encodeImage: @escaping (UIImage) async throws -> Data = ScanSession.encodePNG
   ) {
     self.defaults = defaults
     self.clientSession = clientSession
     self.pendingFile = pendingFile
     self.fixtureMode = fixtureMode
+    self.encodeImage = encodeImage
     // Migrate the working Wi-Fi URL, never the former USB or hosted route.
     hotspotAddress =
       ["backendHotspotURL", "backendWiFiURL", "backendURL"]
@@ -79,7 +82,7 @@ import SwiftUI
       }
     #endif
   }
-  var processing: Bool { [.uploading, .queued, .reading].contains(phase) }
+  var processing: Bool { [.preparing, .uploading, .queued, .reading].contains(phase) }
   var confirmationValues: JSONValue? {
     if let body = pending?.confirmationBody {
       return try? JSONDecoder().decode(JSONValue.self, from: body)
@@ -87,8 +90,12 @@ import SwiftUI
     return draft?.confirmation
   }
   var processingTitle: String {
-    phase == .uploading
-      ? "Uploading image…" : phase == .queued ? "Waiting to read…" : "Reading payment details…"
+    switch phase {
+    case .preparing: return "Preparing image…"
+    case .uploading: return "Uploading image…"
+    case .queued: return "Waiting to read…"
+    default: return "Reading payment details…"
+    }
   }
   func configure(address: String, token: String) throws {
     _ = try BackendClient(address: address, token: token, session: clientSession)
@@ -229,19 +236,36 @@ import SwiftUI
     phase = .capture
   }
   func send() {
-    guard phase == .preview, pending == nil, !reconnecting, let image else { return }
+    guard phase == .preview else { return }
+    guard pending == nil else {
+      phase = .recovery
+      message = "Continue the saved scan before sending another image."
+      return
+    }
+    guard !reconnecting else {
+      message = "Checking the hotspot connection. Tap Send again when it finishes."
+      return
+    }
+    guard let image else {
+      message = "This image is unavailable. Retake the photo."
+      return
+    }
     if fixtureMode {
       loadFixture()
       return
     }
     do {
       let client = try BackendClient(address: address, token: token, session: clientSession)
-      guard let bytes = image.pngData() else { throw ClientFailure("Could not encode this image.") }
-      phase = .uploading
+      phase = .preparing
       message = nil
       let identity = generation
       task = Task {
         do {
+          try Task.checkCancellation()
+          let bytes = try await encodeImage(image)
+          try Task.checkCancellation()
+          guard identity == generation else { return }
+          phase = .uploading
           let selection = try await client.selection()
           let selected = selection.profile
           try Task.checkCancellation()
@@ -259,6 +283,19 @@ import SwiftUI
         } catch { fail(error, identity: identity) }
       }
     } catch { message = error.localizedDescription }
+  }
+  nonisolated static func encodePNG(_ image: UIImage) async throws -> Data {
+    let encoding = Task.detached(priority: .userInitiated) {
+      try Task.checkCancellation()
+      guard let bytes = image.pngData() else { throw ClientFailure("Could not encode this image.") }
+      try Task.checkCancellation()
+      return bytes
+    }
+    return try await withTaskCancellationHandler {
+      try await encoding.value
+    } onCancel: {
+      encoding.cancel()
+    }
   }
   func recover() {
     guard let pending, !processing, !saving, !reconnecting else { return }

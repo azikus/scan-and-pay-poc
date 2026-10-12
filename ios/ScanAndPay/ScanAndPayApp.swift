@@ -129,6 +129,7 @@ struct PrimaryButton: ButtonStyle {
     configuration.label.font(Brand.font(17, .semibold))
       .foregroundStyle(enabled ? Brand.ink : Color.secondary)
       .padding(.vertical, 17).frame(maxWidth: .infinity)
+      .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
       .modifier(ControlSurface(prominent: true, enabled: enabled))
       .opacity(configuration.isPressed ? 0.8 : 1)
       .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
@@ -217,7 +218,8 @@ struct ScanHome: View {
         updateCamera()
       } else {
         camera.stop()
-        model.background()
+        // Permission prompts and Control Centre are inactive, not backgrounded.
+        if phase == .background { model.background() }
       }
     }
     .onChange(of: typeSize) { _, size in if size.isAccessibilitySize { detent = .large } }
@@ -265,9 +267,11 @@ struct ScanHome: View {
             Image(uiImage: image).resizable().scaledToFit()
               .modifier(DocumentContinuity(namespace: documentMotion)).padding(.horizontal, 16)
               .frame(maxWidth: .infinity, maxHeight: .infinity)
+              .clipped()
               .contentShape(Rectangle()).onTapGesture {
                 if model.phase != .preview { imageViewer = true }
               }
+              .allowsHitTesting(model.phase != .preview)
           }
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
         if model.phase == .preview {
@@ -276,8 +280,12 @@ struct ScanHome: View {
               Text(message).font(Brand.font(14)).foregroundStyle(.orange)
             }
             Button(action: model.send) {
-              Label("Send", systemImage: "arrow.up.right").frame(maxWidth: .infinity)
-            }.buttonStyle(PrimaryButton()).accessibilityIdentifier("send-image")
+              Label(
+                model.reconnecting ? "Checking connection…" : "Send",
+                systemImage: model.reconnecting ? "wifi" : "arrow.up.right"
+              ).frame(maxWidth: .infinity)
+            }.buttonStyle(PrimaryButton()).disabled(model.reconnecting)
+              .accessibilityIdentifier("send-image")
           }.padding(22)
         } else {
           HStack {

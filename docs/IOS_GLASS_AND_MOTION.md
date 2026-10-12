@@ -24,6 +24,16 @@ Markus reported that the live preview changed substantially after capture. The e
 
 Apple documents the preview layer’s [videoGravity](https://developer.apple.com/documentation/avfoundation/avcapturevideopreviewlayer/videogravity) display modes. This fix changes live framing/layout only; manual crop/rotation, saved drafts, Send and backend processing are unchanged.
 
+## Send responsiveness follow-up
+
+Markus reported remaining on Ready to send after tapping Send, while Edit crop still worked and no error was visible. The simulator baseline responded to both side and lower-padding taps, so the exact physical-device failure was not reproduced. The preview's image tap layer is now disabled before Send and clipped to its viewport; primary actions explicitly use their full rounded surface for hit testing. This removes an unnecessary gesture layer from the affected screen without changing image pixels.
+
+Real photo PNG encoding previously ran on the main actor before any progress state. Send now enters **Preparing image…** immediately and encodes off the UI thread, then performs the existing selection/upload sequence. Cancellation and generation checks prevent a completed encoding from uploading after background/reset; duplicate taps cannot start another preparation. Reconnecting is visible on the disabled Send button, and missing-image or unexpected saved-scan guards give an explanation instead of silently returning. Temporary inactive states, such as permission prompts, no longer cancel work; actual backgrounding retains the existing pause/recovery behavior. Saved image bytes, profile choice, idempotency keys and confirmations retain their existing semantics.
+
+Verification/evidence for this follow-up is under `.local/send-fix-2026-10-12/`. The baseline surface-tap test passed before the change and must not be described as a reproduced failure. Unit coverage adds suspended preparation, duplicate taps, encoding failure and background cancellation without requests. Mac loopback and hotspot authenticated profile reads both returned 200; no agent inference or backend restart was performed. Physical Send acceptance still requires a fresh capture after installation; an unsent in-memory preview is not preserved across app relaunch.
+
+All **31 offline tests passed** on iOS 26.2 (27 native unit/recovery tests and four UI flows). Signed build and Swift lint/diff checks passed. The update was installed/opened on the physical iPhone and its authenticated hotspot check succeeded at **22:13:40 UTC / 23:13:40 London time** on 12 October. Stored phone records were not cleared or copied; the unsent preview requires a fresh capture.
+
 ## Shared branded header
 
 Markus requested the Azikus logo and Scan & Pay title on each screen, with a changing subtitle. A shared `ScreenHeader` now displays the supplied dark Azikus mark, **Scan & Pay**, and the current context: Scan a document, Adjust image, Ready to send, Your document, the current processing/recovery message, Review details, Confirm payment, Connection, Structured output or Scan complete. Capture keeps its connection status (or synthetic-preview marker) as a separate detail below the subtitle. Existing actions remain in the header, with a separate action row at accessibility text sizes. This is a presentation change only.

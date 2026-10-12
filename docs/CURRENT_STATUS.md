@@ -8,6 +8,8 @@ Markus requested the bounded iOS Liquid Glass/motion update and hotspot/hosting 
 
 ## Code and presentation
 
+The latest iOS follow-up addresses Send remaining on Ready to send: the preview no longer intercepts taps, primary actions have explicit hit areas, and photo encoding runs off the UI thread with immediate progress. See the Send section in [IOS_GLASS_AND_MOTION.md](IOS_GLASS_AND_MOTION.md) for verification and the outstanding physical-device acceptance. No paid extraction was run by the agent.
+
 - Application code through PRs [#2](https://github.com/azikus/scan-and-pay-poc/pull/2), [#3](https://github.com/azikus/scan-and-pay-poc/pull/3), [#4](https://github.com/azikus/scan-and-pay-poc/pull/4) and [#5](https://github.com/azikus/scan-and-pay-poc/pull/5) is merged. The last application commit is `57fa993cfd01e7533a6140d1c7a5d71f96289293`.
 - The native capture/review/confirmation flow, admin inspector and automatic Mac network listeners are implemented. Android remains a README only. Source folders are `backend/`, `frontend/admin/`, `ios/` and `android/`.
 - The initial presentation was created with Markus and revised on 9 October. Its approved version has **25 slides**, English slides, Croatian notes and approximately **19–20 minutes** including the live demo. The old “presentation not started” instructions are historical.
