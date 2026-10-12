@@ -115,4 +115,4 @@ Original source material also remains at `/Users/markusi/Developer/Azikus/Aircas
 
 ## Additional LLM choices
 
-[LLM expansion](docs/LLM_EXPANSION.md) documents the separate provider work, Fireworks adapter and 15 disabled example presets in `providers.expanded.example.json`. Multiple models from one provider remain independently versioned choices in the admin once configured and enabled.
+[LLM expansion](docs/LLM_EXPANSION.md) documents the separate provider work, Grok charge accounting and 13 opt-in example presets in `providers.expanded.example.json`. Multiple models from one provider remain independently versioned choices in the admin once configured and enabled.

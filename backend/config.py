@@ -35,8 +35,6 @@ PROVIDER_HOSTS = {
     "gemini": "generativelanguage.googleapis.com",
     "xai": "api.x.ai",
     "together": "api.together.ai",
-    "fireworks": "api.fireworks.ai",
-    "cohere": "api.cohere.com",
     "azure": None,
     "google_documentai": None,
     "aws": None,
@@ -49,8 +47,6 @@ OPERATIONS = {
     "gemini": {"vision"},
     "xai": {"vision"},
     "together": {"vision"},
-    "fireworks": {"vision"},
-    "cohere": {"vision"},
     "azure": {"ocr", "invoice"},
     "google_documentai": {"ocr", "invoice"},
     "aws": {"ocr", "invoice"},
@@ -61,8 +57,6 @@ KEY_ENV = {
     "gemini": "GEMINI_API_KEY",
     "xai": "XAI_API_KEY",
     "together": "TOGETHER_API_KEY",
-    "fireworks": "FIREWORKS_API_KEY",
-    "cohere": "COHERE_API_KEY",
     "azure": "AZURE_DOCUMENT_INTELLIGENCE_KEY",
     "mindee": "MINDEE_V2_API_KEY",
 }
@@ -151,15 +145,12 @@ class ModelOption(Model):
         if self.schema_mode == "prompt_json" and self.provider not in {
             "anthropic",
             "gemini",
-            "cohere",
         }:
             raise ValueError("Prompt JSON transport is not implemented for this provider")
         if self.provider == "together" and self.reasoning not in {None, "none", "enabled"}:
             raise ValueError("Together thinking mode must be none or enabled")
         if self.provider == "anthropic" and self.reasoning not in {None, "adaptive"}:
             raise ValueError("Anthropic thinking mode must be adaptive or omitted")
-        if self.provider == "fireworks" and self.reasoning is not None:
-            raise ValueError("Fireworks schema transport does not expose thinking controls")
         host = PROVIDER_HOSTS[self.provider]
         if self.config is None:
             self.config = ProviderConfig(endpoint_host=host or "unconfigured.invalid")

@@ -2,7 +2,6 @@
 
 import copy
 import json
-from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
 
@@ -13,10 +12,8 @@ from pydantic import SecretStr, ValidationError
 from backend.adapters.extended import ExtendedAdapter
 from backend.adapters.vision import vision_request, vision_text
 from backend.config import ModelOption, ProfileConfig
-from backend.errors import ProviderError, ServiceError
-from backend.images import prepare_image
-from backend.models import Hints
-from backend.profiles import registry, validate_limits
+from backend.errors import ProviderError
+from backend.profiles import registry
 from backend.tests.conftest import upload
 from backend.tests.test_api import client_for, finish
 from backend.tests.test_compact import example_v5
@@ -92,12 +89,6 @@ def test_every_expanded_model_uses_one_dispatch_and_keeps_review(settings, png, 
             if option.provider != "gemini"
             else option.model in request.url.path
         )
-        if option.provider == "fireworks":
-            assert request.url.path == "/inference/v1/chat/completions"
-            assert request.headers["authorization"] == "Bearer offline-secret"
-            schema = sent["response_format"]["json_schema"]["schema"]
-            assert "JSON schema:" in sent["messages"][0]["content"]
-            assert "$defs" in schema
         return httpx.Response(200, json=body)
 
     with client_for(
@@ -133,32 +124,8 @@ def test_adaptive_thinking_requires_explicit_opt_in_and_is_never_parsed(content)
         vision_text(body, "anthropic", adaptive_thinking=True)
 
 
-def test_fireworks_fixed_host_and_operation():
-    with pytest.raises(ValidationError):
-        ModelOption(
-            provider="fireworks",
-            model="synthetic",
-            operation="vision",
-            config={"endpoint_host": "evil.example"},
-        )
-    with pytest.raises(ValidationError):
-        ModelOption(provider="fireworks", model="synthetic", operation="ocr")
-
-
-def test_fireworks_image_ceiling_before_dispatch(settings, png):
-    image = prepare_image(png, Hints())
-    settings.providers.options["limit"] = copy.deepcopy(PRESETS["fireworks-kimi-expanded"])
-    definition = registry(settings)["limit"]
-    image = replace(image, canonical=b"x" * 7_500_000)
-    with pytest.raises(ServiceError) as error:
-        validate_limits(image, [definition])
-    assert error.value.error.code == "provider_input_limit"
-    image = replace(image, canonical=image.canonical[:-3])
-    validate_limits(image, [definition])
-
-
 def test_reasoning_controls_and_snapshot_versions(settings):
-    for provider, reasoning in [("anthropic", "low"), ("fireworks", "none")]:
+    for provider, reasoning in [("anthropic", "low")]:
         with pytest.raises(ValidationError):
             ModelOption(
                 provider=provider, model="synthetic", operation="vision", reasoning=reasoning
@@ -171,3 +138,9 @@ def test_reasoning_controls_and_snapshot_versions(settings):
     option.reasoning = None
     assert registry(settings)["sonnet"].metadata.version != first
     assert "thinking" not in vision_request(option, "synthetic", "secret")[2]
+
+
+@pytest.mark.parametrize("provider", ["fireworks", "cohere"])
+def test_removed_recipients_cannot_be_configured(provider):
+    with pytest.raises(ValidationError, match="Unsupported provider operation"):
+        ModelOption(provider=provider, model="synthetic", operation="vision")

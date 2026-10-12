@@ -1,5 +1,7 @@
 # All catalogue profiles — 12 October 2026
 
+**Historical run:** On 13 October Markus requested Fireworks and Cohere Aya removal. Those six profiles are now absent from the active 31-profile catalogue; dated outcomes and accounting in this report are preserved. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for current scope.
+
 Markus requested every supported entry enabled and run on the verified barcode-free Croatian invoice. The private runtime has **37 enabled/configured profiles across 12 providers**. No profile is disabled because a request fails. Source example presets remain credential-free opt-in templates; their defaults do not represent the enabled private runtime.
 
 This is a fresh one-invoice compatibility run, separate from the stopped 9 October comparison and the completed 19-model run. Input is the inspected full-resolution invoice; metadata-free PNG reencoding preserves every RGB pixel. Evidence and frozen keys/snapshots are private under `.local/all-catalogue-2026-10-12/run-20261012T224905Z/` in the original checkout. No raw invoices, banking data or credentials belong in Git.

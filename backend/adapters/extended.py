@@ -75,13 +75,9 @@ def record_usage(body: dict[str, Any], stage: Stage, option: ModelOption) -> Non
             "gemini": ("promptTokenCount", "candidatesTokenCount"),
             "anthropic": ("input_tokens", "output_tokens"),
             "openai": ("input_tokens", "output_tokens"),
-            "cohere": ("input_tokens", "output_tokens"),
         }.get(option.provider, ("prompt_tokens", "completion_tokens"))
-        billing = raw.get("billed_units", {}) if option.provider == "cohere" else raw
-        if not isinstance(billing, dict):
-            raise ProviderError("invalid_provider_output")
-        if input_key in billing and output_key in billing:
-            incoming, outgoing = billing[input_key], billing[output_key]
+        if input_key in raw and output_key in raw:
+            incoming, outgoing = raw[input_key], raw[output_key]
             if type(incoming) is not int or type(outgoing) is not int:
                 raise ProviderError("invalid_provider_output")
             # Conservative gross estimate: cached input charged at the full input rate.

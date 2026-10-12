@@ -1,5 +1,7 @@
 # Paid single-invoice LLM smoke check — 12 October 2026
 
+**Historical run:** On 13 October Markus requested Fireworks and Cohere Aya removal. Those six profiles are now absent from the active 31-profile catalogue; dated outcomes and accounting in this report are preserved. See [LLM_EXPANSION.md](LLM_EXPANSION.md) for current scope.
+
 Markus explicitly requested a paid invoice extraction with all models. The completed corrected run used one visually verified, barcode-free Croatian invoice at its full 2481 × 3508 resolution, with identical pixels across all 19 enabled direct-image LLM profiles. Every model made one external attempt; no retries or fallback ran. OCR/rules, the two-stage hybrid and inactive models were outside this model-only scope. This is a single-invoice compatibility check, not a full-corpus benchmark.
 
 ## Outcomes

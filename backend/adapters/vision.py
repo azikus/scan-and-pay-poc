@@ -54,8 +54,6 @@ def vision_request(
         for variant in box["anyOf"]:
             if variant.get("type") == "array":
                 variant["items"].update(minimum=0, maximum=1)
-    if provider == "fireworks":
-        instructions += "\nJSON schema:\n" + json.dumps(schema)
     if provider == "anthropic":
         if option.protocol_version in {"2", "3", "4", "5", "6"} and option.schema_mode == "native":
 
@@ -150,32 +148,6 @@ def vision_request(
                 "generationConfig": generation,
             },
         )
-    if provider == "cohere":
-        cohere_body: dict[str, Any] = {
-            "model": model,
-            "max_tokens": limit,
-            "messages": [
-                {"role": "system", "content": instructions},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": "Extract the printed payment fields."},
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": "data:image/png;base64," + encoded},
-                        },
-                    ],
-                },
-            ],
-        }
-        if option.schema_mode == "prompt_json":
-            cohere_body["messages"][0]["content"] += (
-                "\nReturn only JSON, without markdown fences, matching this schema:\n"
-                + json.dumps(schema)
-            )
-        else:
-            cohere_body["response_format"] = {"type": "json_object", "schema": schema}
-        return "/v2/chat", {"Authorization": "Bearer " + key}, cohere_body
     if provider == "openai":
         body: dict[str, Any] = {
             "model": model,
@@ -216,7 +188,7 @@ def vision_request(
     if provider == "together" and option.reasoning is not None:
         extra["chat_template_kwargs"] = {"enable_thinking": option.reasoning != "none"}
     return (
-        "/inference/v1/chat/completions" if provider == "fireworks" else "/v1/chat/completions",
+        "/v1/chat/completions",
         {"Authorization": "Bearer " + key},
         {
             "model": model,
@@ -239,7 +211,7 @@ def vision_request(
                 "type": "json_schema",
                 "json_schema": {
                     "name": "payment_extraction",
-                    **({} if provider == "fireworks" else {"strict": True}),
+                    "strict": True,
                     "schema": schema,
                 },
             },
@@ -279,18 +251,6 @@ def vision_text(
         ):
             raise ProviderError("invalid_provider_output")
         return "".join(p["text"] for p in parts if p["type"] == "output_text"), body.get("model")
-    if provider == "cohere":
-        message = body["message"]
-        if message.get("refusal") or body.get("finish_reason") in {"ERROR_TOXIC", "error_toxic"}:
-            raise ProviderError("provider_refusal")
-        parts = message["content"]
-        if (
-            body["finish_reason"] not in {"COMPLETE", "complete"}
-            or message.get("tool_calls")
-            or any(p["type"] != "text" for p in parts)
-        ):
-            raise ProviderError("invalid_provider_output")
-        return "".join(p["text"] for p in parts), body.get("model")
     (choice,) = body["choices"]
     message = choice["message"]
     if message.get("refusal") or choice["finish_reason"] == "content_filter":
