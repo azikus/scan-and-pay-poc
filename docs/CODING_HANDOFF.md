@@ -2,7 +2,7 @@
 
 ## Current scope — 12 October 2026
 
-Read [CURRENT_STATUS.md](CURRENT_STATUS.md) first. Application PRs #2–#5 are merged. The initial presentation was delivered and revised with Markus on 9 October; it is now maintained in [presentation/](../presentation/README.md). Earlier instructions to start a presentation chat or treat the deck as unstarted are historical.
+Read [CURRENT_STATUS.md](CURRENT_STATUS.md) first. **Latest follow-up:** Markus authorized the scoped Liquid Glass/motion update and hotspot verification; see [IOS_GLASS_AND_MOTION.md](IOS_GLASS_AND_MOTION.md). The previous import-only limits below describe the completed presentation task. Application PRs #2–#5 are merged. The initial presentation was delivered and revised with Markus on 9 October; it is now maintained in [presentation/](../presentation/README.md). Earlier instructions to start a presentation chat or treat the deck as unstarted are historical.
 
 Markus authorized the repository import, reconciliation of documentation and commit/push of the resulting changes. Preserve the approved 25-slide story, English slides, Croatian notes and dated evaluation evidence. The editable source is `presentation/index.html`; `npm run content` regenerates `docs/PRESENTATION_CONTENT.md`. Keep `docs/PRESENTATION_EVIDENCE.md` as the authoring record. Build outputs, dependencies and optional private invoice assets stay ignored. No backend or mobile feature work, paid inference, experiment rerun or public deployment is part of this cleanup.
 

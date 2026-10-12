@@ -2,12 +2,16 @@
 
 This file supersedes prospective wording and operational snapshots in the dated 8–9 October handoffs. Historical experiment evidence remains unchanged.
 
+## Latest follow-up
+
+Markus requested the bounded iOS Liquid Glass/motion update and hotspot/hosting assessment. See [implementation and connection evidence](IOS_GLASS_AND_MOTION.md). This begins iOS polish without starting cloud deployment, new inference, Android or the final website milestone.
+
 ## Code and presentation
 
 - Application code through PRs [#2](https://github.com/azikus/scan-and-pay-poc/pull/2), [#3](https://github.com/azikus/scan-and-pay-poc/pull/3), [#4](https://github.com/azikus/scan-and-pay-poc/pull/4) and [#5](https://github.com/azikus/scan-and-pay-poc/pull/5) is merged. The last application commit is `57fa993cfd01e7533a6140d1c7a5d71f96289293`.
 - The native capture/review/confirmation flow, admin inspector and automatic Mac network listeners are implemented. Android remains a README only. Source folders are `backend/`, `frontend/admin/`, `ios/` and `android/`.
 - The initial presentation was created with Markus and revised on 9 October. Its approved version has **25 slides**, English slides, Croatian notes and approximately **19–20 minutes** including the live demo. The old “presentation not started” instructions are historical.
-- The 12 October repository import places editable HTML, theme, motion, reviewed assets and reproducible build/serve/export tooling under [presentation/](../presentation/README.md). The normal build excludes the real invoice gallery; a separate ignored local edition preserves it. The original external deck is untouched.
+- The 12 October repository import merged in [PR #6](https://github.com/azikus/scan-and-pay-poc/pull/6), commit `75c8cd0`. It places editable HTML, theme, motion, reviewed assets and reproducible build/serve/export tooling under [presentation/](../presentation/README.md). The normal build excludes the real invoice gallery; a separate ignored local edition preserves it. The original external deck is untouched.
 - [PRESENTATION_CONTENT.md](PRESENTATION_CONTENT.md) is generated from the HTML source. [PRESENTATION_EVIDENCE.md](PRESENTATION_EVIDENCE.md) records authoring sources and revisions. Both belong in Git alongside the deck. No later application development is part of this import.
 
 ## Current private state

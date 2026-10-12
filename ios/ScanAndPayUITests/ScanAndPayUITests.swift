@@ -67,6 +67,31 @@ final class ScanAndPayUITests: XCTestCase {
     attachment.lifetime = .keepAlways
     add(attachment)
   }
+  func testCropRotationResetAndReturnToPreview() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-synthetic-preview"]
+    app.launch()
+    app.buttons["capture"].tap()
+    XCTAssertTrue(app.staticTexts["Adjust image"].waitForExistence(timeout: 5))
+    let rotate = app.buttons["Rotate"]
+    rotate.tap()
+    let finished = NSPredicate(format: "enabled == true")
+    expectation(for: finished, evaluatedWith: app.buttons["use-crop"])
+    waitForExpectations(timeout: 5)
+    app.buttons["Reset crop"].tap()
+    let crop = XCTAttachment(screenshot: app.screenshot())
+    crop.name = "Liquid Glass crop controls"
+    crop.lifetime = .keepAlways
+    add(crop)
+    app.buttons["use-crop"].tap()
+    XCTAssertTrue(app.buttons["send-image"].waitForExistence(timeout: 5))
+    app.buttons["Edit crop"].tap()
+    XCTAssertTrue(app.buttons["use-crop"].waitForExistence(timeout: 5))
+    app.buttons["Retake"].tap()
+    XCTAssertTrue(app.buttons["capture"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.buttons["send-image"].exists)
+  }
+
   func testMissingFieldCanBeAddedWithoutLosingKeyboardFocus() {
     let app = XCUIApplication()
     app.launchArguments = ["-synthetic-preview"]

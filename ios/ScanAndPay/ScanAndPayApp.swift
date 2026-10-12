@@ -11,14 +11,61 @@ enum Brand {
       relativeTo: .body)
   }
 }
-struct PrimaryButton: ButtonStyle {
-  @Environment(\.isEnabled) var enabled
+// Glass belongs to controls; document pixels and editable text stay unobstructed.
+struct ControlSurface: ViewModifier {
+  var prominent = false
+  var enabled = true
+  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+  func body(content: Content) -> some View {
+    let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+    if reduceTransparency {
+      content.background(
+        prominent && enabled ? Brand.ice : Color(uiColor: .secondarySystemBackground), in: shape)
+    } else if #available(iOS 26.0, *) {
+      content.glassEffect(
+        .regular.tint(prominent && enabled ? Brand.ice : nil).interactive(enabled), in: shape)
+    } else if prominent && enabled {
+      content.background(Brand.ice, in: shape)
+    } else {
+      content.background(.regularMaterial, in: shape)
+        .overlay(shape.strokeBorder(.white.opacity(0.16), lineWidth: 0.5))
+    }
+  }
+}
+struct GlassControlButton: ButtonStyle {
+  @Environment(\.isEnabled) private var enabled
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   func makeBody(configuration: Configuration) -> some View {
-    configuration.label.font(Brand.font(17, .semibold)).foregroundStyle(
-      enabled ? Brand.ink : Color.secondary
-    ).padding(.vertical, 17).frame(maxWidth: .infinity).background(
-      enabled ? Brand.ice : Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 18)
-    ).opacity(configuration.isPressed ? 0.7 : 1)
+    configuration.label.font(Brand.font(15, .semibold)).foregroundStyle(.primary)
+      .padding(.horizontal, 14).frame(minHeight: 44)
+      .modifier(ControlSurface(enabled: enabled))
+      .opacity(enabled ? 1 : 0.45)
+      .scaleEffect(configuration.isPressed && !reduceMotion ? 0.96 : 1)
+      .animation(reduceMotion ? nil : .smooth(duration: 0.18), value: configuration.isPressed)
+  }
+}
+struct PrimaryButton: ButtonStyle {
+  @Environment(\.isEnabled) private var enabled
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label.font(Brand.font(17, .semibold))
+      .foregroundStyle(enabled ? Brand.ink : Color.secondary)
+      .padding(.vertical, 17).frame(maxWidth: .infinity)
+      .modifier(ControlSurface(prominent: true, enabled: enabled))
+      .opacity(configuration.isPressed ? 0.8 : 1)
+      .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
+      .animation(reduceMotion ? nil : .smooth(duration: 0.18), value: configuration.isPressed)
+  }
+}
+struct DocumentContinuity: ViewModifier {
+  let namespace: Namespace.ID
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @ViewBuilder func body(content: Content) -> some View {
+    if reduceMotion {
+      content
+    } else {
+      content.matchedGeometryEffect(id: "document", in: namespace, properties: .frame)
+    }
   }
 }
 
@@ -32,6 +79,8 @@ struct ScanHome: View {
   @StateObject private var camera = CameraController()
   @Environment(\.scenePhase) private var scenePhase
   @Environment(\.dynamicTypeSize) private var typeSize
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Namespace private var documentMotion
   @State private var picked: PhotosPickerItem?
   @State private var settings = false
   @State private var json = false
@@ -45,7 +94,12 @@ struct ScanHome: View {
       ZStack {
         Brand.ink.ignoresSafeArea()
         content
-      }
+          .environment(\.colorScheme, .dark)
+          .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 16)))
+      }.animation(
+        reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.46, dampingFraction: 0.9),
+        value: screen
+      )
       .toolbar(.hidden, for: .navigationBar)
       .sheet(isPresented: $settings) { ConnectionSettings(model: model) }
 
@@ -104,9 +158,13 @@ struct ScanHome: View {
       }
     }
   }
+  private var screen: String {
+    model.phase == .capture ? "capture" : model.phase == .crop ? "crop" : "document"
+  }
   @ViewBuilder private var content: some View {
     if model.phase == .crop, let image = model.originalImage {
-      ManualCrop(image: image, use: model.cropped, retake: model.reset)
+      ManualCrop(image: image, namespace: documentMotion, use: model.cropped, retake: model.reset)
+        .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 18)))
     } else {
       VStack(spacing: 0) {
         HStack(spacing: 12) {
@@ -131,19 +189,20 @@ struct ScanHome: View {
               Task { await model.reconnect() }
             } label: {
               if model.reconnecting {
-                ProgressView().tint(Brand.ice).frame(width: 44, height: 44)
+                ProgressView().tint(Brand.ice).frame(width: 20, height: 44)
               } else {
-                Image(systemName: "arrow.clockwise").frame(width: 44, height: 44)
+                Image(systemName: "arrow.clockwise").frame(width: 20, height: 44)
               }
-            }.accessibilityLabel("Reconnect").accessibilityIdentifier("reconnect")
+            }.buttonStyle(GlassControlButton()).accessibilityLabel("Reconnect")
+              .accessibilityIdentifier("reconnect")
               .disabled(model.reconnecting || model.fixtureMode)
             Button {
               settings = true
             } label: {
-              Image(systemName: "slider.horizontal.3").frame(width: 44, height: 44)
-            }.accessibilityLabel("Connection settings")
+              Image(systemName: "slider.horizontal.3").frame(width: 20, height: 44)
+            }.buttonStyle(GlassControlButton()).accessibilityLabel("Connection settings")
           } else if model.phase == .preview {
-            Button("Edit crop", action: model.editCrop).font(Brand.font(14))
+            Button("Edit crop", action: model.editCrop).buttonStyle(GlassControlButton())
           } else {
             Button {
               imageViewer = true
@@ -154,11 +213,13 @@ struct ScanHome: View {
         }.foregroundStyle(.white).tint(Brand.ice).padding(.horizontal, 22).padding(.vertical, 12)
         ZStack {
           if let image = model.image {
-            Image(uiImage: image).resizable().scaledToFit().padding(.horizontal, 16).frame(
-              maxWidth: .infinity, maxHeight: .infinity
-            ).contentShape(Rectangle()).onTapGesture {
-              if model.phase != .preview { imageViewer = true }
-            }
+            Image(uiImage: image).resizable().scaledToFit()
+              .modifier(DocumentContinuity(namespace: documentMotion)).padding(.horizontal, 16)
+              .frame(
+                maxWidth: .infinity, maxHeight: .infinity
+              ).contentShape(Rectangle()).onTapGesture {
+                if model.phase != .preview { imageViewer = true }
+              }
           } else if model.fixtureMode {
             Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(22)
           } else if camera.available {
@@ -202,7 +263,7 @@ struct ScanHome: View {
             if model.response != nil { Button("JSON") { json = true } }
           }.font(Brand.font(14)).tint(Brand.ice).padding(22)
         }
-      }
+      }.id(screen).transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: -12)))
     }
   }
   private var captureControls: some View {
@@ -217,7 +278,7 @@ struct ScanHome: View {
             Image(systemName: "photo.on.rectangle").font(.system(size: 21))
             Text(importing ? "Opening…" : "Import").font(Brand.font(12))
           }.frame(maxWidth: .infinity, minHeight: 66)
-        }.disabled(importing)
+        }.buttonStyle(GlassControlButton()).disabled(importing)
         Button {
           if model.fixtureMode { model.captured(fixtureImage()) } else { camera.capture() }
         } label: {
@@ -283,8 +344,8 @@ struct ReviewSheet: View {
             .disabled(model.processing || model.saving || model.reconnecting || model.fixtureMode)
           Button("Clear scan", role: .destructive) { discard = true }
         } label: {
-          Image(systemName: "ellipsis.circle").font(.system(size: 24)).frame(width: 44, height: 44)
-        }.accessibilityLabel("Scan options")
+          Image(systemName: "ellipsis").font(.system(size: 20)).frame(width: 20, height: 44)
+        }.buttonStyle(GlassControlButton()).accessibilityLabel("Scan options")
       }.padding(.horizontal, 22).padding(.top, 24)
       ScrollView {
         VStack(alignment: .leading, spacing: 17) {
@@ -321,6 +382,7 @@ struct ReviewSheet: View {
             Button("Retake") { discard = true }.buttonStyle(.bordered)
           }
         }.padding(22)
+          .animation(reduceMotion ? nil : .easeInOut(duration: 0.24), value: model.processing)
       }.scrollDismissesKeyboard(.interactively).disabled(model.reconnecting)
       if model.phase == .review {
         VStack(spacing: 10) {

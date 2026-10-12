@@ -12,7 +12,7 @@ struct PaymentConfirmation: View {
             Brand.ink)
         Spacer()
         Button(action: cancel) { Image(systemName: "xmark").frame(width: 44, height: 44) }
-          .accessibilityLabel("Cancel payment")
+          .buttonStyle(GlassControlButton()).accessibilityLabel("Cancel payment")
       }.padding(.bottom, 28)
       Text("Confirm payment").font(Brand.font(30, .semibold))
       ScrollView {
