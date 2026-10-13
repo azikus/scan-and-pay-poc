@@ -87,7 +87,7 @@ export function project(
       detail:
         s.outcome === "incomplete"
           ? "Some details need your review"
-          : "Payment details remain private on the mobile phone",
+          : "",
     };
   if (s.backend === "request")
     return {
