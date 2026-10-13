@@ -2,7 +2,7 @@
 
 Independent Azikus backend for turning one JPEG/PNG invoice image into an editable payment draft. Every draft requires user review and confirmation; the PoC does not execute payments.
 
-**Current checkpoint — 9 October 2026:** the native iOS capture/crop → Send → editable review → confirmation/reset flow and the authenticated admin inspector are implemented. Markus confirmed that his real-invoice iPhone testing is complete. This is PoC acceptance, not a production accuracy or measured end-to-end latency claim. See [mobile checkpoint](docs/MOBILE_CHECKPOINT.md), [mobile implementation](docs/MOBILE_IMPLEMENTATION.md) and [iOS setup](ios/README.md).
+**Current checkpoint — 13 October 2026:** iOS automatic capture/crop → explicit Send → editable review → simulated confirmation/reset, backend/admin integration and the SUNMI live companion are accepted. Markus confirmed Send works after the backend repair. Android capture/review and the final presentation are skipped at his request. This is PoC acceptance, not production accuracy or measured end-to-end latency. See [current status](docs/CURRENT_STATUS.md) and [iOS setup](ios/README.md).
 
 The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. The configured choices are listed by the live admin. The latest persisted selection is recorded in [current status](docs/CURRENT_STATUS.md); pending drafts retain their original profile. The historical Phase 2 baseline is described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
 
@@ -14,17 +14,19 @@ The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and
 
 **Connection setup ([PR #5](https://github.com/azikus/scan-and-pay-poc/pull/5)):** expand **Connection** in the admin to copy the current Mac URL into the existing iOS Connection settings. The new `.venv/bin/scanpay-serve` launcher follows private local network changes without restarting the backend. Keep the Mac admin open at `http://127.0.0.1:8000/admin`. See [setup, verification and limits](docs/CONNECTION_SETUP.md).
 
-**Presentation:** the approved 25-slide reveal.js deck now lives in [presentation/](presentation/README.md), with local build/serve instructions, an offline audience export and separate private invoice assets. The initial deck is delivered; its [content](docs/PRESENTATION_CONTENT.md) and [evidence](docs/PRESENTATION_EVIDENCE.md) are versioned alongside it. **Next:** agree the remaining iOS improvements/testing, then backend/admin work, Android and both-platform testing, and the comprehensive final presentation/embeddable HTML. See [current status](docs/CURRENT_STATUS.md), [coding handoff](docs/CODING_HANDOFF.md) and [roadmap](docs/ROADMAP.md).
+**Presentation:** the approved 25-slide reveal.js deck now lives in [presentation/](presentation/README.md), with local build/serve instructions, an offline audience export and separate private invoice assets. The initial deck is delivered; its [content](docs/PRESENTATION_CONTENT.md) and [evidence](docs/PRESENTATION_EVIDENCE.md) are versioned alongside it. **Showcase:** the existing [Webflow HTML](website/README.md) and handoff are retained, unpublished. Repository cleanup/documentation is complete; additional provider runs follow a fresh scoped plan. Android and the final deck are skipped. See [current status](docs/CURRENT_STATUS.md), [coding handoff](docs/CODING_HANDOFF.md) and [roadmap](docs/ROADMAP.md).
 
-**iOS polish (12 October):** native Liquid Glass controls and capture/crop transitions are implemented, with accessibility and iOS 18 fallbacks. Connectivity is now limited to one saved hotspot address and Reconnect. The physical iPhone authenticated over the hotspot; see [UI and connectivity notes](docs/IOS_GLASS_AND_MOTION.md).
+**iOS polish (12 October):** native Liquid Glass controls and capture/crop transitions are implemented, with accessibility and iOS 18 fallbacks. Connectivity is now limited to one saved hotspot address and Reconnect. The physical iPhone authenticated over the hotspot. The later [automatic document scanner](docs/IOS_DOCUMENT_SCANNING.md), dark theme and successful phone Send are accepted; see [UI and connectivity history](docs/IOS_GLASS_AND_MOTION.md).
 
 ## Repository layout
 
 - `backend/`: Python API, domain/orchestration, providers, persistence and offline tests.
 - [frontend/](frontend/README.md): admin HTML/CSS/JavaScript and assets, served by the same FastAPI process and bundled into the Python wheel.
 - [ios/](ios/README.md): native app, XcodeGen specification, Xcode project and synthetic tests.
-- [android/](android/README.md): future-work README only.
+- [android/](android/README.md): skipped capture-app scope; no app/scaffolding.
 - [presentation/](presentation/README.md): editable reveal.js deck, reviewed assets and build/serve/export tooling.
+- [sunmi/](sunmi/README.md): working Android display companion; separate from the skipped capture app.
+- [website/](website/README.md): reviewed showcase source/assets and local Webflow package tooling.
 - `contracts/`, `docs/`, `evaluation/`: shared contracts, documentation and retained evaluation tooling.
 
 Python packaging/configuration stays at the root. Private `.env`, `.local/`, `samples/`, `results/` and historical `reference/` locations stay unchanged.
@@ -111,7 +113,7 @@ A localhost service accepts one JPEG/PNG, persists a job and returns a payment d
 - Preserve paired UK bank details, IBAN, Croatian model/poziv na broj, amount/currency and required references. Customer numbers are not bank routing.
 - Every draft requires review/confirmation. No silent banking-digit repairs, model-confidence guarantees or majority-vote truth.
 - Configure secrets locally; no automatic subscription purchases. Live experiments and public use require their own authorization.
-- Native iOS is implemented. The initial presentation is delivered; further mobile/backend improvements follow, with Android last. Final findings and the separate attendee display remain distinct deliverables.
+- Native iOS, backend/admin integration and the SUNMI display are accepted. Android capture/review and the final presentation are skipped. The initial deck and prepared website showcase remain available.
 
 ## Existing material
 

@@ -1,0 +1,72 @@
+<article id="az-scan-pay" aria-label="Scan and Pay, an Azikus proof of concept">
+  <section class="sp-hero sp-wrap">
+    <div class="sp-hero-copy">
+      <p class="sp-eyebrow">Scan &amp; Pay / Open Banking Expo 2026</p>
+      <h1>Less typing.<br><span>More possibility.</span></h1>
+      <p class="sp-lead">Paper invoices become reviewed payment drafts. Explore what native mobile, AI and spatial computing make possible.</p>
+      <div class="sp-actions"><a class="sp-button" href="#sp-mobile">Explore the experience <span aria-hidden="true">↗</span></a><a class="sp-text-link" href="#sp-spatial">Discover spatial banking <span aria-hidden="true">↗</span></a></div>
+    </div>
+    <div class="sp-hero-art" aria-label="Native Scan and Pay app screens with synthetic invoice data">
+      <div class="sp-halo" aria-hidden="true"></div>
+      <img class="sp-hero-phone sp-phone-back" src="assets/dark-04.webp" width="828" height="1800" alt="Native confirmation screen showing a synthetic payment draft" fetchpriority="high">
+      <img class="sp-hero-phone sp-phone-front" src="assets/dark-03.webp" width="828" height="1800" alt="Native editable invoice review with the original document visible above the sheet" fetchpriority="high">
+    </div>
+  </section>
+
+  <section class="sp-intro sp-wrap sp-reveal">
+    <h2>Paper is familiar.<br><span>Re-entering it shouldn’t be.</span></h2>
+    <div class="sp-intro-bottom"><p>Amounts. Recipients. Account details. References. An invoice already holds the information. We built two working proofs of concept to explore a more natural way to bring it into a payment journey.</p><p>One starts with your phone.<br>The other opens up the interface around you.</p></div>
+  </section>
+
+  <section id="sp-mobile" class="sp-mobile sp-wrap sp-reveal" aria-labelledby="sp-mobile-title">
+    <div class="sp-mobile-heading"><h2 id="sp-mobile-title">A document.<br>A draft.<br><span>Your decision.</span></h2><p>A native mobile phone flow that turns an image into editable details, with a deliberate review before confirmation.</p></div>
+    <div class="sp-walkthrough" data-walkthrough>
+      <div class="sp-step-list" role="tablist" aria-label="Explore the mobile journey" aria-orientation="vertical">
+        <button role="tab" id="sp-step-0" aria-controls="sp-mobile-panel" aria-selected="true" tabindex="0" data-step="0"><span class="sp-step-number">01</span><span><strong>Capture</strong><span>Start with the invoice in front of you.</span></span><span aria-hidden="true">↗</span></button>
+        <button role="tab" id="sp-step-1" aria-controls="sp-mobile-panel" aria-selected="false" tabindex="-1" data-step="1"><span class="sp-step-number">02</span><span><strong>Make it clear</strong><span>Crop, rotate and choose what to send.</span></span><span aria-hidden="true">↗</span></button>
+        <button role="tab" id="sp-step-2" aria-controls="sp-mobile-panel" aria-selected="false" tabindex="-1" data-step="2"><span class="sp-step-number">03</span><span><strong>Review &amp; edit</strong><span>Compare every detail with the source.</span></span><span aria-hidden="true">↗</span></button>
+        <button role="tab" id="sp-step-3" aria-controls="sp-mobile-panel" aria-selected="false" tabindex="-1" data-step="3"><span class="sp-step-number">04</span><span><strong>Confirm</strong><span>Your changes. Your final check.</span></span><span aria-hidden="true">↗</span></button>
+        <button role="tab" id="sp-step-4" aria-controls="sp-mobile-panel" aria-selected="false" tabindex="-1" data-step="4"><span class="sp-step-number">05</span><span><strong>Ready for the next</strong><span>Save the review and start again.</span></span><span aria-hidden="true">↗</span></button>
+      </div>
+      <div id="sp-mobile-panel" class="sp-mobile-panel" role="tabpanel" aria-labelledby="sp-step-0" tabindex="0">
+        <div class="sp-appearance" role="group" aria-label="Screenshot appearance"><button data-appearance="dark" aria-pressed="true">Dark</button><button data-appearance="mobile" aria-pressed="false">Light</button></div>
+        <button class="sp-image-button sp-mobile-image" data-enlarge aria-label="Enlarge the capture screenshot"><img src="assets/dark-01.webp" alt="Native capture screen with a synthetic invoice" width="828" height="1800" loading="lazy"></button>
+        <p class="sp-caption">Actual mobile phone UI. Synthetic invoice data.</p>
+      </div>
+    </div>
+    <div class="sp-mobile-detail" aria-live="polite"><h3 data-step-title>Capture with confidence.</h3><p data-step-description>Take a photo or import an image. The latest build also detects and straightens paper on device. You choose when to send it for extraction.</p></div>
+    <div class="sp-note">This PoC records a reviewed draft. It does not move money.</div>
+  </section>
+
+  <section class="sp-understanding sp-wrap sp-reveal">
+    <div class="sp-section-heading"><h2>Read the document.<br><span>Understand the context.</span></h2><p>Recognising text is only the beginning. The useful part is connecting the right amount, destination and reference.</p></div>
+    <div class="sp-context-grid">
+      <div class="sp-context-feature"><div class="sp-big-type" aria-hidden="true">Aa<span>→</span>£ €</div><h3>Different documents.<br>One review experience.</h3><p>Issuer country, document language and bank-account country stay distinct. Required fields follow the payment route, not a guess based on language.</p></div>
+      <div class="sp-context-list"><div><h3>The right relationships</h3><p>Keep UK sort codes and account numbers together. Preserve IBANs and printed payment references without inventing missing digits.</p></div><div><h3>Useful, even when incomplete</h3><p>Keep recoverable fields, highlight missing requirements and let the user complete the draft.</p></div><div><h3>The original stays intact</h3><p>Source results and user edits are stored separately, so a correction never rewrites the extraction evidence.</p></div></div>
+    </div>
+  </section>
+
+  <section id="sp-spatial" class="sp-spatial sp-wrap sp-reveal" aria-labelledby="sp-spatial-title">
+    <p class="sp-eyebrow">A second perspective</p><h2 id="sp-spatial-title">Banking, with<br><span>room to think.</span></h2>
+    <p class="sp-section-intro">A separate Apple Vision Pro PoC brings accounts, scanning, payment review and activity into a spatial banking experience.</p>
+    <div class="sp-spatial-stage"><button class="sp-image-button" data-enlarge aria-label="Enlarge the spatial banking dashboard"><img id="sp-spatial-screen" src="assets/spatial-01.webp" width="1700" height="1152" alt="Native Mac preview of the spatial banking dashboard with demo accounts and activity" loading="lazy"></button></div>
+    <div class="sp-spatial-tabs" role="tablist" aria-label="Explore spatial banking"><button role="tab" aria-selected="true" aria-controls="sp-spatial-panel" id="sp-spatial-0" data-spatial="0">Accounts &amp; scanning</button><button role="tab" aria-selected="false" aria-controls="sp-spatial-panel" id="sp-spatial-1" tabindex="-1" data-spatial="1">Invoice detected</button><button role="tab" aria-selected="false" aria-controls="sp-spatial-panel" id="sp-spatial-2" tabindex="-1" data-spatial="2">Choose an account</button><button role="tab" aria-selected="false" aria-controls="sp-spatial-panel" id="sp-spatial-3" tabindex="-1" data-spatial="3">Demo receipt</button><button role="tab" aria-selected="false" aria-controls="sp-spatial-panel" id="sp-spatial-4" tabindex="-1" data-spatial="4">Activity</button></div>
+    <div id="sp-spatial-panel" role="tabpanel" aria-labelledby="sp-spatial-0" tabindex="0"><p data-spatial-description>See demo accounts, available balances and the scanning area together in one interface.</p></div>
+    <p class="sp-caption">Actual SwiftUI views captured with the native Mac preview renderer. These are app UI previews, not headset or passthrough captures. Balances and payments are demo data.</p>
+  </section>
+
+  <section class="sp-engineering sp-wrap sp-reveal">
+    <div class="sp-section-heading"><h2>Simple on the surface.<br><span>Visible underneath.</span></h2><p>From the first image to the final review, the demo makes the system understandable to users, operators and the room.</p></div>
+    <div class="sp-engineering-grid">
+      <div class="sp-sunmi-feature"><button class="sp-image-button" data-enlarge aria-label="Enlarge companion display journey screenshot"><img src="assets/sunmi-processing.webp" alt="Companion display showing the mobile, backend and provider journey with observed events" width="1280" height="720" loading="lazy"></button><h3>Follow the journey on the companion display.</h3><p>The live companion shows observed stages, the selected provider and elapsed backend time. Private invoice details stay off the shared display.</p><p class="sp-caption">Application capture from an isolated test session. The live mobile phone and companion display integration was separately verified on hardware.</p></div>
+      <div class="sp-admin-feature"><button class="sp-image-button sp-admin-selector" data-enlarge aria-label="Enlarge current admin method and model selector"><img src="assets/admin-current.jpg" alt="Current admin method and model selector showing OpenAI GPT-4.1 mini" width="1178" height="285" loading="lazy"></button><button class="sp-image-button" data-enlarge aria-label="Enlarge admin invoice context screenshot"><img src="assets/admin-context-uk.jpg" alt="Admin inspector showing country and language evidence for a synthetic UK invoice" width="1280" height="720" loading="lazy"></button><h3>Inspect. Compare. Understand.</h3><p>Choose the method and model for the next scan. Inspect source results, supporting context and confirmed mobile edits.</p><p class="sp-caption">Current method selector; invoice context shown with synthetic data.</p></div>
+    </div>
+    <details class="sp-details"><summary>Explore the extraction approaches <span aria-hidden="true">+</span></summary><div class="sp-methods"><div><h3>Direct image models</h3><p>One vision model reads the image and returns structured fields. Explored with OpenAI, Gemini, Mistral, Anthropic, Together and xAI.</p></div><div><h3>OCR + rules</h3><p>Recognised text and layout are mapped with deterministic rules. Explored with Mistral OCR, Google, Azure and AWS.</p></div><div><h3>Document APIs</h3><p>Invoice-specific service output is mapped to a common payment draft. Explored with Google, Azure, AWS and Mindee.</p></div><div><h3>OCR + annotations</h3><p>A requested field schema guides a document service’s structured output.</p></div><div><h3>OCR + a model</h3><p>Recognition and interpretation run as separate, measured stages.</p></div></div></details>
+  </section>
+
+
+
+  <section class="sp-next sp-wrap sp-reveal"><div class="sp-section-heading"><h2>The next step is<br><span>your payment journey.</span></h2><p>For banks, fintechs and payment teams exploring what comes after manual entry.</p></div><div class="sp-next-grid"><div><h3>Working today</h3><p>Native mobile phone capture and review. Configurable extraction. Country-aware guidance. Traceable edits. A live companion display. A separate spatial-banking prototype.</p></div><div><h3>Where we go next</h3><p>Broader invoice validation and exploration of integration with payment services. Production quality, latency and reliability need their own acceptance criteria.</p></div></div><div id="sp-repository" class="sp-repository"><a class="sp-button sp-repo-button" href="https://github.com/azikus/scan-and-pay-poc" target="_blank" rel="noopener noreferrer">Explore the code on GitHub <span aria-hidden="true">↗</span></a></div><a class="sp-contact" href="mailto:contact@azikus.com?subject=Let%E2%80%99s%20talk%20Scan%20%26%20Pay"><span>Let’s build what’s next.</span><span aria-hidden="true">↗</span></a><div class="sp-endnote"><span>Native mobile. AI engineering. Product thinking.</span><a href="https://www.openbankingexpo.com/" target="_blank" rel="noopener noreferrer">Open Banking Expo · London, 13–14 October 2026 ↗</a></div></section>
+
+  <dialog class="sp-lightbox" aria-label="Application screenshot"><button class="sp-close" aria-label="Close screenshot">Close <span aria-hidden="true">×</span></button><img alt=""><p></p></dialog>
+</article>

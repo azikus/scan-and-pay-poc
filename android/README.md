@@ -1,5 +1,5 @@
-# Android — later work
+# Android capture app — skipped
 
-Android implementation has not started. This directory reserves its place in the repository; it contains no app, scaffolding or dependencies.
+Markus explicitly skipped the Android capture/review PoC on 13 October 2026. No app, scaffolding or dependencies are planned for this delivery; both-platform capture-app testing is consequently removed from scope.
 
-The next task is the presentation together with Markus, followed by iOS improvements, backend work and Android last. When Android begins, use the shared [API contract](../docs/API_CONTRACT.md) and the agreed [mobile experience](../docs/MOBILE_UX_BRIEF.md), preserving explicit Send, review/confirmation and recovery semantics. See the [roadmap](../docs/ROADMAP.md) and [current handoff](../docs/CODING_HANDOFF.md).
+The working Android-based [SUNMI companion](../sunmi/companion/README.md) is a separate live display feature and remains supported. See [current status](../docs/CURRENT_STATUS.md) and [roadmap](../docs/ROADMAP.md).

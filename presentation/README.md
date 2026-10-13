@@ -43,4 +43,4 @@ This writes only `dist-private/`, including its own presenter deck and audience 
 
 ## Evidence and next work
 
-[Authoring evidence](../docs/PRESENTATION_EVIDENCE.md) keeps metric sources and revision history separate from slides. [Current status](../docs/CURRENT_STATUS.md) records the application, allowance and delivery state. The presentation is the initial PoC deck, not the later comprehensive findings/embeddable website milestone. Next development remains iOS improvements/testing, then backend/admin, then Android last.
+[Authoring evidence](../docs/PRESENTATION_EVIDENCE.md) keeps metric sources and revision history separate from slides. [Current status](../docs/CURRENT_STATUS.md) records the application, allowance and delivery state. The initial deck is retained. Markus skipped Android and the comprehensive final presentation on 13 October; no new deck is pending. The separate existing [Webflow showcase](../website/README.md) is preserved and unpublished.

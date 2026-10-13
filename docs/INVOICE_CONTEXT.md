@@ -1,5 +1,7 @@
 # Invoice context and applicable fields — 13 October 2026
 
+> Current update — 13 October: PR #11 is merged; standard context is retained. The removed worktree is not a runtime dependency; the private launcher uses the stable archive in CURRENT_STATUS.md. Markus confirmed successful phone Send after repair. Historical source/checkpoint instructions below do not override current scope.
+
 Markus requested implementation in a separate worktree/PR from latest main, including country explanations/flags and admin light/dark appearance. He explicitly authorized fresh paid calls for every available image. Base: `aabad9f7c64e6bcb3247d0a86bd89114c41313b0` (merged PR #9). The earlier no-inference/handoff restrictions do not apply to this bounded request. The stopped 9 October comparison is untouched.
 
 Before PR creation, main advanced to `814a1f176141335b7a7bec7c624e882fb457e6ab` (PR #10, explicit cloud credentials). That change is merged here. Only the three status/instruction documents conflicted; both scopes were retained. The integrated backend was rechecked and loaded with an idle service restart; every profile version is unchanged. Paid results below remain pinned to the original extraction profile and were not rerun for this integration.

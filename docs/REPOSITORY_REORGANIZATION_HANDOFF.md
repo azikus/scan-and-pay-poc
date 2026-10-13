@@ -1,5 +1,7 @@
 # Repository reorganization — 9 October 2026
 
+> Historical scope/checkpoint: retain the dated evidence below. Current scope, runtime and acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md), [CODING_HANDOFF.md](CODING_HANDOFF.md) and [ROADMAP.md](ROADMAP.md). Android/final presentation are skipped; mobile/backend/SUNMI and successful phone Send are accepted. Old next-task wording, worktree paths, provider selections and financial admission limits are not current instructions.
+
 The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2) at `62ac67da3aefd5817466e326cdd0b362ae58edd1`. Markus authorized this separate structural refactor, checks, documentation/status updates and normal PR/merge without further routine confirmation. Refactor: [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), from `codex/repository-layout` into `main`. The PR records the final merge commit and status.
 
 ## Delivered layout

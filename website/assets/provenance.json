@@ -1,0 +1,110 @@
+[
+  {
+    "file": "mobile-01.webp",
+    "source": "01-invoice-capture.png",
+    "kind": "Original app screenshot; synthetic data",
+    "sha256": "0808fcb3b137b63d5442e5b4a949a1a400583a33899b810a7aa971c84668e83c"
+  },
+  {
+    "file": "mobile-02.webp",
+    "source": "02-crop-and-rotate.png",
+    "kind": "Original app screenshot; synthetic data",
+    "sha256": "b6f215b596b7f425b692a1927d5485235e8f02daf02a9a308b66043bf4c9a773"
+  },
+  {
+    "file": "mobile-03.webp",
+    "source": "03-editable-payment-review.png",
+    "kind": "Original app screenshot; synthetic data",
+    "sha256": "e0617f058f3e0045905c8841e100ef98ee30a6e08a679370156d9a1214e788bf"
+  },
+  {
+    "file": "mobile-04.webp",
+    "source": "04-review-confirmation.png",
+    "kind": "Original app screenshot; synthetic data",
+    "sha256": "6f1f5b654f812ce905c40b3745b3e2f831d98436c204388ffde4c5e17b264baa"
+  },
+  {
+    "file": "mobile-05.webp",
+    "source": "05-scan-complete.png",
+    "kind": "Original app screenshot; synthetic data",
+    "sha256": "28b2aa6641f84009e11798c33c094395d9bd1d2b66d40749f6825791b4f7a7f4"
+  },
+  {
+    "file": "spatial-01.webp",
+    "source": "01-accounts-and-scan-dashboard.png",
+    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "sha256": "9d93a2d2fa750f36cdeaa1638beed1bf92753c70c9c0672820c48e9a1c2546d1"
+  },
+  {
+    "file": "spatial-02.webp",
+    "source": "02-invoice-detected.png",
+    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "sha256": "be2ee2ff0b6a0c19e5b6ab5e057b66f66e83c1316fbd42749f5b0a823d2a2925"
+  },
+  {
+    "file": "spatial-03.webp",
+    "source": "03-review-and-select-account.png",
+    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "sha256": "363880575c8d41b9b915ef137660be6336b51a5f35f6a662b1c1605f409be8bd"
+  },
+  {
+    "file": "spatial-04.webp",
+    "source": "04-simulated-payment-receipt.png",
+    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "sha256": "785ceaf2174815a96afbcce7c564450d7847ea2dafa92feabd8972ca3fda6658"
+  },
+  {
+    "file": "spatial-05.webp",
+    "source": "05-transaction-history.png",
+    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "sha256": "f78cd29f1641e9e47aba07fd1d7b9661f1ac2caeb2e18cfc3339d5a967dd9103"
+  },
+  {
+    "file": "sunmi-processing.webp",
+    "source": "scanpay-processing.png",
+    "kind": "Existing application QA capture; synthetic or masked content",
+    "sha256": "0afeda7f0afafd06578e1efcecfa7bbd9d92fd21f2e2a33e5a33778b952ae272"
+  },
+  {
+    "file": "dark-01.webp",
+    "source": "9A133932-7118-4A50-83D7-483058107403.png",
+    "kind": "Actual native iOS UI test capture; synthetic data; dark appearance",
+    "sha256": "cc8c0f1a1f2424bb0f963601fd245948162e2fcb02a6a94557a298e24bb3c750"
+  },
+  {
+    "file": "dark-02.webp",
+    "source": "E1948DED-E7E1-42E3-B87C-2A8C6E008BBE.png",
+    "kind": "Actual native iOS UI test capture; synthetic data; dark appearance",
+    "sha256": "a2eeecacdfff9cabcc1bf005c186d6551a08618107b6813fb3ac133343917240"
+  },
+  {
+    "file": "dark-03.webp",
+    "source": "4888CE12-2686-4628-85BC-86865A9AD99E.png",
+    "kind": "Actual native iOS UI test capture; synthetic data; dark appearance",
+    "sha256": "4cba13c6578c2c8c507d5e17af2df36093d23745b1a93e78687c9c39dc78fbb6"
+  },
+  {
+    "file": "dark-04.webp",
+    "source": "35D02F85-11D2-492A-A501-8FB90FE6F508.png",
+    "kind": "Actual native iOS UI test capture; synthetic data; dark appearance",
+    "sha256": "d342de8b3e7258b3f5ea1cf0ef9e892181d3761ddb4b1bbea4350338bcd73add"
+  },
+  {
+    "file": "dark-05.webp",
+    "source": "4AF7A453-4ED9-4DEA-8E34-24ACF8B0AD2E.png",
+    "kind": "Actual native iOS UI test capture; synthetic data; dark appearance",
+    "sha256": "1b930a03e2e007ad8e53b865a6a0b4d1983bca49d197d92335b28a9b5dbef9b5"
+  },
+  {
+    "file": "admin-current.jpg",
+    "source": "Authenticated localhost admin, captured 13 October 2026",
+    "kind": "Fresh screenshot cropped to method selector; no scan data or credentials",
+    "sha256": "4ecac02ce7c6e872b4ea1fa6f46f76e81e3afc718d326729bf26b284612df7e5"
+  },
+  {
+    "file": "admin-context-uk.jpg",
+    "source": "website/qa/uk-context-fixture.html",
+    "kind": "Unchanged production admin context renderer from 269e022, isolated synthetic UK fixture, captured in browser; no inference or live data",
+    "sha256": "db66e376a5a5116b73a88e95bca4cb844938377d8e1935700819a53691ad416a"
+  }
+]

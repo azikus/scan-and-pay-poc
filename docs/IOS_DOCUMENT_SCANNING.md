@@ -32,7 +32,7 @@ After camera acceptance, Markus reported `Profile execution failed; diagnostic c
 
 During investigation, the separately authorized website chat restored the backend from a stable Git archive of merged main `269e0223580ecba96793d9382c3efcffa77d720e`, under the original checkout's ignored `.local/runtime-source/` directory, and restarted it while idle. The existing private launcher now points there. Worktree cleanup no longer removes that runtime's source. Historical instructions to retain the invoice-context worktree are superseded by this deployment.
 
-Independent verification passed: authenticated health/profile/catalogue reads, admin/display serving, request preparation for the exact selected OpenAI profile, and 108 offline extended-adapter/invoice-context tests from the deployed source. Jobs, accounting, stages, reviews, selection and backend identity match the pre-restart snapshot. No provider request or failed-job retry was made during verification. Live extraction after repair still requires a new explicit user Send; retained failures are not rewritten as successes.
+Independent verification passed: authenticated health/profile/catalogue reads, admin/display serving, request preparation for the exact selected OpenAI profile, and 108 offline extended-adapter/invoice-context tests from the deployed source. Jobs, accounting, stages, reviews, selection and backend identity match the pre-restart snapshot. No provider request or failed-job retry was made during verification. Markus subsequently confirmed on 13 October that explicit phone Send works after the repair. This closes the live verification gate through user confirmation; no additional agent run or timing measurement is claimed. Retained failures remain unchanged.
 
 ## Apple references
 

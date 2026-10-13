@@ -1,5 +1,7 @@
 # Provider access checklist
 
+> Historical scope/checkpoint: retain the dated evidence below. Current scope, runtime and acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md), [CODING_HANDOFF.md](CODING_HANDOFF.md) and [ROADMAP.md](ROADMAP.md). Android/final presentation are skipped; mobile/backend/SUNMI and successful phone Send are accepted. Old next-task wording, worktree paths, provider selections and financial admission limits are not current instructions.
+
 **Cloud credentials — 13 October:** Markus requested AWS and Google credentials directly in root `.env`, with no interactive setup. Explicit `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (optional `AWS_SESSION_TOKEN`) now override AWS profile lookup. `GOOGLE_CREDENTIALS_JSON` loads authorized-user or service-account credentials in memory and overrides ADC/file lookup. Google Document AI uses OAuth identity credentials, not a Gemini-style API key. Existing credentials were migrated without generating new keys or changing identities; exact profile versions and private accounting/selection were preserved. Legacy SDK fallback remains only when explicit env credentials are absent. See [ENV_CLOUD_CREDENTIALS.md](ENV_CLOUD_CREDENTIALS.md).
 
 
