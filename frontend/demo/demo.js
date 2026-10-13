@@ -1,4 +1,4 @@
-import { project, usableProfile, methodLabel, profileLabel, providerLabel, selectedProfile, graphIndex } from "./state.js";
+import { project, usableProfile, methodLabel, profileLabel, providerLabel, selectedProfile, graphIndex, scanInsights } from "./state.js";
 const $ = (id) => document.getElementById(id);
 let token = "",
   snapshot = null,
@@ -9,7 +9,7 @@ let token = "",
 let lastPacket = 0,
   view = new URLSearchParams(location.search).get("view") || "compact";
 const native = window.Scanpay;
-let graphSignature = "", phaseSignature = "";
+let graphSignature = "", illustrationKind = "", titleText = "", titleExit = null, celebrationKey = "";
 const svgNS = "http://www.w3.org/2000/svg";
 function svgElement(tag, attributes = {}) {
   const element = document.createElementNS(svgNS, tag);
@@ -52,28 +52,28 @@ function graph(model) {
   const signature = JSON.stringify(nodes);
   if (signature !== graphSignature) {
     graphSignature = signature;
-    const canvas = svgElement("svg", {viewBox: "0 0 1000 510", class: "orbit", "data-count": nodes.length, role: "group", "aria-label": "Scan journey, clockwise from capture to review"});
+    const canvas = svgElement("svg", {viewBox: "0 0 900 600", class: "orbit", "data-count": nodes.length, role: "group", "aria-label": "Scan journey, clockwise from capture to review"});
     const defs = svgElement("defs");
     const marker = svgElement("marker", {id: "flow-arrow", viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse"});
     marker.append(svgElement("path", {d: "M1 1L8 5L1 9", fill: "none", stroke: "#9bb0cb", "stroke-width": 1.6}));
     defs.append(marker); canvas.append(defs);
-    const position = angle => [500 + 365 * Math.cos(angle), 225 + 145 * Math.sin(angle)];
-    const angles = nodes.map((_, i) => (-150 + i * 360 / nodes.length) * Math.PI / 180);
+    const position = angle => [450 + 300 * Math.cos(angle), 270 + 190 * Math.sin(angle)];
+    const angles = nodes.map((_, i) => (-126 + i * 360 / nodes.length) * Math.PI / 180);
     angles.slice(0, -1).forEach((angle, i) => {
-      const start = position(angle + .18), end = position(angles[i+1] - .22);
-      const path = svgElement("path", {d: `M${start} A365 145 0 0 1 ${end}`, class: "flow-link", "marker-end": "url(#flow-arrow)"});
+      const start = position(angle + .27), end = position(angles[i+1] - .29);
+      const path = svgElement("path", {d: `M${start} A300 190 0 0 1 ${end}`, class: "flow-link", "marker-end": "url(#flow-arrow)"});
       canvas.append(path);
     });
-    const core = svgElement("foreignObject", {x: 340, y: 160, width: 320, height: 140});
+    const core = svgElement("foreignObject", {x: 330, y: 178, width: 240, height: 200});
     const center = document.createElement("div");center.className = "orbit-center";
-    const dots = document.createElement("div");dots.className = "activity-dots";dots.setAttribute("aria-hidden", "true");
-    for(let i=0;i<5;i++)dots.append(document.createElement("b"));
+    const hero = document.createElement("div");hero.id="active-illustration";
+    illustrationKind = "";
     const label = document.createElement("strong");label.id="orbit-label";
     const note = document.createElement("small");note.id="orbit-note";
-    center.append(dots,label,note);core.append(center);canvas.append(core);
+    center.append(hero,label,note);core.append(center);canvas.append(core);
     nodes.forEach(([name, detail, kind], i) => {
       const [x,y] = position(angles[i]);
-      const box = svgElement("foreignObject", {x: x-95, y: y-52, width: 190, height: 182});
+      const box = svgElement("foreignObject", {x: x-100, y: y-60, width: 200, height: 190});
       const node = document.createElement("div");node.className = "node";
       const art = document.createElement("div");art.className="art-wrap";art.append(illustration(kind));
       const badge = document.createElement("b");badge.className="node-number";badge.textContent=String(i+1).padStart(2,"0");art.append(badge);
@@ -96,14 +96,83 @@ function graph(model) {
   });
   $("orbit-label").textContent = model.complete ? "Complete" : waiting ? "Awaiting provider" : model.moving ? "In transit" : model.node===4 ? "Your review" : model.idle ? "Ready" : "Live journey";
   $("orbit-note").textContent = waiting ? "Awaiting response" : model.complete ? "No payment made" : "Capture → draft → review";
-  const phase = `${selected}:${model.session?.journey_id}:${model.node}:${model.title}`;
-  if (phase !== phaseSignature) {
-    phaseSignature = phase;
-    $("title").getAnimations().forEach(a=>a.cancel());
-    if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
-      $("title").animate([{opacity:.35,transform:"translateY(8px)"},{opacity:1,transform:"translateY(0)"}],{duration:360,easing:"ease-out"});
+  const kind = nodes[Math.max(0,index)][2];
+  if (kind !== illustrationKind) {
+    illustrationKind = kind;
+    $("active-illustration").replaceChildren(illustration(kind));
+    $("customer-illustration").replaceChildren(illustration(kind));
   }
+  $("active-illustration").classList.toggle("running", model.moving && index >= 0);
 }
+function transitionTitle(text) {
+  if (text === titleText) return;
+  const title = $("title");
+  const previous = titleText;
+  titleText = text;
+  title.getAnimations().forEach(a => a.cancel());
+  titleExit?.remove();
+  titleExit = null;
+  title.textContent = text;
+  if (!previous || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const outgoing = document.createElement("span");
+  outgoing.className = "title-outgoing";
+  outgoing.textContent = previous;
+  outgoing.setAttribute("aria-hidden", "true");
+  title.parentElement.append(outgoing);
+  outgoing.style.left = `${title.offsetLeft}px`;
+  outgoing.style.top = `${title.offsetTop}px`;
+  outgoing.style.width = `${title.offsetWidth}px`;
+  titleExit = outgoing;
+  outgoing.animate([{opacity:.65,transform:"translateY(0)"},{opacity:0,transform:"translateY(-22px)"}],{duration:180,easing:"ease-in",fill:"forwards"}).finished.then(()=>outgoing.remove()).catch(()=>{});
+  title.animate([{opacity:0,transform:"translateY(24px)"},{opacity:1,transform:"translateY(0)"}],{duration:450,delay:100,fill:"backwards",easing:"cubic-bezier(.22,1,.36,1)"});
+}
+function celebrate(model) {
+  $("celebration").hidden = !model.complete;
+  document.body.classList.toggle("complete", Boolean(model.complete));
+  if (!model.complete) return;
+  const key = `${selected}:${model.session?.journey_id}:${model.session?.completed_at}`;
+  if (key === celebrationKey) return;
+  celebrationKey = key;
+  const burst = document.createElement("div");burst.className="success-burst";
+  for (let i=0;i<2;i++) {
+    const ring=document.createElement("b");ring.className="success-ring";ring.style.animationDelay=`${i*.16}s`;burst.append(ring);
+  }
+  for (let i=0;i<32;i++) {
+    const particle=document.createElement("i");particle.className="success-particle";
+    const angle=i*Math.PI*2/32, distance=120+(i*17)%70;
+    particle.style.setProperty("--x",`${Math.cos(angle)*distance}px`);
+    particle.style.setProperty("--y",`${Math.sin(angle)*distance+24}px`);
+    particle.style.setProperty("--r",`${i*37}deg`);
+    particle.style.animationDelay=`${.2+(i%4)*.04}s`;burst.append(particle);
+  }
+  const seal=document.createElement("div");seal.className="success-seal";
+  const check=svgElement("svg",{viewBox:"0 0 100 100"});
+  check.append(svgElement("path",{d:"M19 51L42 73L83 29",pathLength:1}));seal.append(check);burst.append(seal);
+  $("celebration").replaceChildren(burst);
+}
+function renderInsights(model, now, active) {
+  const session=model.session;
+  const remote=(session?.stages||[]).filter(s=>s.execution==="external");
+  const names=[...new Set(remote.map(s=>providerLabel(s.provider)))];
+  $("insight-provider").textContent=names.join(" → ") || "Waiting for provider";
+  $("insight-method").textContent=[...new Set(remote.map(s=>s.model || methodLabel(s.method)))].join(" → ");
+  const observing=active && Boolean(session) && now-session.last_seen<30 && session.phone!=="paused";
+  const data=scanInsights(session,now,observing);
+  $("elapsed-value").textContent=data.elapsed===null ? "—" : `${data.elapsed.toFixed(1)}s`;
+  $("elapsed-label").textContent=data.finished ? "Backend processing time" : data.paused ? "Last observed processing time" : "Since backend received image";
+  const signature=JSON.stringify(data.activity.map(e=>e.event_id));
+  if($("activity-log").dataset.signature!==signature) {
+    $("activity-log").dataset.signature=signature;
+    $("activity-log").replaceChildren(...data.activity.map(e=>{
+      const row=document.createElement("li"),label=document.createElement("span"),time=document.createElement("time");
+      label.textContent=e.label;
+      time.textContent=new Date(e.server_time*1000).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      row.append(label,time);return row;
+    }));
+  }
+  $("activity-note").textContent=!session ? "Follow a mobile phone in Controls." : !observing ? "Updates paused. Showing the last observed steps." : data.activity.length ? "" : "Observed steps appear here as you scan.";
+}
+
 function setView(v) {
   view = ["compact", "technical", "customer"].includes(v) ? v : "compact";
   document.body.dataset.view = view;
@@ -152,7 +221,7 @@ function render() {
   $("idle").hidden = !qr;
   $("journey").hidden = qr;
   $("idle-note").textContent = model.detail;
-  $("title").textContent = model.title;
+  transitionTitle(model.title);
   $("detail").textContent = model.detail;
   document.body.classList.toggle(
     "moving",
@@ -160,24 +229,12 @@ function render() {
   );
   document.body.dataset.phase = model.complete ? "complete" : model.session?.phone || "waiting";
   graph(model);
-  $("stages").replaceChildren(
-    ...(model.session?.stages || []).map((s) => {
-      const el = document.createElement("span");
-      el.textContent = `${s.execution === "local" ? "Backend" : s.provider || "Provider"} · ${s.model || s.method} · ${s.state}`;
-      return el;
-    }),
-  );
+  celebrate(model);
+  renderInsights(model, now, liveConnected);
   $("summary").hidden = !(
     view === "customer" &&
     ["review", "confirmation"].includes(model.session?.phone)
   );
-  const request = [...(model.session?.events || [])]
-    .reverse()
-    .find((e) => e.kind === "request");
-  $("timing").textContent =
-    model.moving && model.session?.backend === "request" && request
-      ? `${Math.max(0, Math.floor(now - request.server_time))}s since the latest provider request`
-      : "";
   $("clock").textContent = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",

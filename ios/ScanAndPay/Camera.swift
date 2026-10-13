@@ -278,7 +278,7 @@ struct ManualCrop: View {
         Text("Use crop").frame(maxWidth: .infinity)
       }.buttonStyle(PrimaryButton()).padding(.horizontal, 22).accessibilityIdentifier("use-crop")
     }.padding(.top, 8).padding(.bottom, 14).background(DocumentBackdrop(image: image))
-      .foregroundStyle(Brand.ink).tint(Brand.ink)
+      .foregroundStyle(.primary).tint(.primary)
       .disabled(rotating)
   }
   private func rotate() {

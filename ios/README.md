@@ -24,9 +24,11 @@ Send immediately shows **Preparing image…** while encoding the PNG off the UI 
 
 ## Appearance and motion
 
+As of 13 October, the app uses dark mode throughout, with semantic foreground colours, the reversed Azikus mark, dark document backdrops and ice-blue completion accents. Document images retain their original pixels. The signed build is installed on the paired iPhone 16 Pro; all four offline native UI flows pass.
+
 Every screen shares the Azikus mark and **Scan & Pay** title, with a subtitle for the current screen or processing state. Header actions move to a separate row at accessibility text sizes.
 
-The scan screen shows the complete camera frame between light Liquid Glass header and capture panels. Aspect-fit avoids the zoomed preview that previously revealed extra edges after capture. It preserves the full-resolution photo for manual crop. Adjust image, Ready to send, review, confirmation and completion share the glass treatment; settings, JSON navigation and the image viewer use the same light appearance. Documents and JSON remain sharp and readable. Native Liquid Glass controls are used on iOS 26, with material/solid accessibility fallbacks on older systems. Capture, crop and preview transition together; crop rotation/reset animate and the image carries between crop and preview. Reduce Motion avoids spatial animation. See [behavior, hotspot verification](../docs/IOS_GLASS_AND_MOTION.md).
+The scan screen shows the complete camera frame between dark Liquid Glass header and capture panels. Aspect-fit avoids the zoomed preview that previously revealed extra edges after capture. It preserves the full-resolution photo for manual crop. Adjust image, Ready to send, review, confirmation and completion share the glass treatment; settings, JSON navigation and the image viewer use the same dark appearance. Documents and JSON remain sharp and readable. Native Liquid Glass controls are used on iOS 26, with material/solid accessibility fallbacks on older systems. Capture, crop and preview transition together; crop rotation/reset animate and the image carries between crop and preview. Reduce Motion avoids spatial animation. See [behavior, hotspot verification](../docs/IOS_GLASS_AND_MOTION.md).
 
 ## Optional demo displays
 

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { project, usableProfile, selectedProfile, graphIndex, profileLabel } from "./state.js";
+import { project, usableProfile, selectedProfile, graphIndex, profileLabel, scanInsights } from "./state.js";
 const state = {
   session_id: "a",
   phone: "reading",
@@ -53,4 +53,21 @@ test("hybrid motion follows the active remote stage instead of skipping OCR", ()
   assert.equal(graphIndex({node:3},remote),4);
   assert.equal(graphIndex({node:4},remote),5);
   assert.equal(graphIndex({node:-1},remote),-1);
+});
+
+test("scan insights filter old journeys, coalesce heartbeats, and freeze terminal timings", () => {
+  const event = (kind, time, extra={}) => ({kind, source:"backend", server_time:time, journey_id:"current", ...extra});
+  const session = {journey_id:"current", updated_at:115, events:[
+    event("accepted", 20, {journey_id:"previous"}), event("accepted",100),
+    event("request",102,{stage_id:"ocr"}), event("completed",105,{stage_id:"ocr"}),
+    event("request",106,{stage_id:"llm"}), event("completed",112),
+    event("review",113,{source:"phone"}),event("review",114,{source:"phone"}),
+  ]};
+  const data=scanInsights(session,120);
+  assert.equal(data.elapsed,12);
+  assert.equal(data.finished,true);
+  assert.equal(data.activity.filter(e=>e.kind==="review").length,1);
+  assert.equal(data.activity.some(e=>e.journey_id==="previous"),false);
+  assert.equal(scanInsights({...session, events:session.events.slice(0,5)},120,false).elapsed,15);
+  assert.equal(scanInsights(null,120).elapsed,null);
 });

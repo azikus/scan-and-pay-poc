@@ -31,28 +31,28 @@
         <p class="eyebrow" id="mode-label">LIVE SYSTEM JOURNEY</p>
         <h1 id="title">Waiting for mobile phone</h1>
         <p id="detail"></p>
-        <div id="graph">
-          <div class="node">
-            01<span>Mobile phone</span><small>Capture</small>
+        <div class="journey-layout">
+          <div class="journey-visual">
+            <div id="graph"></div>
+            <div id="customer-illustration" aria-hidden="true"></div>
+            <div id="celebration" hidden aria-hidden="true"></div>
           </div>
-          <i></i>
-          <div class="node">02<span>Backend</span><small>Receive</small></div>
-          <i></i>
-          <div class="node">03<span>Provider</span><small>Read</small></div>
-          <i></i>
-          <div class="node">04<span>Backend</span><small>Check</small></div>
-          <i></i>
-          <div class="node">
-            05<span>Mobile phone</span><small>Review</small>
-          </div>
+          <aside id="scan-insights" aria-label="Live scan information">
+            <p class="eyebrow">THIS SCAN</p>
+            <h2 id="insight-provider">Waiting for a scan</h2>
+            <p id="insight-method" class="subtle"></p>
+            <div class="elapsed"><strong id="elapsed-value">—</strong><span id="elapsed-label">Processing time</span></div>
+            <h3>Recent activity</h3>
+            <ol id="activity-log"></ol>
+            <p id="activity-note" class="subtle">Observed steps appear here as you scan.</p>
+          </aside>
         </div>
-        <div id="stages"></div>
         <div id="summary" hidden>
           <span>Recipient <b>Private</b></span
           ><span>Destination <b>•••• ••••</b></span
           ><span>Reference <b>•••• ••••</b></span>
         </div>
-        <p id="timing" class="subtle"></p>
+
       </section>
     </main>
     <footer>

@@ -161,3 +161,29 @@ export function graphIndex(model, remote) {
   }
   return model.node >= 3 ? model.node + Math.max(0, remote.length - 1) : model.node;
 }
+
+// Timings use observed backend timestamps only, never estimates or payment fields.
+const eventLabels = {
+  crop: "Image captured", preview: "Image ready", preparing: "Preparing upload",
+  uploading: "Sending image", accepted: "Backend received image", queued: "Queued",
+  running: "Processing started", request: "Request sent to provider",
+  response: "Provider response received", validation: "Checking fields", local: "Applying rules",
+  completed: "Draft prepared", partially_completed: "Draft needs review",
+  review: "Review opened", confirmation: "Confirmation opened", confirmed: "Confirmation saved",
+  failed: "Processing failed", interrupted: "Processing interrupted", recovery: "Recovery needed",
+};
+export function scanInsights(session, now, active = true) {
+  const events = (session?.events || []).filter(e => e.journey_id === session.journey_id);
+  const activity = [];
+  for (const e of events) {
+    if (!eventLabels[e.kind]) continue;
+    const last = activity.at(-1);
+    if (last?.kind === e.kind && last.source === e.source && last.stage_id === e.stage_id) continue;
+    activity.push({...e, label: eventLabels[e.kind]});
+  }
+  const start = events.find(e => e.source === "backend" && e.kind === "accepted");
+  const end = events.find(e => e.source === "backend" && ["completed", "partially_completed", "failed", "interrupted"].includes(e.kind) && !e.stage_id);
+  const current = active ? now : Math.min(now, session?.updated_at ?? session?.last_seen ?? now);
+  const elapsed = start ? Math.max(0, (end?.server_time ?? current) - start.server_time) : null;
+  return {activity: activity.slice(-4).reverse(), elapsed, finished: Boolean(end), paused: !active && !end};
+}

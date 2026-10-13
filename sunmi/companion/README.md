@@ -71,3 +71,12 @@ Removed synthetic replay and all fabricated sessions/provider events from the sh
 The obsolete `com.azikus.scanpay.displaytest` package was uninstalled, its source removed (dated README retained), and the isolated rehearsal process on port 8769 stopped. The live backend was not restarted. All live routes and persistent session identifiers were retained for compatibility with the installed mobile app. The existing mobile setting is still called **Demo displays** and enables real telemetry; the separate simulated payment flow and offline regression fixtures are unchanged.
 
 Verification: six frontend checks and 23 backend review/demo tests pass; the APK builds with no `application-debuggable` flag and no removed bootstrap/capture methods in its DEX. Live provider selection and private state are preserved. No agent inference was performed.
+
+
+## Display motion and mobile dark mode — 13 October
+
+The live SUNMI views now animate outgoing/incoming titles, enlarge the circular component illustrations, and show an animated active component in the center. A right-hand panel shows the actual providers/models, observed backend elapsed time and four recent journey events. Heartbeat repetitions are coalesced; prior journeys are excluded; terminal backend timings stop and disconnected timings freeze. The customer view uses one large active illustration. Saved confirmation triggers a drawn checkmark, two expanding rings and 32 particles matching the mobile celebration; provider responses and failures cannot trigger it. Reduced Motion removes spatial/repeating effects. No synthetic playback or new data endpoint was added.
+
+The native app now uses dark glass across capture, crop, preview, review, confirmation, settings and completion. Semantic text colours and the reversed Azikus mark preserve contrast; source document pixels are unchanged. The signed update was installed in place on the existing paired iPhone 16 Pro and the SUNMI companion was relaunched. Existing tokens, selected provider and stored drafts are retained. No backend restart or agent inference was needed.
+
+Verification: seven frontend projection/selection/timing tests, isolated browser checks at 1280 × 720, 1280 × 800 and 1920 × 1080 (including hybrid stages, completion and reduced motion), and all four existing offline native UI flows pass. Native review/completion screenshots were inspected. Real-device confirmation animation acceptance remains for Markus’s next scan; no live confirmation was submitted by the agent.
