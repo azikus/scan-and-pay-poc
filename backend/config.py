@@ -241,6 +241,10 @@ class Settings(Model):
     openai_key: SecretStr = SecretStr("")
     mistral_key: SecretStr = SecretStr("")
     provider_keys: dict[str, SecretStr] = Field(default_factory=dict)
+    aws_access_key_id: SecretStr = SecretStr("")
+    aws_secret_access_key: SecretStr = SecretStr("")
+    aws_session_token: SecretStr = SecretStr("")
+    google_credentials_json: SecretStr = SecretStr("")
     resources: dict[str, str] = Field(default_factory=dict)
     providers: ProfileConfig = Field(default_factory=ProfileConfig)
     workers: int = Field(default=2, ge=1, le=2)
@@ -273,6 +277,10 @@ class Settings(Model):
             openai_key=SecretStr(os.getenv("OPENAI_API_KEY", "")),
             mistral_key=SecretStr(os.getenv("MISTRAL_API_KEY", "")),
             provider_keys={k: SecretStr(os.getenv(v, "")) for k, v in KEY_ENV.items()},
+            aws_access_key_id=SecretStr(os.getenv("AWS_ACCESS_KEY_ID", "")),
+            aws_secret_access_key=SecretStr(os.getenv("AWS_SECRET_ACCESS_KEY", "")),
+            aws_session_token=SecretStr(os.getenv("AWS_SESSION_TOKEN", "")),
+            google_credentials_json=SecretStr(os.getenv("GOOGLE_CREDENTIALS_JSON", "")),
             resources={k: os.getenv(k, "") for k in RESOURCE_ENV},
             data_dir=Path(os.getenv("SCANPAY_DATA_DIR", ".local/backend")),
             providers=providers,
