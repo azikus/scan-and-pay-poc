@@ -39,7 +39,7 @@ Private evidence: `.local/invoice-context-2026-10-13/` in the original checkout.
 | Critical readable fields | 47 exact + 1 accepted name variant = 48/63 (76.19%) |
 | Reviewed absences | 85/98 correct; separate from readable accuracy |
 
-The frozen `reviewed-key-r4.json` excludes 146 fields, including 92 pending labels. This is partial development-corpus scoring, not whole-invoice accuracy. Context countries have no separate human-adjudicated accuracy score. Latencies exclude mobile capture/upload/review and p95 is descriptive for this small sample.
+The frozen `reviewed-key-r4.json` excludes 146 fields, including 92 pending labels. This is partial development-corpus scoring, not whole-invoice accuracy. Issuer-country labels were subsequently approved by Markus; see the country evaluation below. Latencies exclude mobile capture/upload/review and p95 is descriptive for this small sample.
 
 The historical same-model profile scored 79/102 accepted readable fields on the reviewed subset. This new run scores three fewer. It is **not an extraction-accuracy improvement**: 11 readable values mismatch, 12 are missing and three remain uncertain. No fuzzy matching or country-based field filling is used. The new profile remains separately selectable; the user's existing selected `openai-mini-image-roles-v3@2-5094b6dc13ef5718` is preserved.
 
@@ -64,11 +64,11 @@ This PR is for review; merge, Android, hosting and presentation changes are outs
 
 Markus requested country-based scoring, then chose **add breakdowns now; prepare country labels for review**. `evaluation.country_scores` adds a saved-response report alongside the frozen benchmark. No inference, default change or runtime restart is needed. Both compared profiles use the same country cohort key; the evaluated model cannot change its own cohort or remove an incorrect printed field from its denominator.
 
-The existing answer key has no reviewed issuer-country labels. A separate `country-review@1` key binds to its exact digest and image inventory. Suggestions carry source-profile attribution, but remain pending with expected country null. Country-detection accuracy is unscored (`fraction: null`) until explicit reviewer-attributed labels exist. Invalid countries, altered inventories/hashes, missing attribution and a saved result from the wrong image are rejected.
+The original field answer key has no issuer-country labels. A separate `country-review@1` key binds to its exact digest and image inventory. On 13 October, Markus explicitly approved all 17 country suggestions in chat; no form export was needed. The new private reviewed key records that confirmation and reviewer attribution, retaining the original pending key and reports. Country guidance matches 13/17 approved entries (76.47%) for the old profile and 17/17 (100%) for the new profile. This is agreement with user-approved suggestions on this development set, not a blind independent benchmark. Invalid countries, altered inventories/hashes, missing attribution and a saved result from the wrong image are rejected.
 
 Payment-scheme breakdowns derive from positive **reviewed printed fields**, not predicted country/language: IBAN, linked UK sort/account pair, or biller identifiers; insufficient/conflicting evidence stays unresolved. Correctly absent other-scheme fields are counted separately as not applicable. Other confirmed absences remain separately visible, including unexpected populated values; none contributes to readable-field accuracy. This is an extraction breakdown, not a payment-readiness metric.
 
-| Provisional country cohort | Input entries | Old accepted/readable | New accepted/readable |
+| User-approved country cohort | Input entries | Old accepted/readable | New accepted/readable |
 | --- | ---: | ---: | ---: |
 | Italy | 4 | 33/44 | 29/44 |
 | Greece | 3 | 9/18 | 9/18 |
@@ -78,17 +78,21 @@ Payment-scheme breakdowns derive from positive **reviewed printed fields**, not 
 | Cyprus | 1 | unscored | unscored |
 | Spain | 1 | unscored | unscored |
 
-These countries are model suggestions shared across the comparison, **not verified country labels**. Sparse or zero readable labels do not support country-wide accuracy claims. The frozen 17-entry manifest includes one explicit exact-image duplicate (16 distinct image hashes); reports expose both counts and preserve the original field denominator. The fresh all-image batch processed each distinct byte sequence once and reused its result for duplicate manifest entries.
+Both profiles use the same user-approved country labels. Suggestions originated from the new context profile and were then approved by Markus. Sparse or zero readable labels do not support country-wide accuracy claims. The frozen 17-entry manifest includes one explicit exact-image duplicate (16 distinct image hashes); reports expose both counts and preserve the original field denominator. The fresh all-image batch processed each distinct byte sequence once and reused its result for duplicate manifest entries.
 
 Scheme breakdowns, old → new: UK domestic 17/18 → 18/18; IBAN 6/7 → 6/7; biller-reference 31/49 → 27/49; unresolved 10/11 → 10/11; document fields 15/17 → 15/17. Both runs correctly omit 51 labelled inapplicable fields. The overall readable result remains 79/102 → 76/102; the country view does not erase the four extra-digit references on one Italian invoice or the wrong Greek amount. Two beneficiary checks gained credit. The Greek cohort's unchanged total hides one gain and one loss.
 
 Private artifacts in the original checkout's `.local/invoice-context-2026-10-13/`:
 
-- `country-review.json`: all 17 country labels pending, with image paths, suggestions and evidence summaries.
+- `country-review.json`: preserved initial pending key, with image paths, suggestions and evidence summaries.
+- `country-reviewed-markus-2026-10-13.json`: all 17 countries approved by Markus in chat, with the confirmation provenance.
+- `old-country-report-reviewed.json` / `new-country-report-reviewed.json`: saved-response scores using the same approved country key; country matches 13/17 and 17/17 respectively.
 - `country-review.html`: local review form with invoice previews and an explicit reviewed-label JSON download; no network submission, provider calls or automatic persistence. The form's links, pending labels and JavaScript syntax were checked. Automated visual preview was unavailable because the in-app browser blocks `file:` URLs.
 - `old-country-report-r2.json` / `new-country-report-r2.json`: comparable country/scheme reports, with unchanged original scores.
 - `score-audit.json` / `score-audit-changes.json`: same-image/key/model audit and individual changed-field evidence, retained privately.
 
-After country review, run the CLI from the original data root with this worktree on the Python module path: `python -m evaluation.country_scores --manifest ... --batch ... --key ... --context country-review-completed.json --output NEW_REPORT.json`. Use the same reviewed context file for both batches and a fresh output filename; prior reports are not overwritten. Original reviewed fields/labels remain immutable.
+To create any later saved-response report, run the CLI from the original data root with this worktree on the Python module path: `python -m evaluation.country_scores --manifest ... --batch ... --key ... --context country-reviewed-markus-2026-10-13.json --output NEW_REPORT.json`. Use the same reviewed context file for both batches and a fresh output filename; prior reports are not overwritten. Original reviewed fields/labels remain immutable.
 
 Verification after this evaluation-only follow-up: **784 backend/evaluation tests pass**, including 17 new cases; **95.98% statement / 91.40% branch coverage**. Ruff and strict mypy pass. Native/admin application code and its previously recorded checks are unchanged. No additional paid calls.
+
+The subsequent country approval changed only private labels, saved-response reports and documentation. Both reports validated the key/image bindings; original readable-field scores and pending artifacts were preserved. No application code changed or provider calls were made during this approval update.
