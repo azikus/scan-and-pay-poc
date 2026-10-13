@@ -1,5 +1,8 @@
 # Coding handoff — continue here
 
+**Cloud credentials — 13 October:** Markus requested AWS and Google credentials directly in root `.env`, with no interactive setup. Explicit `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (optional `AWS_SESSION_TOKEN`) now override AWS profile lookup. `GOOGLE_CREDENTIALS_JSON` loads authorized-user or service-account credentials in memory and overrides ADC/file lookup. Google Document AI uses OAuth identity credentials, not a Gemini-style API key. Existing credentials were migrated without generating new keys or changing identities; exact profile versions and private accounting/selection were preserved. Legacy SDK fallback remains only when explicit env credentials are absent. See [ENV_CLOUD_CREDENTIALS.md](ENV_CLOUD_CREDENTIALS.md).
+
+
 ## Combined integration verification — 13 October
 
 Markus requested latest `main` merged into this branch, checked, and PR #9 merged. Integrated base: `08de9e15c20e468ea87caf0a5df9132b845c8486` (PR #7), which includes PR #8’s native glass/hotspot/Send changes. Only AGENTS.md and CODING_HANDOFF.md conflicted; both scopes were retained. No application conflict required a code change.

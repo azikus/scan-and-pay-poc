@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 
 Configure a random `SCANPAY_TOKEN` in `.env` using [.env.example](.env.example). A private `.env` with a generated token has already been prepared in this workspace; keep it. For a fresh checkout, the commands in [operations](docs/OPERATIONS.md) create it without printing the token or replacing an existing file. Provider keys are unnecessary for startup, health, profiles and tests.
 
-Use this same root `.env` for all credentials and connection settings. See the [access checklist](docs/PHASE2_ACCESS.md). Billing tiers and access notes belong in private integration evidence. Credentials alone do not enable a profile; each option requires explicit operator enablement and account/data-terms readiness metadata.
+Use this same root `.env` for all credentials and connection settings. AWS key pairs and inline Google credential JSON are supported directly; see [cloud credentials in env](docs/ENV_CLOUD_CREDENTIALS.md). See the [access checklist](docs/PHASE2_ACCESS.md). Billing tiers and access notes belong in private integration evidence. Credentials alone do not enable a profile; each option requires explicit operator enablement and account/data-terms readiness metadata.
 
 ```sh
 .venv/bin/scanpay-serve

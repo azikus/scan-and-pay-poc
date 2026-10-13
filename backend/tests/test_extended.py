@@ -279,9 +279,9 @@ def test_document_protocol_mapping_and_immutable_poll_artifacts(
     from backend.adapters import cloud_auth
 
     monkeypatch.setattr(
-        cloud_auth, "google_headers", lambda _: {"Authorization": "Bearer synthetic"}
+        cloud_auth, "google_headers", lambda *a: {"Authorization": "Bearer synthetic"}
     )
-    monkeypatch.setattr(cloud_auth, "aws_headers", lambda *a: {"Authorization": "synthetic"})
+    monkeypatch.setattr(cloud_auth, "aws_headers", lambda *a, **kw: {"Authorization": "synthetic"})
     settings.resources.update(
         GOOGLE_CLOUD_PROJECT="test-project",
         GOOGLE_DOCUMENTAI_LOCATION="eu",
