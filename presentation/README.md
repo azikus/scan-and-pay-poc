@@ -32,7 +32,7 @@ Build output is regenerated, not committed. After `npm ci`, run `npm run build` 
 
 The repository edition shows a numbered overview of the **17 evaluation inputs**, preserving the study counts without including invoice pixels. Other screenshots were inspected before import: review is synthetic, payment values are already masked, and the admin/production screenshots contain no personal or banking values. Asset attribution is below.
 
-The full invoice gallery remains an optional **local-only** asset. On the existing Mac it is already copied, unchanged, into ignored `private-assets/corpus-gallery.png`. On another machine, obtain that file from the private original export; do not add it to Git. Then:
+The full invoice gallery remains an optional **local-only** asset. On the existing installation it is already copied, unchanged, into ignored `private-assets/corpus-gallery.png`. On another machine, obtain that file from the private original export; do not add it to Git. Then:
 
 ```sh
 npm run build:private

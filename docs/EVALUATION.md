@@ -55,7 +55,7 @@ Costs identify exact model/processor/profile/prompt versions, full input coverag
 
 ## Limits
 
-Recipient-role mistakes, amount/reference confusion, missing bank fields and variation between repeated runs remain possible. Format/checksum validation cannot verify correctness or account ownership. Physical iPhone/SUNMI acceptance establishes that the journey works; it is not an independently scored camera dataset or production reliability study.
+Recipient-role mistakes, amount/reference confusion, missing bank fields and variation between repeated runs remain possible. Format/checksum validation cannot verify correctness or account ownership. Physical mobile/display acceptance establishes that the journey works; it is not an independently scored camera dataset or production reliability study.
 
 ## Private source map
 

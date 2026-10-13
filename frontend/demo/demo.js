@@ -201,7 +201,7 @@ function receive(data) {
   render();
 }
 function render() {
-  // Use server time plus monotonic elapsed time, not the SUNMI wall clock.
+  // Use server time plus monotonic elapsed time, not the display's wall clock.
   const now = Number.isFinite(snapshot?.server_time)
       ? snapshot.server_time + (performance.now() - lastPacket) / 1000
       : Date.now() / 1000,
@@ -412,8 +412,6 @@ if (native) {
       selected = config.session;
     }
     $("sessions").addEventListener("change", () => native.follow(selected));
-    $("vision").onclick = () => native.mode("vision");
-    $("scanpay").onclick = () => native.mode("scanpay");
     $("configure").onclick = () => native.settings();
   } catch {
     $("error").textContent = "Open native connection settings.";

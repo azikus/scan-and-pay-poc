@@ -13,7 +13,7 @@ Events have `version`, UUID `event_id`, monotonic server `sequence`, `session_id
 
 Separate `demo-state.json` stores only sanitized observation state: up to eight sessions, 128 recent scan bindings and 64 events per session. Default inactivity retention is eight hours (`Settings.demo_retention_seconds`, configurable 60–86,400 seconds). Persistence is coalesced on a single background writer. Observer/storage errors cannot fail extraction or confirmation. Following a restart, phone connection is unknown and unfinished observed stages become interrupted; no job is rerun. A fresh phone snapshot restores presence. A crash can lose the most recent best-effort update; this channel is not an audit ledger. Old mobile drafts without demo association remain valid and simply lack full display telemetry.
 
-Display session selection is a local operator control; it never deletes scans or alters the phone. The shipped companion observes live data and has no synthetic playback. See [SUNMI setup](SETUP.md#sunmi-build-connection-and-displays).
+Display session selection is a local operator control; it never deletes scans or alters the phone. The shipped companion observes live data and has no synthetic playback. See [display setup](SETUP.md#display-client-build-connection-and-panels).
 
 ## Admin method selection
 
@@ -158,7 +158,7 @@ Compatible compact extraction profiles include `diagnostics.context_explanations
 
 ## Local connection status
 
-Authenticated `GET /v1/admin/connection` returns `automatic` (boolean), `refresh_seconds` (nullable integer), `checked_at` (nullable timestamp of the last successful interface check), `addresses` (URL, interface identifier and `network|link_local` kind) and `warnings` (strings). The managed Mac launcher reports only successfully bound private/link-local IPv4 listeners. Loopback is not advertised as a phone URL. Discovery failure retains the previous listener list and check time with an explicit warning; bind failures are excluded and retried by the launcher. Responses are no-store and contain no token. Reads do not enumerate interfaces, dispatch inference, alter selection or change drafts.
+Authenticated `GET /v1/admin/connection` returns `automatic` (boolean), `refresh_seconds` (nullable integer), `checked_at` (nullable timestamp of the last successful interface check), `addresses` (URL, interface identifier and `network|link_local` kind) and `warnings` (strings). The automatic interface launcher reports only successfully bound private/link-local IPv4 listeners. Loopback is not advertised as a phone URL. Discovery failure retains the previous listener list and check time with an explicit warning; bind failures are excluded and retried by the launcher. Responses are no-store and contain no token. Reads do not enumerate interfaces, dispatch inference, alter selection or change drafts.
 
 Ordinary manual Uvicorn startup reports `automatic=false` and, when the request's actual server socket address is private/link-local, that address only. It never treats a client Host header as a discovered address. Listener availability is not proof of connectivity from a particular phone. Existing scan, review, profile and identity semantics are unchanged.
 

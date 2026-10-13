@@ -2,7 +2,7 @@
 
 ### From a paper invoice to a reviewed payment draft.
 
-Scan & Pay is an Azikus proof of concept that combines native iPhone capture, configurable AI/OCR extraction and an editable review experience. A local Mac backend coordinates processing and keeps the original result separate from the user's corrections. An admin inspector and SUNMI companion make the same journey visible to an operator and the room.
+Scan & Pay is an Azikus proof of concept that combines native mobile capture, configurable AI/OCR extraction and an editable review experience. An API service coordinates processing and keeps the original result separate from the user's corrections. An admin inspector and live display companion make the same journey visible to an operator and the room.
 
 **Capture → Adjust → Send → Review → Confirm**
 
@@ -12,7 +12,7 @@ Scan & Pay is an Azikus proof of concept that combines native iPhone capture, co
 
 ## The mobile experience
 
-The app keeps the document close to the fields throughout the journey. Dark Liquid Glass controls, native sheets and a reduced-motion alternative make capture, editing and confirmation feel like one continuous flow.
+The app keeps the document close to the fields throughout the journey. Clear controls, native sheets and a reduced-motion alternative make capture, editing and confirmation feel like one continuous flow.
 
 <table>
   <tr>
@@ -27,9 +27,9 @@ The app keeps the document close to the fields throughout the journey. Dark Liqu
   </tr>
 </table>
 
-**Capture.** Point the camera at the paper and hold steady. Apple Vision identifies the document, greys the surrounding preview and triggers automatic capture. The app straightens the image and opens **Adjust image**. Manual shutter and photo import remain available; detection runs on the phone.
+**Capture.** Point the camera at the paper and hold steady. On-device document detection identifies the paper, greys the surrounding preview and triggers automatic capture. The app straightens the image and opens **Adjust image**. Manual shutter and photo import remain available; detection runs on the phone.
 
-**Adjust and send.** Crop or rotate the document, return to the full original photo, or retake it. After **Use crop**, the final preview offers **Send**. That explicit action uploads the image to the Mac. The app shows **Preparing image…**, then the processing state and field placeholders while it waits for the result.
+**Adjust and send.** Crop or rotate the document, return to the full original photo, or retake it. After **Use crop**, the final preview offers **Send**. That explicit action uploads the image to the API service. The app shows **Preparing image…**, then the processing state and field placeholders while it waits for the result.
 
 **Review.** The returned draft appears in an expandable sheet with the document visible above it. Check the recipient, amount, currency, account and reference against the image. Edit a value or add missing details; corrections are marked **Edited**. Missing required fields and uncertainty remain visible, while optional empty fields are kept under **Add other details**.
 
@@ -45,23 +45,21 @@ The app keeps the document close to the fields throughout the journey. Dark Liqu
 
 **Continue.** A successful save shows the completion animation, clears the mobile draft and returns to capture. The backend retains the original extraction and the confirmed review.
 
-*These are actual application screenshots using explicitly synthetic invoice data. They illustrate the interface, not extraction accuracy. Click a screenshot to inspect it at full size. The capture fixture does not demonstrate live document detection.*
-
 ## How extraction works
 
-The phone handles capture and review. The Mac handles authenticated requests, provider orchestration, field normalization and persistence. Hosted providers receive only the payloads required by the selected method.
+The mobile client handles capture and review. The API service handles authentication, provider orchestration, field normalization and persistence. Hosted providers receive only the payloads required by the selected method.
 
 ```mermaid
 flowchart LR
-    Phone["iPhone<br/>Capture and explicit Send"] -->|"Image + frozen request"| API["Mac backend<br/>Authenticate · persist · queue"]
+    Phone["Mobile client<br/>Capture and explicit Send"] -->|"Image + frozen request"| API["API service<br/>Authenticate · persist · queue"]
     API -->|"Selected method"| Provider["Hosted model / OCR / document API"]
-    Provider -->|"Fields or text/layout"| Rules["Mac interpretation<br/>Associations · validation · review guidance"]
-    Rules -->|"Editable draft"| Review["iPhone<br/>Review and simulated confirmation"]
-    API --> Store[("Private SQLite + files")]
+    Provider -->|"Fields or text/layout"| Rules["Interpretation service<br/>Associations · validation · review guidance"]
+    Rules -->|"Editable draft"| Review["Mobile client<br/>Review and simulated confirmation"]
+    API --> Store[("Private storage")]
     Rules --> Store
     Review -->|"Separate confirmed values"| Store
     Store --> Admin["Admin inspector"]
-    API -.->|"Sanitized live events"| Display["SUNMI companion"]
+    API -.->|"Sanitized live events"| Display["live display companion"]
 ```
 
 A scan uses one exact, versioned profile. The admin's choice applies to the **next new Send**; it cannot change a draft that is already uploading, being processed or waiting for review.
@@ -69,7 +67,7 @@ A scan uses one exact, versioned profile. The admin's choice applies to the **ne
 | Method | What happens | External payload |
 | --- | --- | --- |
 | Direct image model | A hosted vision model returns structured fields from the invoice | Image plus extraction instructions/schema |
-| OCR + rules | A service returns text/layout; local rules assemble the draft | Image to OCR; rules run on the Mac |
+| OCR + rules | A service returns text/layout; local rules assemble the draft | Image to OCR; rules run in the backend |
 | Document API | An invoice/document service returns fields that an adapter maps into the shared contract | Image |
 | OCR + annotations | A document service extracts against a requested field schema | Image plus schema |
 | OCR → model | OCR runs first; a separate model interprets the returned content | Image to OCR, then text/layout to the model |
@@ -108,36 +106,25 @@ For each saved scan, the inspector can show the exact mobile upload, normalized 
 
 ## The live companion
 
-![SUNMI technical journey showing sanitized mobile, backend and provider events](website/assets/sunmi-processing.webp)
+![Live system journey showing sanitized mobile, backend and provider events](website/assets/sunmi-processing.webp)
 
-The SUNMI companion follows real mobile/backend activity: capture, upload, queued work, provider requests/responses, review and saved confirmation. It shows the selected provider, observed backend elapsed time and recent journey events. Invoice pixels, account details and edited values stay off the shared display.
+The live display companion follows real mobile/backend activity: capture, upload, queued work, provider requests/responses, review and saved confirmation. It shows the selected provider, observed backend elapsed time and recent journey events. Invoice pixels, account details and edited values stay off the shared display.
 
-Two display modes are available:
-
-- **Vision Pro mode:** AirScreen receives headset mirroring on the main panel while the companion uses the customer panel.
-- **Scan & Pay mode:** the main panel shows the technical journey and the smaller panel shows simplified status.
+The primary display shows the technical system journey, while the secondary display shows simplified customer status.
 
 The idle view shows the website QR. **Controls → Next scan** offers the same shared method/model selection as the admin. Reconnect restores live observation; it cannot submit a scan. A provider response is an observed event, not proof of a correct draft. The capture above comes from an isolated QA session; live integration is separately accepted on hardware.
 
-See [companion setup](docs/SETUP.md#sunmi-build-connection-and-displays) for installation and display placement.
-
-## Recovery without duplicate scans
-
-The phone saves pending image bytes, request options, profile/version, idempotency key, accepted scan ID and edits. An accepted scan resumes polling after an interruption. An uncertain upload can be recovered explicitly with the same request; repeated acceptance returns the original scan.
-
-Confirmations also have a stable UUID and frozen body. If saving is interrupted, recovery uses that same confirmation rather than writing a second review. Backend identity checks protect recovery when the Mac address changes. A newer result cannot reopen a discarded draft.
-
-Reconnect, polling, inspection and display observation do not trigger provider calls. A deliberately new request key creates a new run. An unsent capture is held in memory and must be retaken after an app relaunch.
+See [companion setup](docs/SETUP.md#display-client-build-connection-and-panels) for installation and display placement.
 
 ## Run locally
 
-The physical setup uses the iPhone's **Personal Hotspot** and one saved Mac address. Connect the Mac to the hotspot, open admin **Connection**, copy its address into the app's **Connection → Hotspot → Mac address**, and tap **Reconnect**. Keep the Mac awake. The phone's `localhost` is the phone itself.
+Run the API service on a host reachable by the mobile client and live display over a shared private network. Configure the server base URL and access token in each client, then reconnect. A client's `localhost` refers to that client device, not the API host.
 
-A fresh checkout needs Python 3.12, hash-locked dependencies, a private `.env`, enabled provider profiles and an iOS build. The [setup guide](docs/SETUP.md) covers these steps and safe use of an existing installation. The admin and live display require no separate frontend service.
+The backend uses Python 3.12 and can be started through its ASGI entry point on a compatible host. The capture app supplied here is an iOS implementation; the client/server contract does not depend on a specific device vendor or hotspot topology. The [setup guide](docs/SETUP.md) covers installation, host binding and the available client builds. Admin and live views are served by the same API service.
 
 ## Scope
 
-This is a working local PoC for single-image capture, extraction and human review. The backend accepts JPEG/PNG; the iOS app uploads an oriented PNG. It does not execute payments, decode payment QR/barcode payloads or accept multipage/HEIC API uploads. The Android capture app is outside this delivery; the Android-based SUNMI display companion is supported.
+This is a working local PoC for single-image capture, extraction and human review. The backend accepts JPEG/PNG; the iOS app uploads an oriented PNG. It does not execute payments, decode payment QR/barcode payloads or accept multipage/HEIC API uploads. The Android capture app is outside this delivery; the Android-based display companion is supported.
 
 Extraction can be wrong or incomplete. Reviewed development measurements and their limits are in the [evaluation guide](docs/EVALUATION.md). No production accuracy, latency or availability guarantee is implied.
 
@@ -145,7 +132,7 @@ Extraction can be wrong or incomplete. Reviewed development measurements and the
 
 | Read | Purpose |
 | --- | --- |
-| [Setup](docs/SETUP.md) | Backend, credentials, hotspot and local operation |
+| [Setup](docs/SETUP.md) | Backend, credentials, networking and client builds |
 | [API contract](docs/API_CONTRACT.md) | Wire semantics, typed observations and review endpoints |
 | [Evaluation](docs/EVALUATION.md) | Corpus runs, scoring, measurements and known limitations |
 | [Development](docs/DEVELOPMENT.md) | Architecture, providers, repository map and checks |

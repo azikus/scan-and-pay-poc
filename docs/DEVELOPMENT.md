@@ -21,7 +21,7 @@ Python packaging/lockfiles stay at the root. `.env`, `.local/`, `samples/`, `res
 
 ## Architecture
 
-Scan & Pay runs one Python/FastAPI service on the Mac. The iPhone, admin and SUNMI companion use that service; only explicitly selected provider stages send data to hosted inference APIs.
+Scan & Pay runs one Python/FastAPI API service. The mobile client, admin and live display use that service; only explicitly selected provider stages send data to hosted inference APIs.
 
 ### Components
 
@@ -55,9 +55,9 @@ Scan & Pay runs one Python/FastAPI service on the Mac. The iPhone, admin and SUN
 | Deterministic rules | No new external transfer | Interpretation of returned OCR/document observations |
 | OCR → model | Image to OCR, then text/layout to the interpreter | Separate stage/recipient records and combined timing/cost |
 | Native document detection | No provider transfer | Phone camera frames, document geometry and perspective correction |
-| SUNMI telemetry | No payment fields, image or provider credential | Sanitized identifiers, phases and observed stage events |
+| Display telemetry | No payment fields, image or provider credential | Sanitized identifiers, phases and observed stage events |
 
-Provider content handling is account/service-specific. The Mac backend is local, but selected inference stages are hosted. Region/retention/training metadata must not be inferred from headquarters, model licensing or a hostname. Unknown processing residency stays unknown.
+Provider content handling is account/service-specific. The configured API service is local, but selected inference stages are hosted. Region/retention/training metadata must not be inferred from headquarters, model licensing or a hostname. Unknown processing residency stays unknown.
 
 ### Storage and isolation
 
@@ -69,7 +69,7 @@ A process lock prevents two service owners sharing a data directory. Completed w
 
 ### Networking and recovery
 
-`scanpay-serve` keeps loopback and reconciles physical private/link-local IPv4 listeners. The iOS settings expose one saved hotspot address. Reconnect uses authenticated reads and checks the persistent `server_id`; older accepted drafts use scan/image identity checks. Uncertain legacy uploads remain bound to their original address when identity cannot be established safely.
+The ASGI entry point supports an explicit private bind address. Optional `scanpay-serve` reconciles private/link-local IPv4 listeners using macOS interface discovery; this launcher is deployment tooling, not an API requirement. The native settings store one private server address; their hotspot label reflects the current demonstration setup. Reconnect uses authenticated reads and checks the persistent `server_id`; older accepted drafts use scan/image identity checks. Uncertain legacy uploads remain bound to their original address when identity cannot be established safely.
 
 Two jobs can progress concurrently with bounded outbound calls and queue capacity. Profile stage/job timeouts are explicit. Disconnection is not cancellation, and a timeout does not prove the upstream provider stopped processing. No hidden retry or provider fallback is introduced.
 
@@ -104,7 +104,7 @@ Fireworks and Cohere Aya are not supported by the active implementation. Example
 
 ### Selection and request snapshots
 
-The admin and SUNMI **Next scan** controls share the same persisted selection. A new phone Send reads its exact profile ID/version, verifies readiness and freezes that reference with the request. Existing scans and pending recovery do not adopt a new default.
+The admin and live display **Next scan** controls share the same persisted selection. A new phone Send reads its exact profile ID/version, verifies readiness and freezes that reference with the request. Existing scans and pending recovery do not adopt a new default.
 
 Extract runs one profile. Compare resolves explicit profile IDs or `all_enabled` into an immutable eligible roster. Disabled, missing, unconfigured or image-incompatible explicit choices fail before dispatch. Compare returns independent results, with no vote or automatic winning result. No provider fallback or substitution is hidden in a method.
 
@@ -141,19 +141,19 @@ Fresh provider runs need a saved complete input/profile/repeat plan, new stable 
 
 ## Native implementation
 
-### iPhone
+### Native capture client
 
 The SwiftUI app supports iOS 18+, bundle ID `com.azikus.scanpay.poc`. AVFoundation capture and Apple Vision document geometry/stability/rectification run on the phone. Lifetime checks discard late camera/detection callbacks, and generation checks isolate preparation, upload and recovery from resets/backgrounding. PNG preparation runs off the UI thread.
 
-Dark Liquid Glass uses material/solid fallbacks, semantic colors, accessibility sizing and Reduce Motion. Document pixels and selectable wrapped JSON remain readable. Atomic Application Support records preserve frozen requests/edits/confirmations with file protection and backup exclusion; Keychain holds the local API token.
+The interface uses material/solid fallbacks, semantic colors, accessibility sizing and Reduce Motion. Document pixels and selectable wrapped JSON remain readable. Atomic Application Support records preserve frozen requests/edits/confirmations with file protection and backup exclusion; Keychain holds the local API token.
 
 `-synthetic-preview` is a bundled offline UI fixture; remove it for real operation. Tests cover linked candidates/nulls, geometry/orientation/document stability, exact-profile mismatch, duplicates, interrupted requests, frozen confirmations and late-result isolation. Original Azikus artwork and licensed Hanken Grotesk live in Resources.
 
-### SUNMI host
+### Display host
 
 `com.azikus.scanpay.companion` is a controlled-origin Android WebView host with Internet access, no backup and no provider keys. Android Keystore AES/GCM encrypts the local token; browser storage is disabled. GET access is limited to shell/assets, snapshots/stream and profile catalogue. Its only allowed mutation is PUT to `/v1/admin/selection`; scan submission/confirmation is blocked.
 
-LauncherActivity renders its own window on the restricted customer display; other activities remain private. The ADB script discovers the current presentation display instead of hardcoding its ID. The host keeps only its visible windows awake, restores the saved display mode and changes no global display/security/network settings. Normal builds have no debug bootstrap/capture helpers or fabricated playback.
+LauncherActivity renders its own window on the restricted customer display; other activities remain private. The ADB script discovers the current presentation display instead of hardcoding its ID. The host keeps only its visible windows awake, always opens the technical primary panel and customer secondary panel and changes no global display/security/network settings. Normal builds have no debug bootstrap/capture helpers or fabricated playback.
 
 ### Static frontends
 
@@ -189,7 +189,7 @@ node --test frontend/demo/state.test.mjs
 
 When changing package assets, install a wheel outside the checkout and verify both shells, every allowed asset and rejection of unlisted paths. Browser QA uses isolated synthetic records, never private live invoice pages or provider calls. Review keyboard use, small screens, reduced motion, connection loss and error states.
 
-Native build/test commands and signing preservation are in [Setup](SETUP.md#iphone-build-and-tests). Keep the existing phone bundle ID, Keychain/drafts and SUNMI signing identity. Display QA uses 1280 × 720, 1280 × 800 and 1920 × 1080 layouts, with keyboard/reduced-motion/hybrid/error/completion/reconnect checks through an isolated backend rather than file URLs.
+Native build/test commands and signing preservation are in [Setup](SETUP.md#native-client-build-and-tests). Keep the existing phone bundle ID, Keychain/drafts and display signing identity. Display QA uses 1280 × 720, 1280 × 800 and 1920 × 1080 layouts, with keyboard/reduced-motion/hybrid/error/completion/reconnect checks through an isolated backend rather than file URLs.
 
 ## Documentation
 

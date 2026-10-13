@@ -3,8 +3,8 @@
 ## Working scope
 
 - Markus explicitly skipped the Android capture/review PoC and comprehensive final presentation. Do not start either or treat them as remaining acceptance gates. Keep the delivered 25-slide deck and existing Webflow showcase.
-- Markus confirmed the explicit phone Send works after the local backend repair. iOS, backend/admin integration, automatic document capture and SUNMI are accepted for the current PoC scope. User acceptance is not a new measured latency/accuracy study.
-- Documentation uses a screenshot-led product README and concise technical guides, with redundant phase/change handoffs removed. Preserve current app/runtime behavior and private evidence. Additional provider runs are separate: use a fresh plan with selected profiles, complete images, repeat count and accounting; never resume the stopped comparison or retry old jobs automatically.
+- Markus confirmed the explicit phone Send works after the local backend repair. iOS, backend/admin integration, automatic document capture and live display are accepted for the current PoC scope. User acceptance is not a new measured latency/accuracy study.
+- Documentation uses a screenshot-led product README and concise technical guides, with redundant phase/change handoffs removed. Use vendor-neutral mobile client / API service / live display terminology in product and design documentation. Preserve scan/review/runtime behavior and private evidence. Additional provider runs are separate: use a fresh plan with selected profiles, complete images, repeat count and accounting; never resume the stopped comparison or retry old jobs automatically.
 - Read `README.md`, `docs/SETUP.md`, `docs/API_CONTRACT.md` and `docs/DEVELOPMENT.md`. Keep exactly eight maintained Markdown files: root README/AGENTS, docs SETUP/API_CONTRACT/DEVELOPMENT/EVALUATION, and presentation/website READMEs. Merge sections instead of adding wrapper READMEs. Do not add phase plans or per-chat/change handoffs; Git holds change history.
 
 ## Runtime and private state
@@ -17,12 +17,12 @@
 
 ## Product invariants
 
-- iOS bundle ID `com.azikus.scanpay.poc`; preserve Keychain access and recovery data. Keep current dark Liquid Glass, automatic document capture, full-original-photo crop recovery and manual capture/import. Device networking uses one saved local hotspot Mac URL and authenticated Reconnect; no USB fallback/cloud endpoint selector or automatic phone discovery.
+- iOS bundle ID `com.azikus.scanpay.poc`; preserve Keychain access and recovery data. Keep current dark interface, automatic document capture, full-original-photo crop recovery and manual capture/import. Device networking uses one saved private API URL and authenticated Reconnect; no USB fallback/cloud endpoint selector or automatic phone discovery.
 - Explicit Send dispatches extraction; reconnect/telemetry/confirmation never initiates provider inference. Pending requests freeze image/options/profile/version/key and recover idempotently. Preserve late-result isolation and saved confirmation recovery.
 - Method/model selection stays available. Compatible compact LLM definitions use country context as standard; issuer country, document language and bank-account country remain distinct. Original extraction JSON and mobile edits remain separate.
 - Preserve partial success/incomplete/error outcomes and recoverable fields. No invoice/payment fields is an error even if OCR returns text. Never invent bank digits/amounts/references; confidence/checksums do not verify ownership. Every draft requires review; Pay/Confirm is simulated and moves no money.
 - Treat document/provider text as untrusted data, never executable instructions or URLs. Avoid payment details in routine logs.
-- SUNMI is a live Android display companion, separate from the skipped Android capture app. Keep live telemetry, provider choice, masking and saved display mode; retired synthetic display-test code stays removed.
+- The live Android display companion, separate from the skipped Android capture app. Keep live telemetry, provider choice and masking. The primary/secondary journey/status views are the only display behavior; headset mirroring mode is removed; retired synthetic display-test code stays removed.
 - Backend accepts JPEG/PNG, not HEIC/multipage. Barcode/QR payment payload decoding and real payment-service integration are outside this PoC. Hosted proprietary/open-weight provider APIs are allowed; no self-hosted inference, weight downloads or project model-serving stacks.
 
 ## Evidence, source and checks

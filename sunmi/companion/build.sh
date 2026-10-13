@@ -14,7 +14,7 @@ find "$output/classes" -name '*.class' -print > "$output/classes.list"
 "$build_tools/aapt" package -f -M "$task_root/AndroidManifest.xml" -I "$platform" -F "$output/unsigned.apk"
 (cd "$output" && "$build_tools/aapt" add unsigned.apk classes.dex)
 "$build_tools/zipalign" -f 4 "$output/unsigned.apk" "$output/aligned.apk"
-signing_key="${SUNMI_SIGNING_KEY:-$repo_root/.local/sunmi-companion/debug.keystore}"
+signing_key="${DISPLAY_SIGNING_KEY:-${SUNMI_SIGNING_KEY:-$repo_root/.local/sunmi-companion/debug.keystore}}"
 if [ ! -f "$signing_key" ]; then
   keytool -genkeypair -keystore "$signing_key" -storepass android -keypass android -alias androiddebugkey -dname 'CN=Scanpay Companion,O=Azikus,C=HR' -keyalg RSA -keysize 2048 -validity 3650
 fi
