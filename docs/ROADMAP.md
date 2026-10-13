@@ -1,16 +1,18 @@
 # Delivery roadmap
 
-## Agreed milestones — status reconciled 12 October 2026
+## Agreed milestones — status reconciled 13 October 2026
 
 Markus explicitly approved this sequence. These five **next milestones** supersede the old execution order; historical M1–M8 identifiers below remain unchanged so earlier evidence stays traceable. Development milestones may span multiple sessions. Agree the detailed work for each when it starts.
 
 | Next milestone | Scope and completion checkpoint | Status |
 | --- | --- | --- |
 | 1 — Initial presentation | Create the presentation **together with Markus** from the working PoC and retained measured results. Agree audience, story, format and demo; distinguish delivered functionality, evidence and remaining work. | Delivered 9 October; 25-slide source imported into `presentation/` |
-| 2 — iOS improvements and real-invoice testing | Complete the remaining agreed iOS work and verify it with real invoices, review/edit/recovery scenarios and device networking. Record actual mobile timing when measured. | In progress: scoped Liquid Glass/motion update and hotspot verification; remaining work to agree |
-| 3 — Backend/admin improvements and integration testing | Complete the remaining agreed backend/admin work and verify the iOS → backend → admin journey, extraction/review semantics and failure handling. Preserve evidence and version changes. | Planned after 2 |
-| 4 — Android app and both-platform testing | Implement Android against the shared contract, then complete testing across iOS, Android, backend and admin. **This is the final development milestone.** | Planned after 3 |
+| 2 — iOS improvements and real-invoice testing | Complete the remaining agreed iOS work and verify it with real invoices, review/edit/recovery scenarios and device networking. Record actual mobile timing when measured. | Complete for current scope; Markus accepted the installed update and confirmed end-to-end testing complete on 13 October |
+| 3 — Backend/admin improvements and integration testing | Complete the remaining agreed backend/admin work and verify the iOS → backend → admin journey, extraction/review semantics and failure handling. Preserve evidence and version changes. | Complete for current scope; Markus confirmed integration testing complete on 13 October |
+| 4 — Android app and both-platform testing | Implement Android against the shared contract, then complete testing across iOS, Android, backend and admin. **This is the final development milestone.** | Next development milestone |
 | 5 — Comprehensive final presentation and website HTML | Create a fuller final presentation plus embeddable HTML explaining functionality, workflow, architecture, measured results and limitations using sanitized material. Agree the site's embedding constraints before authoring. | Planned after development |
+
+**User completion update — 13 October:** Markus confirmed that both the iPhone → backend → admin integration testing and the SUNMI live demo are done. This supersedes earlier next-step wording that listed either as unfinished. SUNMI completion is recorded from his confirmation; no additional test results or timing measurements are asserted here. The SUNMI companion is separate from the Android capture/review app. Next: Android and both-platform testing, then the final presentation and embeddable HTML.
 
 **Approved updates before milestone 1:** the extracted-field review/confirmation sheets merged in PR #4. Markus subsequently approved the admin Connection panel and automatic backend network-listener updates; see [connection setup](CONNECTION_SETUP.md). These bounded follow-ups and their supporting tests/docs do not begin the later iOS/backend milestones. The initial deck has since been delivered. Its repository import does not begin later iOS/backend, Android or website implementation.
 

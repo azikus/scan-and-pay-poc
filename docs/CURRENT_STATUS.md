@@ -1,5 +1,9 @@
 # Current project status — 13 October 2026
 
+## User acceptance and next milestone — 13 October
+
+Markus accepted the updated app on his physical iPhone and confirmed that end-to-end integration testing and the SUNMI live demo are complete. These items must not be proposed again as unfinished work. The app from PR #11 built, installed and launched successfully on the iPhone 16 Pro; private records are in `.local/invoice-context-2026-10-13/device-build.log`, `device-install.json` and `device-launch.json` in the original checkout. SUNMI/integration completion is user-confirmed, without new agent measurements. Next is the Android capture/review app and both-platform testing, followed by the comprehensive final presentation and embeddable HTML. This status correction does not change the selected extraction profile or authorize a PR merge.
+
 ## Invoice context follow-up — 13 October
 
 Latest evaluation follow-up: country/scheme breakdowns are added to the same PR, using fixed shared cohorts and reviewed printed route evidence. Markus subsequently approved all 17 suggested country labels in chat. Saved-response country guidance matches 13/17 approved entries for the old profile and 17/17 for the new profile (16 distinct images; user-approved suggestions, not a blind benchmark). The original 79/102 → 76/102 benchmark is retained. Both runs correctly omit 51 inapplicable fields. The original pending key/form are preserved alongside a new reviewer-attributed key and reports; see [details and reviewed breakdowns](INVOICE_CONTEXT.md#countryscheme-evaluation-follow-up--13-october). Evaluation-only verification: 784 tests, 95.98% statements/91.40% branches, static checks. No new inference, selection or runtime change.

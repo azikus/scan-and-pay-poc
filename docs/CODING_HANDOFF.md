@@ -1,5 +1,9 @@
 # Coding handoff — continue here
 
+## User acceptance and next milestone — 13 October
+
+Markus accepted the updated app on his physical iPhone and confirmed that end-to-end integration testing and the SUNMI live demo are complete. These items must not be proposed again as unfinished work. The app from PR #11 built, installed and launched successfully on the iPhone 16 Pro; private records are in `.local/invoice-context-2026-10-13/device-build.log`, `device-install.json` and `device-launch.json` in the original checkout. SUNMI/integration completion is user-confirmed, without new agent measurements. Next is the Android capture/review app and both-platform testing, followed by the comprehensive final presentation and embeddable HTML. This status correction does not change the selected extraction profile or authorize a PR merge.
+
 ## Invoice context follow-up — 13 October
 
 Latest user clarification: add country/scheme score breakdowns now and prepare country labels for review. Implemented in `evaluation.country_scores`; review key/form and both saved-response reports are private under `.local/invoice-context-2026-10-13/`. Markus subsequently approved all 17 country suggestions in chat. The private `country-reviewed-markus-2026-10-13.json` records this approval; `old-country-report-reviewed.json` and `new-country-report-reviewed.json` score 13/17 and 17/17 country matches respectively (16 distinct images). These are user-approved model suggestions, not blind independent labels. Preserve the initial pending key/form and earlier reports. Preserve the original extraction benchmark and use a single shared country key across compared profiles. Read the follow-up section in INVOICE_CONTEXT.md. This evaluation-only update adds no paid calls, runtime changes or default promotion.
@@ -33,7 +37,7 @@ Markus authorized the repository import and the separately requested provider ex
 
 ## What comes next
 
-The initial presentation is available for review and use. Agree the remaining iOS improvements and real-invoice testing with Markus before starting them. Then continue backend/admin work and integration testing, Android and both-platform testing as the final development milestone, and finally the comprehensive final presentation plus embeddable website HTML. See [ROADMAP.md](ROADMAP.md). Do not create another chat automatically.
+The initial presentation is available for review and use. Markus has confirmed integration testing and the SUNMI demo complete. Next is Android and both-platform testing as the final development milestone, then the comprehensive final presentation plus embeddable website HTML. See [ROADMAP.md](ROADMAP.md). Do not create another chat automatically.
 
 ## Runtime and preservation
 
