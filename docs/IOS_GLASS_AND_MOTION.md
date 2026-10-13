@@ -1,5 +1,7 @@
 # iOS Liquid Glass, motion and connectivity — 12 October 2026
 
+> Current update — 13 October: the installed app now uses dark glass and automatic native document capture; Markus accepted capture/integration and confirmed explicit phone Send works. Earlier light-theme and pending-acceptance sections below are dated implementation evidence, superseded by CURRENT_STATUS.md and IOS_DOCUMENT_SCANNING.md.
+
 Markus requested native Liquid Glass, screen transitions (especially cropping), a review of client connectivity/hosting options, and a working hotspot connection. This starts the scoped iOS polish work after the initial presentation; it does not authorize cloud deployment or another provider experiment.
 
 ## UI changes

@@ -1,4 +1,4 @@
-# Admin frontend
+# Admin and live display frontends
 
 `admin/` contains the inspector's HTML, JavaScript, CSS, artwork and licensed fonts. Edit these files here. No separate frontend build, package manager or web server is required.
 
@@ -14,3 +14,7 @@ node --check frontend/admin/admin.js
 ```
 
 Before changing packaging, verify an installed wheel from outside the checkout, including `/admin`, every allowed asset and rejection of unlisted assets. See [reorganization verification](../docs/REPOSITORY_REORGANIZATION_HANDOFF.md) for the recorded check. Backend startup and private configuration remain in the [root README](../README.md) and [operations](../docs/OPERATIONS.md).
+
+## Live display
+
+`demo/` contains the accepted SUNMI live journey webpage and its licensed assets, served at `/demo` and bundled into wheels as `backend/demo_assets/`. See [live display behavior](demo/README.md) and [companion setup](../sunmi/companion/README.md). This is real sanitized telemetry; the retired synthetic display-test app is not part of current source.

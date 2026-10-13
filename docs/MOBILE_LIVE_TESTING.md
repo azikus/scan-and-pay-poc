@@ -1,5 +1,7 @@
 # Mobile live testing — 9 October 2026
 
+> Historical scope/checkpoint: retain the dated evidence below. Current scope, runtime and acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md), [CODING_HANDOFF.md](CODING_HANDOFF.md) and [ROADMAP.md](ROADMAP.md). Android/final presentation are skipped; mobile/backend/SUNMI and successful phone Send are accepted. Old next-task wording, worktree paths, provider selections and financial admission limits are not current instructions.
+
 **Current continuation — 12 October 2026:** the initial presentation is delivered and its source is in [presentation/](../presentation/README.md). [CURRENT_STATUS.md](CURRENT_STATUS.md) owns the latest operational snapshot and authorized allowance. The dated checkpoints below retain their original values and verification evidence; they do not override the current handoff.
 
 **Latest connection follow-up, 9 October:** same-iPhone hotspot authentication passed from the phone at 09:13:12 CEST (USB failed → hotspot Wi-Fi connected). The admin now exposes current URLs under **Connection**, and `scanpay-serve` updates private network listeners without restarting the backend. Saved iOS URLs remain manually editable; no new mobile code. Current preserved update snapshot is **2,204 / €336.75**, Mistral Small selected; no agent inference. See [CONNECTION_SETUP.md](CONNECTION_SETUP.md). Older operational snapshots below retain their original dates and values.

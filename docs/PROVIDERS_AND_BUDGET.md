@@ -1,5 +1,7 @@
 # Provider shortlist and experiment budget
 
+> Historical scope/checkpoint: retain the dated evidence below. Current scope, runtime and acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md), [CODING_HANDOFF.md](CODING_HANDOFF.md) and [ROADMAP.md](ROADMAP.md). Android/final presentation are skipped; mobile/backend/SUNMI and successful phone Send are accepted. Old next-task wording, worktree paths, provider selections and financial admission limits are not current instructions.
+
 Research baseline 1 October 2026; hosting scope and Mistral candidates corrected 5 October after the user clarified that provider-hosted open-weight models are welcome. This shortlist includes planned profiles; actual implemented/live-tested status is recorded in IMPLEMENTATION_STATUS.md. Inclusion is not a measured ranking. Prices are public USD list rates unless stated otherwise; the project budget is EUR. Do not equate currencies or omit VAT, FX, minimums, retries and account-specific terms. Recheck before dispatch.
 
 ## 1. Selection model

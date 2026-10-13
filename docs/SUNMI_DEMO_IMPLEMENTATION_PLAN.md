@@ -1,5 +1,7 @@
 # SUNMI live demo implementation plan
 
+> Historical scope/checkpoint: retain the dated evidence below. Current scope, runtime and acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md), [CODING_HANDOFF.md](CODING_HANDOFF.md) and [ROADMAP.md](ROADMAP.md). Android/final presentation are skipped; mobile/backend/SUNMI and successful phone Send are accepted. Old next-task wording, worktree paths, provider selections and financial admission limits are not current instructions.
+
 **13 October live-only follow-up:** after physical acceptance, Markus requested removal of demo-only code. The shipped replay/fixtures, standalone rehearsal server and temporary Android setup/capture helpers have been removed. Live observation and provider controls remain; prospective replay requirements below are historical and superseded.
 
 

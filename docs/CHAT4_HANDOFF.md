@@ -1,5 +1,7 @@
 # Fourth-chat handoff — mobile design and iOS
 
+> Historical scope/checkpoint: retain the dated evidence below. Current scope, runtime and acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md), [CODING_HANDOFF.md](CODING_HANDOFF.md) and [ROADMAP.md](ROADMAP.md). Android/final presentation are skipped; mobile/backend/SUNMI and successful phone Send are accepted. Old next-task wording, worktree paths, provider selections and financial admission limits are not current instructions.
+
 **Status:** ready with Markus’s mobile brief, supplied 8 October 2026. Read [mobile UX brief](MOBILE_UX_BRIEF.md) for the requested flow and proposed design; [copyable new-chat prompt](CHAT4_PROMPT.md) starts the next phase. No fourth chat has been created and no mobile code is written. The proposed loader and bottom sheet need design iteration, not another requirements-collection round.
 
 ## Start here

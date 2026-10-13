@@ -1,5 +1,7 @@
 # Implementation status
 
+> Historical scope/checkpoint: retain the dated evidence below. Current scope, runtime and acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md), [CODING_HANDOFF.md](CODING_HANDOFF.md) and [ROADMAP.md](ROADMAP.md). Android/final presentation are skipped; mobile/backend/SUNMI and successful phone Send are accepted. Old next-task wording, worktree paths, provider selections and financial admission limits are not current instructions.
+
 ## Current checkpoint — 9 October 2026
 
 Latest approved follow-up: **admin Connection controls and automatic local network updates** are implemented and running. The backend keeps loopback and adds/removes private IPv4 listeners without restarting jobs. **690 tests pass; 96.03% statements / 91.25% branches**, with lint/types/JS/contract/packaging, in-flight listener-change and browser checks. iOS still uses its existing URL fields/Reconnect. See [connection setup and physical hotspot evidence](CONNECTION_SETUP.md). The initial presentation was subsequently delivered and is maintained in `presentation/`.

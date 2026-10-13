@@ -1,34 +1,28 @@
-# Delivery roadmap
+# Delivery roadmap — reconciled 13 October 2026
 
-## Agreed milestones — status reconciled 13 October 2026
+## Current delivery scope
 
-Markus explicitly approved this sequence. These five **next milestones** supersede the old execution order; historical M1–M8 identifiers below remain unchanged so earlier evidence stays traceable. Development milestones may span multiple sessions. Agree the detailed work for each when it starts.
+| Item | Status |
+| --- | --- |
+| Initial presentation | Delivered 9 October; approved 25-slide source retained in `presentation/` |
+| iOS improvements and real-invoice testing | Accepted, including automatic native capture and successful explicit Send after backend repair |
+| Backend/admin integration | Complete for current scope; user accepted on 13 October |
+| SUNMI live companion | Complete for current scope; user accepted on 13 October |
+| Android capture/review app and both-platform testing | **Skipped at Markus's request on 13 October**; no remaining acceptance gate |
+| Comprehensive final presentation | **Skipped at Markus's request on 13 October** |
+| Existing website HTML | Prepared Webflow showcase retained in `website/`; unpublished, with hosting/embedding instructions |
+| Repository cleanup/documentation | Complete; see REPOSITORY_CLEANUP.md |
+| Additional provider runs | Subsequent follow-up proposed by Markus; exact profiles, full input inventory and repeats belong in a fresh run plan |
 
-| Next milestone | Scope and completion checkpoint | Status |
-| --- | --- | --- |
-| 1 — Initial presentation | Create the presentation **together with Markus** from the working PoC and retained measured results. Agree audience, story, format and demo; distinguish delivered functionality, evidence and remaining work. | Delivered 9 October; 25-slide source imported into `presentation/` |
-| 2 — iOS improvements and real-invoice testing | Complete the remaining agreed iOS work and verify it with real invoices, review/edit/recovery scenarios and device networking. Record actual mobile timing when measured. | Complete for current scope; Markus accepted the installed update and confirmed end-to-end testing complete on 13 October |
-| 3 — Backend/admin improvements and integration testing | Complete the remaining agreed backend/admin work and verify the iOS → backend → admin journey, extraction/review semantics and failure handling. Preserve evidence and version changes. | Complete for current scope; Markus confirmed integration testing complete on 13 October |
-| 4 — Android app and both-platform testing | Implement Android against the shared contract, then complete testing across iOS, Android, backend and admin. **This is the final development milestone.** | Next development milestone |
-| 5 — Comprehensive final presentation and website HTML | Create a fuller final presentation plus embeddable HTML explaining functionality, workflow, architecture, measured results and limitations using sanitized material. Agree the site's embedding constraints before authoring. | Planned after development |
+No additional iOS/SUNMI rehearsal or phone-Send verification is pending. User confirmation does not establish an independently measured accuracy or mobile latency study. The skipped Android app is separate from the working Android-based SUNMI companion.
 
-**User completion update — 13 October:** Markus confirmed that both the iPhone → backend → admin integration testing and the SUNMI live demo are done. This supersedes earlier next-step wording that listed either as unfinished. SUNMI completion is recorded from his confirmation; no additional test results or timing measurements are asserted here. The SUNMI companion is separate from the Android capture/review app. Next: Android and both-platform testing, then the final presentation and embeddable HTML.
+Keep the delivered deck/showcase, immutable historical evidence, actual live selection and private state. No publication, runtime restart or inference is part of cleanup. The stopped 9 October comparison remains stopped; any new repeats use fresh keys and explicit scope. Current source does not enforce historical local financial/cumulative-call limits.
 
-**Approved updates before milestone 1:** the extracted-field review/confirmation sheets merged in PR #4. Markus subsequently approved the admin Connection panel and automatic backend network-listener updates; see [connection setup](CONNECTION_SETUP.md). These bounded follow-ups and their supporting tests/docs do not begin the later iOS/backend milestones. The initial deck has since been delivered. Its repository import does not begin later iOS/backend, Android or website implementation.
-
-Continue the existing deck using [presentation/README.md](../presentation/README.md), [PRESENTATION_HANDOFF.md](PRESENTATION_HANDOFF.md) and the revised [continuation prompt](PRESENTATION_PROMPT.md).
-
-The original iOS/admin checkpoint is accepted and merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2); the root backend/frontend/ios/android reorganization merged in [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3). Android contains a README only. Read [CURRENT_STATUS.md](CURRENT_STATUS.md) for the current selection snapshot; all benchmark selections/results remain dated evidence.
-
-## Authority and preservation
-
-**Latest scoped follow-up, 12 October:** Markus authorized Liquid Glass, screen/crop motion and connectivity/hosting assessment. The hotspot is verified; no hosted deployment or new inference is included. See [iOS scope and evidence](IOS_GLASS_AND_MOTION.md).
-
-The sheets and connection follow-up are merged. Markus authorized the presentation source import, documentation reconciliation and commit/push on 12 October. The milestone sequence is agreed, but is not permission to begin later development or run paid experiments now. Retain the original ledger, current selection, pending drafts, credentials and private evidence. [CURRENT_STATUS.md](CURRENT_STATUS.md) records the latest snapshot and authorized mobile allowance. No new paid calls, completed evaluation reruns, force push or public publication. Read [coding handoff](CODING_HANDOFF.md) for current scope and [mobile checkpoint](MOBILE_CHECKPOINT.md) for prior acceptance.
+[Current status](CURRENT_STATUS.md) and [coding handoff](CODING_HANDOFF.md) own current guidance. Barcode/QR payment payload decoding, real payment-service integration and hosted deployment remain outside the PoC.
 
 ## Historical delivery record — original M1–M8
 
-The sections below retain the original milestone definitions and dated acceptance criteria. Their prospective wording describes the original plan; it does not start later work or override the five next milestones above. Backend managed OCR shipped before mobile; native OCR remains a separate possible mobile improvement.
+The sections below retain the original milestone definitions and dated acceptance criteria. Their prospective wording describes the original plan; it does not start later work or override the current delivery scope above. Android/final-deck prospective instructions below are retained history, not remaining work.
 
 ## M1 — Backend foundation: complete
 

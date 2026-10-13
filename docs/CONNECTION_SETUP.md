@@ -1,5 +1,7 @@
 # Local connection setup — 9 October 2026
 
+> Current update — 13 October: hotspot-only client settings and successful explicit phone Send are accepted. The initial deck is delivered; Android/final presentation are skipped. Runtime uses the stable source archive in CURRENT_STATUS.md. The 9 October network routes, caps, selection and next-presentation wording below are historical.
+
 **Current continuation — 12 October 2026:** the initial presentation is delivered and its source is in [presentation/](../presentation/README.md). [CURRENT_STATUS.md](CURRENT_STATUS.md) owns the latest operational snapshot and authorized allowance. The dated checkpoints below retain their original values and verification evidence; they do not override the current handoff.
 
 Markus authorized this small connection improvement after the extracted-field sheets: add current Mac addresses/status to the admin and remove the manual backend restart when switching local networks. The initial presentation is next, in his next prompt/chat. No other development or presentation creation is part of this update.

@@ -1,6 +1,6 @@
 # SUNMI live companion
 
-First implementation, 13 October 2026. Package `com.azikus.scanpay.companion` is separate from both the accepted offline display test and the future Android capture app. The backend and phone changes must be deployed together before using live mode. Installed on the physical SUNMI and mobile phone on 13 October; live idle/heartbeat and QR rendering are verified. See the installation record below for the checks completed and remaining rehearsal items.
+Package `com.azikus.scanpay.companion` is the live Android display companion, installed on 13 October alongside the updated iPhone app. Markus accepted end-to-end mobile/backend/SUNMI integration. The offline display-test prototype is retired; the separate Android capture app is skipped. No new rehearsal is pending. Historical installation/checkpoint sections below retain their dated limitations; current runtime uses the stable archive in [current status](../../docs/CURRENT_STATUS.md), not a removed worktree.
 
 ## Build and launch
 
