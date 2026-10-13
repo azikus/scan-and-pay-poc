@@ -11,7 +11,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from decimal import ROUND_CEILING
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 from uuid import uuid4
 
 from backend.client_reviews import (
@@ -28,6 +28,9 @@ from backend.images import PreparedImage, sha256
 from backend.models import Diagnostics, Error, ExcludedProfile, Options, ProfileRef, Run, Scan
 from backend.profiles import Definition
 from backend.scan_artifacts import ScanArtifacts, read_artifacts, safe_file, scan_directory
+
+if TYPE_CHECKING:
+    from backend.demo_events import DemoHub
 
 
 def utcnow() -> str:
@@ -51,6 +54,7 @@ def request_digest(data: bytes, options: Options) -> str:
 
 class Store:
     def __init__(self, settings: Settings):
+        self.demo: DemoHub | None = None
         self.settings = settings
         self.root = settings.data_dir.resolve()
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)

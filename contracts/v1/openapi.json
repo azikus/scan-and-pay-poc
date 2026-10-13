@@ -5,6 +5,132 @@
     "version": "1.0"
   },
   "paths": {
+    "/v1/demo/sessions/{session_id}": {
+      "put": {
+        "summary": "Phone",
+        "operationId": "phone_v1_demo_sessions__session_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhoneState"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Phone V1 Demo Sessions  Session Id  Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/demo/snapshot": {
+      "get": {
+        "summary": "Snapshot",
+        "operationId": "snapshot_v1_demo_snapshot_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Snapshot V1 Demo Snapshot Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/demo/events": {
+      "get": {
+        "summary": "Events",
+        "operationId": "events_v1_demo_events_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "After"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/event-stream": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health",
@@ -418,6 +544,40 @@
               "type": "string",
               "minLength": 1,
               "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "x-scanpay-demo-session",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Scanpay-Demo-Session"
+            }
+          },
+          {
+            "name": "x-scanpay-demo-journey",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Scanpay-Demo-Journey"
             }
           },
           {
@@ -1084,6 +1244,44 @@
         ],
         "title": "Candidate"
       },
+      "CandidateGuidance": {
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "title": "Candidate Id"
+          },
+          "route": {
+            "type": "string",
+            "title": "Route"
+          },
+          "account_country": {
+            "$ref": "#/components/schemas/ContextHint"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldRule"
+            },
+            "type": "object",
+            "title": "Fields"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "candidate_id",
+          "route",
+          "account_country",
+          "fields"
+        ],
+        "title": "CandidateGuidance"
+      },
       "ClientReview": {
         "properties": {
           "schema_version": {
@@ -1233,6 +1431,68 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ConnectionStatus"
+      },
+      "ContextHint": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "inferred",
+              "derived",
+              "unknown",
+              "ambiguous"
+            ],
+            "title": "Status",
+            "default": "unknown"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          },
+          "excerpts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excerpts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ContextHint"
       },
       "Cost": {
         "properties": {
@@ -1408,6 +1668,13 @@
             },
             "type": "array",
             "title": "Stages"
+          },
+          "context_explanations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Context Explanations"
           }
         },
         "additionalProperties": false,
@@ -1617,6 +1884,31 @@
           "deferred"
         ],
         "title": "ExtractionCatalog"
+      },
+      "FieldRule": {
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "enum": [
+              "required",
+              "optional",
+              "not_applicable",
+              "unresolved"
+            ],
+            "title": "Requirement"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "requirement",
+          "reason"
+        ],
+        "title": "FieldRule"
       },
       "Finding": {
         "properties": {
@@ -1928,6 +2220,53 @@
         "additionalProperties": false,
         "type": "object",
         "title": "Payment"
+      },
+      "PhoneState": {
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "maximum": 9007199254740991.0,
+            "minimum": 1.0,
+            "title": "Sequence"
+          },
+          "journey_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journey Id"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "crop",
+              "preview",
+              "preparing",
+              "uploading",
+              "queued",
+              "reading",
+              "review",
+              "confirmation",
+              "recovery",
+              "failed",
+              "paused"
+            ],
+            "title": "Phase"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sequence",
+          "phase"
+        ],
+        "title": "PhoneState"
       },
       "Profile": {
         "properties": {
@@ -2248,6 +2587,45 @@
         "type": "object",
         "title": "Review"
       },
+      "ReviewGuidance": {
+        "properties": {
+          "policy_version": {
+            "type": "string",
+            "const": "invoice-fields@1",
+            "title": "Policy Version",
+            "default": "invoice-fields@1"
+          },
+          "issuer_country": {
+            "$ref": "#/components/schemas/ContextHint"
+          },
+          "language": {
+            "$ref": "#/components/schemas/ContextHint"
+          },
+          "document_fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldRule"
+            },
+            "type": "object",
+            "title": "Document Fields"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CandidateGuidance"
+            },
+            "type": "array",
+            "title": "Candidates"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "issuer_country",
+          "language",
+          "document_fields",
+          "candidates"
+        ],
+        "title": "ReviewGuidance"
+      },
       "Routing": {
         "properties": {
           "applied_rule_packs": {
@@ -2324,6 +2702,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Error"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review_guidance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewGuidance"
               },
               {
                 "type": "null"

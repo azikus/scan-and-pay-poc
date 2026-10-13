@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Scan &amp; Pay · Live journey</title>
+    <link rel="stylesheet" href="/demo/assets/demo.css" />
+  </head>
+  <body>
+    <header>
+      <img src="/demo/assets/logo.svg" alt="Azikus" /><span>SCAN &amp; PAY</span
+      ><span id="connection" role="status">CONNECTING</span
+      ><button id="settings">Controls</button>
+    </header>
+    <main>
+      <section id="idle" hidden>
+        <div>
+          <p class="eyebrow">FROM INVOICE TO PAYMENT DRAFT</p>
+          <h1>See what’s<br />possible.</h1>
+          <p>Scan to explore Scan &amp; Pay.</p>
+          <p class="subtle">azikus.com/scan-and-pay-poc</p>
+          <p id="idle-note"></p>
+        </div>
+        <img
+          class="qr"
+          src="/demo/assets/qr.png"
+          alt="QR code to the Scan and Pay information website"
+        />
+      </section>
+      <section id="journey">
+        <p class="eyebrow" id="mode-label">LIVE SYSTEM JOURNEY</p>
+        <h1 id="title">Waiting for mobile phone</h1>
+        <p id="detail"></p>
+        <div class="journey-layout">
+          <div class="journey-visual">
+            <div id="graph"></div>
+            <div id="customer-illustration" aria-hidden="true"></div>
+            <div id="celebration" hidden aria-hidden="true"></div>
+          </div>
+          <aside id="scan-insights" aria-label="Live scan information">
+            <p class="eyebrow">THIS SCAN</p>
+            <h2 id="insight-provider">Waiting for a scan</h2>
+            <p id="insight-method" class="subtle"></p>
+            <div class="elapsed"><strong id="elapsed-value">—</strong><span id="elapsed-label">Processing time</span></div>
+            <h3>Recent activity</h3>
+            <ol id="activity-log"></ol>
+            <p id="activity-note" class="subtle">Observed steps appear here as you scan.</p>
+          </aside>
+        </div>
+        <div id="summary" hidden>
+          <span>Recipient <b>Private</b></span
+          ><span>Destination <b>•••• ••••</b></span
+          ><span>Reference <b>•••• ••••</b></span>
+        </div>
+
+      </section>
+    </main>
+    <footer>
+      <time id="clock"></time>
+    </footer>
+    <dialog id="controls">
+      <div class="control-heading"><h2>Display controls</h2><button id="close" type="button">Close</button></div>
+      <form id="login">
+        <label id="token-label"
+          >Local access token<input
+            id="token"
+            type="password"
+            autocomplete="off" /></label
+        ><button id="connect" type="submit">Connect</button>
+      </form>
+      <section id="next-scan" aria-labelledby="next-scan-title">
+        <h2 id="next-scan-title">Next scan</h2>
+        <p id="current-provider" class="control-note">Connect to choose a provider.</p>
+        <label>Method<select id="next-method" disabled></select></label>
+        <label>Provider / model<select id="next-profile" disabled></select></label>
+        <div class="buttons"><button id="apply-provider" disabled>Use for next scan</button><button id="refresh-providers">Refresh</button></div>
+        <p class="control-note">Applies to the next new Send from a connected mobile phone. An existing scan or saved draft keeps its original provider.</p>
+        <p id="provider-message" role="status" class="control-note"></p>
+      </section>
+      <label
+        >Follow mobile phone session<select id="sessions">
+          <option value="">Select a mobile phone</option>
+        </select></label
+      ><label
+        >View<select id="view">
+          <option value="compact">Compact technical journey</option>
+          <option value="technical">Full technical journey</option>
+          <option value="customer">Customer status</option>
+        </select></label
+      >
+      <div class="buttons">
+        <button id="reconnect">Reconnect</button
+        ><button id="clear">Clear followed session</button>
+      </div>
+      <div id="native-controls" hidden class="buttons">
+        <button id="vision">Vision Pro mode</button
+        ><button id="scanpay">Scan &amp; Pay mode</button
+        ><button id="configure">Backend connection</button>
+      </div>
+      <p id="error" role="alert"></p>
+    </dialog>
+    <script type="module" src="/demo/assets/demo.js"></script>
+  </body>
+</html>

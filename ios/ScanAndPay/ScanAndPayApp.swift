@@ -59,14 +59,14 @@ struct ScreenHeader<Actions: View>: View {
   }
   private var identity: some View {
     HStack(spacing: 10) {
-      Image("AzikusMarkDark").resizable().scaledToFit()
+      Image("AzikusMark").resizable().scaledToFit()
         .frame(width: 24, height: 24).padding(7).accessibilityLabel("Azikus")
       VStack(alignment: .leading, spacing: 3) {
         Text("Scan & Pay").font(Brand.font(21, .semibold))
-        Text(subtitle).font(Brand.font(13)).foregroundStyle(Brand.slate)
+        Text(subtitle).font(Brand.font(13)).foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
         if let detail {
-          Text(detail).font(Brand.font(12)).foregroundStyle(Brand.slate)
+          Text(detail).font(Brand.font(12)).foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }
       }
@@ -89,7 +89,7 @@ struct ScreenHeader<Actions: View>: View {
           actions
         }
       }
-    }.font(Brand.font(15, .semibold)).foregroundStyle(Brand.ink).tint(Brand.ink)
+    }.font(Brand.font(15, .semibold)).foregroundStyle(.primary).tint(.primary)
       .buttonStyle(.plain).padding(12).modifier(GlassPanel())
   }
 }
@@ -100,7 +100,7 @@ struct DocumentBackdrop: View {
   var body: some View {
     GeometryReader { geo in
       ZStack {
-        Brand.ice
+        Brand.ink
         if let image, !reduceTransparency {
           Image(uiImage: image).resizable().scaledToFill()
             .frame(width: geo.size.width, height: geo.size.height).clipped()
@@ -149,7 +149,7 @@ struct DocumentContinuity: ViewModifier {
 }
 
 @main struct ScanAndPayApp: App {
-  var body: some Scene { WindowGroup { ScanHome() } }
+  var body: some Scene { WindowGroup { ScanHome().preferredColorScheme(.dark) } }
 }
 
 struct ScanHome: View {
@@ -173,13 +173,13 @@ struct ScanHome: View {
       ZStack {
         DocumentBackdrop(image: model.originalImage ?? model.image)
         content
-          .environment(\.colorScheme, .light)
+          .environment(\.colorScheme, .dark)
           .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 16)))
       }.animation(
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.46, dampingFraction: 0.9),
         value: screen
       )
-      .preferredColorScheme(.light)
+      .preferredColorScheme(.dark)
       .toolbar(.hidden, for: .navigationBar)
       .sheet(isPresented: $settings) { ConnectionSettings(model: model) }
 
@@ -292,7 +292,7 @@ struct ScanHome: View {
             Button("Clear scan") { discard = true }
             Spacer()
             if model.response != nil { Button("JSON") { json = true } }
-          }.font(Brand.font(14)).tint(Brand.ink).frame(minHeight: 44).padding(16)
+          }.font(Brand.font(14)).tint(.primary).frame(minHeight: 44).padding(16)
             .modifier(GlassPanel()).padding(16)
         }
       }.padding(.top, 8).id(screen).transition(
@@ -332,7 +332,7 @@ struct ScanHome: View {
       }.frame(maxWidth: .infinity, maxHeight: .infinity)
       captureControls
     }.padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 12)
-      .foregroundStyle(Brand.ink).tint(Brand.ink)
+      .foregroundStyle(.primary).tint(.primary)
   }
   private var captureHeader: some View {
     ScreenHeader(
@@ -358,7 +358,7 @@ struct ScanHome: View {
   private var captureControls: some View {
     VStack(spacing: 10) {
       if let message = model.message {
-        Text(message).font(Brand.font(14)).foregroundStyle(Brand.slate)
+        Text(message).font(Brand.font(14)).foregroundStyle(.secondary)
       }
       Text("Start with a document.").font(Brand.font(24, .semibold))
       Text("Take a photo or choose an image.").font(Brand.font(14)).foregroundStyle(.secondary)
@@ -481,6 +481,7 @@ struct ReviewSheet: View {
             .font(Brand.font(14)).accessibilityIdentifier("review-confirmation")
           Button {
             focused = nil
+            model.demoConfirmationOpened(true)
             payConfirmation = true
           } label: {
             HStack {
@@ -497,6 +498,7 @@ struct ReviewSheet: View {
       .sheet(
         isPresented: $payConfirmation,
         onDismiss: {
+          model.demoConfirmationOpened(false)
           if confirmAfterDismiss {
             confirmAfterDismiss = false
             model.confirm()
@@ -540,6 +542,18 @@ struct ReviewSheet: View {
         }
       }.pickerStyle(.menu).tint(.primary).accessibilityIdentifier("payment-option")
     }
+    if let context = draft.contextSummary {
+      Text(context).font(Brand.font(13)).foregroundStyle(.secondary)
+        .accessibilityIdentifier("invoice-context")
+    }
+    if !draft.missingFields.isEmpty {
+      Label(
+        "Missing required details (\(draft.missingFields.count))",
+        systemImage: "exclamationmark.circle"
+      )
+      .font(Brand.font(14)).foregroundStyle(.orange)
+      .accessibilityIdentifier("missing-required-details")
+    }
     ForEach(Array(draft.reasons.enumerated()), id: \.offset) { _, reason in
       Label(
         reason["message"].string ?? "Check this field.",
@@ -549,7 +563,7 @@ struct ReviewSheet: View {
     ForEach(
       draft.sections(
         for: draft.fields.filter {
-          $0.value != nil || missing || focused == $0.id
+          draft.shouldShow($0, optional: missing) || focused == $0.id
         })
     ) { section in
       Text(section.title).font(Brand.font(17, .semibold)).padding(.top, 8)
@@ -557,13 +571,13 @@ struct ReviewSheet: View {
         fieldEditor(field)
       }
     }
-    if !draft.missingFields.isEmpty || missing {
+    if !draft.optionalFields.isEmpty || missing {
       Button {
         missing.toggle()
       } label: {
         Label(
           missing
-            ? "Hide empty fields" : "Add missing details (\(draft.missingFields.count))",
+            ? "Hide optional details" : "Add other details",
           systemImage: missing ? "minus.circle" : "plus.circle"
         )
         .font(Brand.font(14)).frame(minHeight: 44)
@@ -682,6 +696,14 @@ struct ConnectionSettings: View {
             .accessibilityIdentifier("hotspot-address")
           SecureField("Access token", text: $token).textInputAutocapitalization(.never)
         }.disabled(model.reconnecting)
+        Section {
+          Toggle("Demo displays", isOn: $model.demoEnabled).disabled(model.fixtureMode)
+          if model.demoEnabled { Text("Phone session: " + model.demoSessionLabel).font(.caption) }
+        } footer: {
+          Text(
+            "Share scan stages with the SUNMI companion. Invoice images, payment details and edits stay private."
+          )
+        }
         if let message { Text(message).foregroundStyle(.orange) }
       }.scrollContentBackground(.hidden).background(DocumentBackdrop())
         .toolbar(.hidden, for: .navigationBar)

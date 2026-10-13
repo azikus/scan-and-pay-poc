@@ -12,6 +12,9 @@ struct PaymentConfirmation: View {
       }.padding(.bottom, 12)
       ScrollView {
         VStack(alignment: .leading, spacing: 22) {
+          if let context = draft.contextSummary {
+            Text(context).font(Brand.font(13)).foregroundStyle(.secondary)
+          }
           if let amount = draft.amountField {
             VStack(alignment: .leading, spacing: 6) {
               Text(draft.summaryAmount).font(Brand.font(46, .semibold)).minimumScaleFactor(0.6)
@@ -42,11 +45,14 @@ struct PaymentConfirmation: View {
               }
             }
           }
-          if !draft.paymentIssues.isEmpty {
+          if !draft.paymentIssues.isEmpty || !draft.reasons.isEmpty {
             VStack(alignment: .leading, spacing: 9) {
               Label("Details to note", systemImage: "exclamationmark.circle").font(
                 Brand.font(15, .semibold))
               ForEach(draft.paymentIssues, id: \.self) { Text($0).font(Brand.font(14)) }
+              ForEach(Array(draft.reasons.enumerated()), id: \.offset) { _, reason in
+                Text(reason["message"].string ?? "Check this field.").font(Brand.font(14))
+              }
             }.padding(18).frame(maxWidth: .infinity, alignment: .leading)
               .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
           }
@@ -101,14 +107,14 @@ struct CompletionCelebration: View {
         ZStack {
           if !reduceMotion {
             ForEach(0..<2) { index in
-              Circle().stroke(Brand.slate.opacity(burst ? 0 : 0.45), lineWidth: 1.5)
+              Circle().stroke(Brand.ice.opacity(burst ? 0 : 0.45), lineWidth: 1.5)
                 .frame(width: 150, height: 150).scaleEffect(burst ? 2.4 + Double(index) * 0.3 : 0.8)
                 .animation(.easeOut(duration: 1.35).delay(Double(index) * 0.16), value: burst)
             }
             ForEach(0..<32) { index in
               let angle = Double(index) * .pi * 2 / 32
               let distance = burst ? 120.0 + Double((index * 17) % 70) : 40
-              Capsule().fill(index.isMultiple(of: 3) ? Brand.slate : Color.white)
+              Capsule().fill(index.isMultiple(of: 3) ? Brand.ice : Color.white)
                 .frame(
                   width: index.isMultiple(of: 3) ? 4 : 3, height: index.isMultiple(of: 3) ? 12 : 6
                 )
@@ -122,15 +128,15 @@ struct CompletionCelebration: View {
             .scaleEffect(reveal ? 1 : reduceMotion ? 1 : 0.65)
             .shadow(color: Brand.ice.opacity(0.15), radius: 45)
           CompletionCheck().trim(from: 0, to: draw ? 1 : 0)
-            .stroke(Brand.ink, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
+            .stroke(Brand.ice, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
             .frame(width: 75, height: 75)
         }.frame(height: 210).accessibilityHidden(true)
-        Text("Complete").font(Brand.font(42, .semibold)).foregroundStyle(Brand.ink)
+        Text("Complete").font(Brand.font(42, .semibold)).foregroundStyle(.primary)
           .opacity(reveal ? 1 : 0).offset(y: reveal || reduceMotion ? 0 : 12)
           .accessibilityIdentifier("complete")
         Spacer()
         Button("Scan another", action: dismiss).buttonStyle(GlassControlButton())
-          .foregroundStyle(Brand.ink).frame(minHeight: 48).padding(.bottom, 34)
+          .foregroundStyle(.primary).frame(minHeight: 48).padding(.bottom, 34)
           .accessibilityIdentifier("scan-another")
       }
     }.task {

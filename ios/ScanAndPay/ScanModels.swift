@@ -117,7 +117,27 @@ struct PaymentDraft {
   }
   var candidate: JSONValue { candidateIndex.map { candidates[$0] } ?? .null }
   var prefix: String { "/candidates/\(candidateIndex ?? -1)" }
-  var reasons: [JSONValue] { payment["review"]["reasons"].array }
+  var guidance: JSONValue { run["review_guidance"] }
+  var candidateGuidance: JSONValue {
+    guidance["candidates"].array.first { $0["candidate_id"].string == selectedID } ?? .null
+  }
+  var reasons: [JSONValue] {
+    payment["review"]["reasons"].array.filter {
+      let path = $0["path"].string ?? ""
+      return !path.hasPrefix("/candidates/") || candidateIndex == nil
+        || path.hasPrefix(prefix + "/")
+    }
+  }
+  var contextSummary: String? {
+    let country = guidance["issuer_country"]
+    let language = guidance["language"]
+    var parts: [String] = []
+    if let name = country["label"].string {
+      parts.append("Issuer: \(name)\(country["status"].string == "observed" ? "" : " (suggested)")")
+    }
+    if let name = language["label"].string { parts.append("Language: \(name)") }
+    return parts.isEmpty ? nil : parts.joined(separator: " · ")
+  }
   var outcome: String {
     if let value = run["outcome"].string { return value }
     let useful = Self.observations(payment, path: "").filter {
@@ -201,7 +221,59 @@ struct PaymentDraft {
     }
   }
   var visibleFields: [DraftField] { fields.filter { $0.value != nil } }
-  var missingFields: [DraftField] { fields.filter { $0.value == nil } }
+  func requirement(for path: String) -> String {
+    let rule =
+      path.hasPrefix("/candidates/")
+      ? candidateGuidance["fields"][path] : guidance["document_fields"][path]
+    if let requirement = rule["requirement"].string { return requirement }
+    // Old saved drafts and older servers retain a conservative route-based fallback.
+    let required = ["/beneficiary_name", "/amount/value", "/amount/currency"]
+    if required.contains(where: { path == prefix + $0 }) { return "required" }
+    let kind = candidate["destination"]["kind"].string
+    if kind == "uk_domestic"
+      && ["/destination/sort_code", "/destination/account_number"].contains(where: {
+        path == prefix + $0
+      })
+    {
+      return "required"
+    }
+    if kind == "iban" && path == prefix + "/destination/iban" { return "required" }
+    if kind == "biller_reference"
+      && ["/destination/scheme", "/destination/biller_code"].contains(where: { path == prefix + $0 }
+      )
+    {
+      return "required"
+    }
+    if path == prefix + "/remittance/reference" {
+      switch candidate["remittance"]["reference_requirement"].string {
+      case "required": return "required"
+      case "not_stated": return "optional"
+      default: return "unresolved"
+      }
+    }
+    if path == prefix + "/remittance/model"
+      && candidate["remittance"]["model"]["state"].string != "missing"
+    {
+      return "required"
+    }
+    return "optional"
+  }
+  var missingFields: [DraftField] {
+    fields.filter { $0.value == nil && requirement(for: $0.id) == "required" }
+  }
+  var optionalFields: [DraftField] {
+    fields.filter { $0.value == nil && requirement(for: $0.id) == "optional" }
+  }
+  func shouldShow(_ field: DraftField, optional: Bool) -> Bool {
+    if field.value != nil || field.isEdited { return true }
+    if ["unreadable", "ambiguous", "unsupported"].contains(field.observation["state"].string ?? "")
+    {
+      return true
+    }
+    let requirement = requirement(for: field.id)
+    return requirement == "required" || requirement == "unresolved"
+      || (optional && requirement == "optional")
+  }
   func sections(for fields: [DraftField]) -> [DraftSection] {
     [
       DraftSection(

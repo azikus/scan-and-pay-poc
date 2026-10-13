@@ -160,7 +160,14 @@ def test_admin_pagination_and_static_security(settings, definitions, adapters, p
             and "frame-ancestors 'none'" in shell.headers["Content-Security-Policy"]
         )
         assert shell.headers["Cache-Control"] == "no-store"
-        for asset in ("admin.js", "admin.css", "logo.svg", "HankenGrotesk-Regular.ttf"):
+        for asset in (
+            "admin.js",
+            "theme.js",
+            "context.js",
+            "admin.css",
+            "logo.svg",
+            "HankenGrotesk-Regular.ttf",
+        ):
             assert client.get("/admin/assets/" + asset).status_code == 200
         assert client.get("/admin/assets/.env").status_code == 404
         assert (

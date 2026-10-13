@@ -1,5 +1,52 @@
 # Current project status — 13 October 2026
 
+## SUNMI PR closeout — 13 October
+
+Markus authorized creating and merging the completed SUNMI branch and archiving this chat. Scope includes live-only dual-display telemetry, circular component animations, title transitions, provider choice for the next individual scan, right-hand live scan insights, completion styling and the installed mobile dark theme. Requested footer/completion labels are removed. Running every model for a selected method was estimated only and is not implemented or enabled.
+
+Final checks: 775 offline backend tests; domain/orchestration coverage 96.27% statements / 91.42% branches; 32 native unit/recovery tests; seven frontend tests; Ruff, strict mypy, unchanged generated contracts, normal Android build, and wheel asset/privacy checks. The preceding visual pass also verified four native UI flows, isolated browser layouts and reduced motion. No paid inference or live provider selection change was made during closeout.
+
+Keep the SUNMI worktree at `/Users/markusi/.codex/worktrees/sunmi-live-companion/scan-and-pay`: the existing private backend launcher still serves its source. Archiving the chat must not remove that checkout or stop the running app. Separate PR #11 retains later country-evaluation source/documentation changes not incorporated into this SUNMI branch; its earlier invoice-context implementation was integrated to preserve the installed runtime. Phone foregrounding and real confirmation-animation acceptance remain user checks.
+
+## Display motion and mobile dark mode — 13 October
+
+The live SUNMI views now animate outgoing/incoming titles, enlarge the circular component illustrations, and show an animated active component in the center. A right-hand panel shows the actual providers/models, observed backend elapsed time and four recent journey events. Heartbeat repetitions are coalesced; prior journeys are excluded; terminal backend timings stop and disconnected timings freeze. The customer view uses one large active illustration. Saved confirmation triggers a drawn checkmark, two expanding rings and 32 particles matching the mobile celebration; provider responses and failures cannot trigger it. Reduced Motion removes spatial/repeating effects. No synthetic playback or new data endpoint was added.
+
+The native app now uses dark glass across capture, crop, preview, review, confirmation, settings and completion. Semantic text colours and the reversed Azikus mark preserve contrast; source document pixels are unchanged. The signed update was installed in place on the existing paired iPhone 16 Pro and the SUNMI companion was relaunched. Existing tokens, selected provider and stored drafts are retained. No backend restart or agent inference was needed.
+
+Verification: seven frontend projection/selection/timing tests, isolated browser checks at 1280 × 720, 1280 × 800 and 1920 × 1080 (including hybrid stages, completion and reduced motion), and all four existing offline native UI flows pass. Native review/completion screenshots were inspected. Real-device confirmation animation acceptance remains for Markus’s next scan; no live confirmation was submitted by the agent.
+
+## Live-only SUNMI display — 13 October
+
+Markus confirmed the feature works and requested removing demo code. Synthetic replay/fabricated state, the standalone rehearsal server, the offline display-test source/app and Android development bootstrap/capture hooks are removed. The rebuilt companion is non-debuggable and installed with its existing saved connection and screen mode. Live circular animations, idle QR, provider selection, reconnect and privacy masking remain. `/demo` and `/v1/demo/*` are retained as compatibility names for actual live telemetry; the existing mobile toggle and separate simulated payment confirmation are unchanged. Six frontend tests and 23 backend review/demo tests passed. Earlier replay/setup references below are historical. See [current setup](../sunmi/companion/README.md#live-only-deployment--13-october).
+
+
+## SUNMI visual and provider controls update — 13 October
+
+Markus requested improved animations, illustrated components around a circular path with arrows, and next-scan provider selection within the display app. These are implemented and installed on the connected SUNMI. Controls reuses the existing exact-profile selection endpoint, applies only to new Sends, and is disabled in synthetic replay. The original selection was preserved; isolated fake-provider writes verified saving and refresh persistence. Six frontend checks and 23 backend review/demo tests passed. App-owned captures verified actual WebView layout and provider controls; the saved Scan & Pay two-screen mode is restored. See [display details](../frontend/demo/README.md#circular-journey-and-next-scan-controls--13-october). No paid inference, provider/configuration change or backend restart was performed.
+
+
+## SUNMI installation — 13 October
+
+Markus authorized and received the connected-device installation. Current main, invoice-context changes and explicit cloud credentials were integrated into the SUNMI worktree before deployment. The original private launcher now runs this worktree’s source while retaining the original environment/database. The existing mobile app was upgraded, Demo displays enabled, and the new SUNMI companion installed beside AirScreen. Real device rendering verifies the connected idle QR; Markus confirmed the screen followed his real scan and returned to the QR after he dismissed the result. All 2,379 original reservations, all 32 profiles, prior reviews, backend identity and the selected OpenAI mini definition were preserved; the user’s single scan brought the reservation count to 2,380. Root environment and provider configuration hashes are unchanged. Pay confirmation and live mode-switch/headset continuity remain unverified in this installation rehearsal. Checks passed: 775 backend tests, 32 native unit/recovery tests, four frontend projection tests, signed device builds. See [installation and launch instructions](../sunmi/companion/README.md#physical-installation--13-october). The earlier “not installed / runtime unchanged” paragraph below records the prior source-only checkpoint. Keep this worktree available while the live backend uses it.
+
+
+## SUNMI worktree continuation — 13 October
+
+Markus approved starting the SUNMI implementation in a separate worktree. `codex/sunmi-live-companion` starts from iOS commit `e76e303`; the original checkout and live runtime remain unchanged. The first source implementation adds sanitized backend snapshots/SSE, actual transport events, optional iPhone lifecycle telemetry, three Azikus display views with idle website QR, and a separate Android display host with manual Vision Pro / Scan & Pay modes. The approved deck and external static website remain unchanged.
+
+Offline checks passed: 698 backend tests (backend 96.53% statements / 90.91% branches), 29 native unit/recovery tests, four existing native UI tests, four frontend projection tests, static checks, Android build/signature and installed-wheel assets. Browser checks cover both target display sizes, explicit replay and authenticated synthetic idle updates. See [setup and remaining physical checks](../sunmi/companion/README.md) and the [approved plan](SUNMI_DEMO_IMPLEMENTATION_PLAN.md).
+
+This networked package has not yet replaced the accepted offline test on the SUNMI. Physical installation/mode switching, live iPhone/WebView integration and measured display latency remain open. No paid calls, primary-checkout edits, phone migration, live runtime restart or changes to the original ledger/selection were made. The previous AirScreen plus offline-companion hardware acceptance is retained as a separate result.
+
+
+
+## Invoice context follow-up — 13 October
+
+The separately requested [invoice context implementation](INVOICE_CONTEXT.md) starts from merged PR #9. One opt-in extraction call adds issuer/language explanations; backend route rules distinguish missing required fields from optional/not-applicable fields. Admin adds country flags/evidence and System/Light/Dark themes; iOS uses the applicability guidance while preserving original JSON and recovery.
+
+Fresh authorized testing covered all 37 distinct images once: zero API errors, two success/35 incomplete drafts, 76/102 accepted readable reviewed fields (historical same-model baseline 79/102). The new prompt is separately selectable and is not promoted as an accuracy improvement. Original selection remains unchanged; 32 profiles are now configured. Ledger is 2,379 reservations after exactly 37 additions, with all original rows preserved. Service source is this invoice-context worktree. Checks: 752 backend tests, 30 native unit/recovery plus four UI tests, and browser theme/responsive checks. See the linked record for costs, latency, caveats and private evidence locations. This current scope supersedes the completed integration-only restrictions below.
+
 **Cloud credentials — 13 October:** Markus requested AWS and Google credentials directly in root `.env`, with no interactive setup. Explicit `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (optional `AWS_SESSION_TOKEN`) now override AWS profile lookup. `GOOGLE_CREDENTIALS_JSON` loads authorized-user or service-account credentials in memory and overrides ADC/file lookup. Google Document AI uses OAuth identity credentials, not a Gemini-style API key. Existing credentials were migrated without generating new keys or changing identities; exact profile versions and private accounting/selection were preserved. Legacy SDK fallback remains only when explicit env credentials are absent. See [ENV_CLOUD_CREDENTIALS.md](ENV_CLOUD_CREDENTIALS.md).
 
 

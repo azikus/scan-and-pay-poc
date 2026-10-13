@@ -1,5 +1,20 @@
 # API contract v1
 
+## Demo observation channel — 13 October 2026
+
+This additive version-1 channel observes the phone and existing extraction lifecycle. It creates no extraction reservation, changes no profile/selection and executes no payment. All `/v1/demo/*` routes require the same bearer authentication as the existing API and return no-store responses. `/demo` and its allowlisted assets are data-free public shells with a self-only CSP.
+
+- `PUT /v1/demo/sessions/{session_id}`: UUID path; body `{ "sequence": 1, "journey_id": "<UUID>", "phase": "crop" }`. Sequence is an integer 1–9,007,199,254,740,991, strictly increasing within a phone session. Unknown fields are rejected. Phases are `idle`, `crop`, `preview`, `preparing`, `uploading`, `queued`, `reading`, `review`, `confirmation`, `recovery`, `failed`, `paused`. Journey is nullable only for idle/paused. Response `{ "received": true }` acknowledges best-effort receipt, not durable persistence or extraction success. Equal/older sequence snapshots are ignored. A phone sends a fresh snapshot every eight seconds; times from the phone are not trusted or required.
+- `GET /v1/demo/snapshot`: `{ version: 1, revision, server_time, sessions: [...] }`. A single consistent lock boundary covers revision and sessions. Session projection includes session/journey/scan IDs, phone sequence/phase/last-seen, independent backend state, frozen profile references, allowlisted observed stages, bounded recent event envelopes, outcome and confirmation time. Times are server Unix seconds in UTC. No payment fields, image/hash, evidence, raw payload, account alias or credential is included.
+- `GET /v1/demo/events?after=<revision>`: SSE `event: snapshot`, `id: <revision>`, JSON `data` with the same complete projection. Every connection starts with a current complete snapshot even if `after` is ahead/expired; it is a resynchronization hint, not a promise to replay history. Subsequent changed revisions are checked every 250 ms; an unchanged snapshot is sent at least every ten seconds. Authenticated fetch streaming sets the bearer header. Ordinary `EventSource` is not used. The browser can fall back to authenticated snapshots.
+- `POST /v1/scans` accepts optional UUID headers `X-Scanpay-Demo-Session` and `X-Scanpay-Demo-Journey`; both must be present to associate a scan. This does not enter options, image hashes or idempotency semantics. The first observed binding is immutable; duplicate uploads do not dispatch or rebind. Only a binding matching the current phone journey may change its projection. A reset does not cancel work. Prior-journey results cannot overwrite a new capture.
+
+Events have `version`, UUID `event_id`, monotonic server `sequence`, `session_id`, `journey_id`, optional `scan_id`, `source`, `kind`, `server_time` and optional stage/run IDs. Backend kinds include accepted/running/request/response/local/validation/terminal execution states/confirmed. A request event precedes the actual transport await; a response event indicates receipt only, including HTTP failures and asynchronous polling responses. It does not claim valid extraction or visibility into remote processing. `confirmed` is emitted only after the existing review write succeeds; duplicates do not restart completion. Backend failure or a terminal `outcome=error` never implies a usable draft.
+
+Separate `demo-state.json` stores only sanitized observation state: up to eight sessions, 128 recent scan bindings and 64 events per session. Default inactivity retention is eight hours (`Settings.demo_retention_seconds`, configurable 60–86,400 seconds). Persistence is coalesced on a single background writer. Observer/storage errors cannot fail extraction or confirmation. Following a restart, phone connection is unknown and unfinished observed stages become interrupted; no job is rerun. A fresh phone snapshot restores presence. A crash can lose the most recent best-effort update; this channel is not an audit ledger. Old mobile drafts without demo association remain valid and simply lack full display telemetry.
+
+Display-only session selection/reset and replay are local operator controls; they never delete sessions/scans or alter the phone. Details and physical acceptance gates are in [SUNMI setup](../sunmi/companion/README.md).
+
 ## Admin method selection — 9 October 2026
 
 Authenticated `GET /v1/profiles` advertises `default_extract_profile_id` and the additive nullable `default_extract_profile_version`. A persisted admin selection takes precedence over the configured baseline default; changed/disabled/missing selected versions remain explicit and never silently fall back. A new mobile Send fetches this pair, verifies the matching enabled/configured profile, and freezes its ID/version alongside the upload options and idempotency key. Recovery of an existing upload verifies its frozen selection, independent of a newer default.
@@ -113,7 +128,7 @@ Generate API models and schemas from one typed source. Validate the two syntheti
 
 ## Private mobile review inspector (additive, 9 October 2026)
 
-The original `GET /v1/scans/{scan_id}` response remains unchanged: all nullable observation values remain explicit `null`, and original candidates, warnings, evidence and decimal/digit strings are preserved. Mobile and admin pretty-print this response without stripping nulls. Null result rows can be omitted in the mobile presentation without changing the JSON.
+All nullable observation values in `GET /v1/scans/{scan_id}` remain explicit `null`, and original candidates, warnings, evidence and decimal/digit strings are preserved. Mobile and admin pretty-print this response without stripping nulls. Null result rows can be omitted in the mobile presentation without changing those observations. The additive 13 October review guidance below is computed at read time.
 
 `GET /admin` serves a private inspector shell with no scan data. Its data requests require the same bearer token as the scan API. The page keeps that token in memory only, uses no-store responses and self-only assets, and never sends extraction requests. It is intended for the trusted local setup, not public hosting.
 
@@ -132,6 +147,14 @@ New submissions accept `X-Scanpay-Client: mobile|automated` (default `automated`
 The app submits edits only after Pay opens a summary and the user presses Confirm. Keystrokes are not logged. The inspector shows original JSON and mobile-confirmed values separately and highlights differences.
 
 The PoC confirmation accepts a checked, selected, reviewable candidate even when payment fields are incomplete. Missing/invalid fields remain visible in the confirmation summary. This records `review_confirmed` with `simulated=true`; it does not change backend review state or make the candidate executable. Empty/error results and unselected candidates cannot be confirmed.
+
+## Invoice review guidance (additive, 13 October 2026)
+
+Scan reads add optional `runs[].review_guidance` when payment extraction is present. `policy_version` is `invoice-fields@1`. `issuer_country` and `language` contain nullable `value`/`label`, `status` (`observed|inferred|derived|unknown|ambiguous`), `reason`, `evidence_ids` and `excerpts`. Each candidate has `candidate_id`, `route`, separate `account_country`, `fields` and `warnings`. Document rules are under `document_fields`. Field maps use JSON pointers into `run.payment`; each rule has `requirement` (`required|optional|not_applicable|unresolved`) and `reason`. They can include virtual other-route pointers absent from the candidate's discriminated destination shape; those are presentation rules, not editable observation nodes.
+
+This guidance is a deep-copy read projection, including for old scans, and does not replace stored observations, validation, outcomes, evidence or confirmations. No new provider call is made by a read. Country suggestions cannot override positive payment-route evidence. Missing context is not a missing payment field; unresolved routes and real missing required data remain review concerns. Clients retain populated/edited/uncertain fields and may hide optional empty observations. Older clients may ignore this additive object; newer clients have a route-based fallback when it is absent. Review uploads still enumerate only actual observation nodes, never virtual guidance pointers.
+
+Opt-in compact extraction profiles can add `diagnostics.context_explanations` with short model-supplied explanations for `language`/`issuer_country` and linked evidence excerpts with `grounding: model_claim`. Historical profiles/results omit that empty dictionary. Country labels and flag glyphs are presentation conveniences; neither proves country, account ownership or payment validity. See [INVOICE_CONTEXT.md](INVOICE_CONTEXT.md) for the single-call prompt and evidence.
 
 ## Local connection status (additive, 9 October 2026)
 

@@ -263,6 +263,9 @@ def registry(settings: Settings) -> dict[str, Definition]:
         if option.field_policy == "partial_v1":
             components.append("partial-fields@1")
             parameters["field_policy"] = "partial_v1"
+        if option.context_policy == "invoice_v1":
+            components.append("invoice-context@1")
+            parameters["prompt"] = str(parameters["prompt"]) + "+invoice-context@1"
         if option.operation == "ocr":
             components.insert(1, "label-rules@" + option.rules_version)
             if option.rules_version == "3":
