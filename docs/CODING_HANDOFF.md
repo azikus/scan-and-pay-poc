@@ -1,5 +1,11 @@
 # Coding handoff — continue here
 
+## Automatic iOS capture — 13 October
+
+Markus requested Apple-native document detection, a grey live-preview mask and automatic capture into the existing Adjust image screen, then explicitly requested latest main and a separate branch. Continue this scoped change in `codex/ios-auto-document-scan`, based on main `269e022`, at `/Users/markusi/.codex/worktrees/ios-auto-document-scan/scan-and-pay`. Read [IOS_DOCUMENT_SCANNING.md](IOS_DOCUMENT_SCANNING.md). The final 43 iOS tests and signed build pass; the combined update is installed on the existing iPhone, and Markus confirmed the camera flow works. Do not reopen already accepted general mobile/SUNMI integration or start Android automatically. The original checkout's temporary scanning edits were moved to this separate branch, with unrelated untracked work retained.
+
+The subsequent missing-worktree backend outage was repaired by the separately authorized website chat. The private launcher now uses merged main's stable archive at the original checkout's `.local/runtime-source/269e0223580ecba96793d9382c3efcffa77d720e/`; preserve that source and all private state. This supersedes older instructions to retain the removed invoice-context worktree. Independent read-only service checks, selected-profile request preparation and 108 offline extraction tests passed, with original state unchanged. No live inference was repeated; a new explicit user Send remains the live verification step. See the scanning document for evidence and limits.
+
 ## PR #11 merge closeout — 13 October
 
 Markus authorized the checked merge. Latest remote main `7d188e7` is already integrated. Final checks and privacy review passed: 792 backend/evaluation tests, seven frontend tests, 96.19% statement / 91.34% branch domain coverage, static/contract/package checks and installed-wheel serving. No new paid calls, phone install, selection change or service restart. The live backend still uses the invoice-context-review worktree; retain it after merging. See INVOICE_CONTEXT.md for the full closeout record.

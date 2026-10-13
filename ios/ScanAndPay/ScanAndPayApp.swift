@@ -168,6 +168,7 @@ struct ScanHome: View {
   @State private var detent: PresentationDetent = .fraction(0.68)
   @State private var discard = false
   @State private var importing = false
+  @State private var choosingPhoto = false
   var body: some View {
     NavigationStack {
       ZStack {
@@ -203,7 +204,7 @@ struct ScanHome: View {
       if model.complete { CompletionCelebration { model.complete = false } }
     }
     .onAppear {
-      camera.captured = { model.captured($0) }
+      camera.captured = { model.captured($0, scanned: $1) }
       reviewVisible = model.processing || [.review, .failed, .recovery].contains(model.phase)
       updateCamera()
     }
@@ -223,6 +224,10 @@ struct ScanHome: View {
       }
     }
     .onChange(of: typeSize) { _, size in if size.isAccessibilitySize { detent = .large } }
+    .onChange(of: settings) { _, _ in updateCamera() }
+    .onChange(of: choosingPhoto) { _, _ in updateCamera() }
+    .onChange(of: importing) { _, _ in updateCamera() }
+    .onChange(of: model.complete) { _, _ in updateCamera() }
     .onChange(of: picked) { _, item in
       guard let item else { return }
       importing = true
@@ -246,9 +251,12 @@ struct ScanHome: View {
   @ViewBuilder private var content: some View {
     if model.phase == .capture {
       captureScreen.id(screen)
-    } else if model.phase == .crop, let image = model.originalImage {
-      ManualCrop(image: image, namespace: documentMotion, use: model.cropped, retake: model.reset)
-        .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 18)))
+    } else if model.phase == .crop, let image = model.image {
+      ManualCrop(
+        image: image, uncroppedImage: model.originalImage, namespace: documentMotion,
+        use: model.cropped, retake: model.reset
+      )
+      .transition(reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 18)))
     } else {
       VStack(spacing: 16) {
         ScreenHeader(subtitle: model.phase == .preview ? "Ready to send" : "Your document") {
@@ -309,6 +317,9 @@ struct ScanHome: View {
           Image(uiImage: fixtureImage()).resizable().scaledToFit().padding(.horizontal, 8)
         } else if camera.available {
           CameraPreview(session: camera.session).clipped()
+          if let document = camera.document {
+            DocumentPreviewMask(document: document, imageSize: camera.previewImageSize)
+          }
         } else {
           VStack(spacing: 16) {
             Image(systemName: "camera").font(.system(size: 38, weight: .light))
@@ -360,15 +371,23 @@ struct ScanHome: View {
       if let message = model.message {
         Text(message).font(Brand.font(14)).foregroundStyle(.secondary)
       }
-      Text("Start with a document.").font(Brand.font(24, .semibold))
-      Text("Take a photo or choose an image.").font(Brand.font(14)).foregroundStyle(.secondary)
+      Text(camera.takingPhoto ? "Capturing document…" : "Start with a document.")
+        .font(Brand.font(24, .semibold))
+      Text(camera.autoEnabled ? camera.scanHint : "Tap the shutter when you’re ready.")
+        .font(Brand.font(14)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+      if let error = camera.error {
+        Text(error).font(Brand.font(13)).foregroundStyle(.secondary)
+      }
       HStack {
-        PhotosPicker(selection: $picked, matching: .images, photoLibrary: .shared()) {
+        Button {
+          choosingPhoto = true
+        } label: {
           VStack(spacing: 6) {
             Image(systemName: "photo.on.rectangle").font(.system(size: 21))
             Text(importing ? "Opening…" : "Import").font(Brand.font(12))
           }.frame(maxWidth: .infinity, minHeight: 66).contentShape(Rectangle())
-        }.buttonStyle(.plain).disabled(importing)
+        }.buttonStyle(.plain).disabled(importing || camera.takingPhoto)
+          .photosPicker(isPresented: $choosingPhoto, selection: $picked, matching: .images)
         Button {
           if model.fixtureMode { model.captured(fixtureImage()) } else { camera.capture() }
         } label: {
@@ -378,12 +397,24 @@ struct ScanHome: View {
         }.buttonStyle(.plain)
           .disabled((!camera.available && !model.fixtureMode) || camera.takingPhoto || importing)
           .accessibilityLabel("Capture document").accessibilityIdentifier("capture")
-        Color.clear.frame(maxWidth: .infinity, maxHeight: 66)
+        Button {
+          camera.setAutomatic(!camera.autoEnabled)
+        } label: {
+          VStack(spacing: 6) {
+            Image(systemName: camera.autoEnabled ? "viewfinder" : "camera")
+              .font(.system(size: 21))
+            Text(camera.autoEnabled ? "Auto" : "Manual").font(Brand.font(12))
+          }.frame(maxWidth: .infinity, minHeight: 66).contentShape(Rectangle())
+        }.buttonStyle(.plain).disabled(camera.takingPhoto)
+          .accessibilityLabel(camera.autoEnabled ? "Auto scan on" : "Auto scan off")
+          .accessibilityIdentifier("auto-scan")
       }.padding(.top, 8)
     }.padding(22).modifier(GlassPanel())
   }
   private func updateCamera() {
-    if scenePhase == .active && model.phase == .capture && !model.fixtureMode {
+    if scenePhase == .active && model.phase == .capture && !model.fixtureMode
+      && !settings && !choosingPhoto && !importing && !model.complete
+    {
       camera.start()
     } else {
       camera.stop()

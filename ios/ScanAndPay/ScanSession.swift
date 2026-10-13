@@ -28,7 +28,10 @@ import SwiftUI
   private var demoConfirmation = false
   private lazy var demo = DemoTelemetry(defaults: defaults, session: clientSession)
   @Published var demoEnabled = false {
-    didSet { defaults.set(demoEnabled, forKey: "demoEnabled"); demoUpdate() }
+    didSet {
+      defaults.set(demoEnabled, forKey: "demoEnabled")
+      demoUpdate()
+    }
   }
   var demoSessionLabel: String { String(demo.sessionID.prefix(8)) }
   func demoConfirmationOpened(_ opened: Bool) {
@@ -37,8 +40,12 @@ import SwiftUI
   }
   private func demoUpdate() {
     guard !fixtureMode else { return }
-    let name = demoPaused ? "paused" : demoConfirmation ? "confirmation" : phase == .capture ? "idle" : String(describing: phase)
-    demo.update(enabled: demoEnabled, address: address, token: token, phase: name, journey: demoJourney)
+    let name =
+      demoPaused
+      ? "paused"
+      : demoConfirmation ? "confirmation" : phase == .capture ? "idle" : String(describing: phase)
+    demo.update(
+      enabled: demoEnabled, address: address, token: token, phase: name, journey: demoJourney)
   }
   let fixtureMode: Bool
   private let clientSession: URLSession?
@@ -220,12 +227,12 @@ import SwiftUI
     }
     connectionStatus = "Couldn’t reconnect. \(lastError)"
   }
-  func captured(_ source: UIImage) {
+  func captured(_ source: UIImage, scanned: UIImage? = nil) {
     guard phase == .capture || phase == .crop || phase == .preview else { return }
     generation = UUID()
     demoJourney = UUID().uuidString.lowercased()
-    image = source.oriented()
-    originalImage = image
+    originalImage = source.oriented()
+    image = scanned?.oriented() ?? originalImage
     phase = .crop
     complete = false
     message = nil

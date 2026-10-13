@@ -1,5 +1,13 @@
 # Current project status — 13 October 2026
 
+## Automatic iOS document capture — 13 October
+
+The requested Apple-native scanning flow is implemented on `codex/ios-auto-document-scan`, based on freshly fetched main `269e022` after PR #11. Apple Vision identifies the paper, greys out its surroundings, and triggers capture after a steady view. The straightened image opens Adjust image; Reset crop/Edit crop can recover the complete original photo. Manual shutter/import and explicit Send remain available. Latest dark mode, invoice applicability and SUNMI telemetry are retained. See [implementation and verification](IOS_DOCUMENT_SCANNING.md).
+
+All 43 offline iOS tests passed, including actual native detection on a synthetic paper image; mask/rectification images were inspected. The signed build passed and was installed in place on the paired iPhone 16 Pro. Markus confirmed the new camera flow works on the physical device. No paid extraction or private state/configuration change was performed for this feature.
+
+**Subsequent runtime repair:** the live server's invoice-context worktree had been removed. The separately authorized website chat restored it from a stable archive of merged main under the original checkout's `.local/runtime-source/269e0223580ecba96793d9382c3efcffa77d720e/` and restarted it while idle. This supersedes the historical worktree-retention instructions below. Independent health/catalogue/admin/display checks, selected-profile request preparation and 108 offline extraction tests passed; saved jobs, reviews, accounting, selection and identity are unchanged. The reported pre-provider failures remain preserved; a new explicit user Send is needed to verify live extraction. See [outage details](IOS_DOCUMENT_SCANNING.md#subsequent-local-backend-outage).
+
 ## PR #11 merge closeout — 13 October
 
 Markus authorized the checked merge. Latest remote main `7d188e7` is already integrated. Final checks and privacy review passed: 792 backend/evaluation tests, seven frontend tests, 96.19% statement / 91.34% branch domain coverage, static/contract/package checks and installed-wheel serving. No new paid calls, phone install, selection change or service restart. The live backend still uses the invoice-context-review worktree; retain it after merging. See INVOICE_CONTEXT.md for the full closeout record.
