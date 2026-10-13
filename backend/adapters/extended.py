@@ -167,7 +167,9 @@ class ExtendedAdapter:
                         )
                         if document:
                             stage.source_stage_ids = [document.source_stage_id]
+                    context.demo("request", stage)
                     response = await client.request(method, url, **kwargs)
+                    context.demo("response", stage)
                     stage.usage["http_status"] = response.status_code
                     try:
                         body = response.json()

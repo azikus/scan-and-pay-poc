@@ -258,6 +258,7 @@ class Settings(Model):
     providers: ProfileConfig = Field(default_factory=ProfileConfig)
     workers: int = Field(default=2, ge=1, le=2)
     queue_capacity: int = Field(default=10, ge=1)
+    demo_retention_seconds: int = Field(default=28800, ge=60, le=86400)
     # Legacy settings are accepted for compatibility and never enforce spending/call limits.
     smoke_budget_eur: Decimal = Field(default=Decimal("30"), allow_inf_nan=False)
     max_calls: int = 12

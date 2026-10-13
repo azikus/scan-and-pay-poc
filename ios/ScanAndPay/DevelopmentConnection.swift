@@ -5,6 +5,7 @@
   struct DevelopmentConnection: Decodable {
     let addresses: [String]
     let token: String
+    let demoDisplays: Bool?
     static var setupFile: URL {
       FileManager.default.temporaryDirectory.appending(path: "connection-setup.json")
     }
@@ -27,6 +28,7 @@
         }
         try model.configureHotspot(address: address, token: token)
         await model.reconnect()
+        if let demoDisplays { model.demoEnabled = demoDisplays }
         let report: [String: Any] = [
           "selected_address": model.address, "attempts": model.connectionAttempts,
           "checked_at": ISO8601DateFormatter().string(from: Date()),

@@ -83,6 +83,36 @@ private final class FakeMac: @unchecked Sendable {
 }
 
 @MainActor final class RecoveryTests: XCTestCase {
+  func testDemoBindingSurvivesRecoveryAndLegacyPendingStillDecodes() throws {
+    let legacy = PendingScan(key: "original", address: "http://192.168.1.2:8000", image: Data(), options: Data())
+    let oldData = try JSONEncoder().encode(legacy)
+    XCTAssertTrue(try JSONDecoder().decode(PendingScan.self, from: oldData).demoHeaders.isEmpty)
+    var bound = legacy
+    bound.demoSessionID = UUID().uuidString
+    bound.demoJourneyID = UUID().uuidString
+    let recovered = try JSONDecoder().decode(PendingScan.self, from: JSONEncoder().encode(bound))
+    XCTAssertEqual(recovered.demoHeaders, bound.demoHeaders)
+    XCTAssertEqual(recovered.key, "original")
+  }
+  func testDemoOutageDoesNotBlockReviewOrConfirmation() async throws {
+    let (model, mac, _) = try setup()
+    model.demoEnabled = true
+    model.captured(UIGraphicsImageRenderer(size: CGSize(width: 20, height: 30)).image { ctx in UIColor.white.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 20, height: 30)) })
+    model.cropped(model.image!)
+    StubProtocol.respond = { request in
+      if request.url!.path.hasPrefix("/v1/demo/") { throw URLError(.cannotConnectToHost) }
+      return try mac.respond(request)
+    }
+    model.send()
+    try await wait { model.phase == .review }
+    XCTAssertNotNil(model.pending?.demoSessionID)
+    XCTAssertNotNil(model.pending?.demoJourneyID)
+    model.checked = true
+    model.confirm()
+    try await wait { model.complete }
+    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 1)
+    model.demoEnabled = false
+  }
   private func setup(
     empty: Bool = false, result: JSONValue? = nil,
     encodeImage: @escaping (UIImage) async throws -> Data = ScanSession.encodePNG

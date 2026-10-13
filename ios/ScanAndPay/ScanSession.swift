@@ -5,7 +5,7 @@ import SwiftUI
   enum Phase: Equatable {
     case capture, crop, preview, preparing, uploading, queued, reading, review, recovery, failed
   }
-  @Published var phase: Phase = .capture
+  @Published var phase: Phase = .capture { didSet { if oldValue != phase { demoUpdate() } } }
   @Published var image: UIImage?
   @Published var originalImage: UIImage?
   @Published var draft: PaymentDraft?
@@ -23,6 +23,23 @@ import SwiftUI
   private(set) var pending: PendingScan?
   private var task: Task<Void, Never>?
   private var generation = UUID()
+  private var demoJourney: String?
+  private var demoPaused = false
+  private var demoConfirmation = false
+  private lazy var demo = DemoTelemetry(defaults: defaults, session: clientSession)
+  @Published var demoEnabled = false {
+    didSet { defaults.set(demoEnabled, forKey: "demoEnabled"); demoUpdate() }
+  }
+  var demoSessionLabel: String { String(demo.sessionID.prefix(8)) }
+  func demoConfirmationOpened(_ opened: Bool) {
+    demoConfirmation = opened
+    demoUpdate()
+  }
+  private func demoUpdate() {
+    guard !fixtureMode else { return }
+    let name = demoPaused ? "paused" : demoConfirmation ? "confirmation" : phase == .capture ? "idle" : String(describing: phase)
+    demo.update(enabled: demoEnabled, address: address, token: token, phase: name, journey: demoJourney)
+  }
   let fixtureMode: Bool
   private let clientSession: URLSession?
   private let pendingFile: URL
@@ -51,6 +68,7 @@ import SwiftUI
       let image = UIImage(data: stored.image)
     {
       pending = stored
+      demoJourney = stored.demoJourneyID
       self.image = image
       originalImage = image
       phase = .recovery
@@ -70,6 +88,8 @@ import SwiftUI
         }
       }
     }
+    demoEnabled = defaults.bool(forKey: "demoEnabled")
+    demoUpdate()
     #if DEBUG
       if !fixtureMode {
         do {
@@ -103,6 +123,7 @@ import SwiftUI
     self.address = address
     self.token = token
     defaults.set(address, forKey: "backendURL")
+    demoUpdate()
   }
   // The app cannot identify the Wi-Fi SSID. Accept a local Mac address, with one
   // saved endpoint for the Personal Hotspot workflow; no USB/cloud fallback.
@@ -202,6 +223,7 @@ import SwiftUI
   func captured(_ source: UIImage) {
     guard phase == .capture || phase == .crop || phase == .preview else { return }
     generation = UUID()
+    demoJourney = UUID().uuidString.lowercased()
     image = source.oriented()
     originalImage = image
     phase = .crop
@@ -233,6 +255,7 @@ import SwiftUI
     checked = false
     saving = false
     message = nil
+    demoConfirmation = false
     phase = .capture
   }
   func send() {
@@ -265,7 +288,6 @@ import SwiftUI
           let bytes = try await encodeImage(image)
           try Task.checkCancellation()
           guard identity == generation else { return }
-          phase = .uploading
           let selection = try await client.selection()
           let selected = selection.profile
           try Task.checkCancellation()
@@ -276,7 +298,9 @@ import SwiftUI
             ]))
           let record = PendingScan(
             key: UUID().uuidString, address: client.baseURL.absoluteString, image: bytes,
-            options: options, profileVersion: selected.version, serverID: selection.serverID)
+            options: options, profileVersion: selected.version, serverID: selection.serverID,
+            demoSessionID: demoEnabled ? demo.sessionID : nil,
+            demoJourneyID: demoEnabled ? demoJourney : nil)
           try PendingStore.save(record, to: pendingFile)
           self.pending = record
           try await uploadAndPoll(client, identity: identity)
@@ -331,6 +355,7 @@ import SwiftUI
   }
   private func uploadAndPoll(_ client: BackendClient, identity: UUID) async throws {
     guard let record = pending else { return }
+    phase = .uploading
     let id = try await client.submit(record)
     guard identity == generation else { return }
     pending?.scanID = id
@@ -452,6 +477,8 @@ import SwiftUI
     if phase == .capture { complete = true }
   }
   func background() {
+    demoPaused = true
+    demoUpdate()
     generation = UUID()
     task?.cancel()
     task = nil
@@ -465,6 +492,8 @@ import SwiftUI
     }
   }
   func foreground() {
+    demoPaused = false
+    demoUpdate()
     if phase == .recovery, pending?.scanID != nil, pending?.confirmationBody == nil { recover() }
   }
   func loadFixture() {

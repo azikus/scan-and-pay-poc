@@ -131,7 +131,7 @@ struct BackendClient {
       headers: [
         "Content-Type": "multipart/form-data; boundary=\(boundary)", "Idempotency-Key": pending.key,
         "X-Scanpay-Client": "mobile",
-      ])
+      ].merging(pending.demoHeaders) { _, new in new })
     guard let id = response["scan_id"].string,
       id.range(of: "^scan-[a-zA-Z0-9-]+$", options: .regularExpression) != nil
     else {
@@ -191,6 +191,13 @@ struct PendingScan: Codable {
   var confirmationID: String?
   var confirmationBody: Data?
   var serverID: String?
+  var demoSessionID: String?
+  var demoJourneyID: String?
+  var demoHeaders: [String: String] {
+    guard let sid = demoSessionID, UUID(uuidString: sid) != nil,
+          let journey = demoJourneyID, UUID(uuidString: journey) != nil else { return [:] }
+    return ["X-Scanpay-Demo-Session": sid, "X-Scanpay-Demo-Journey": journey]
+  }
   var extractionProfile: ExtractionProfile? {
     guard let json = try? JSONDecoder().decode(JSONValue.self, from: options),
       let id = json["profiles"].array.first?.string

@@ -15,6 +15,7 @@
 		58AEC58A6376DD4CDA0F9244 /* ScanSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB88D794FA463D9618D6E3E /* ScanSession.swift */; };
 		6FF06872DF29C5A0E1952E87 /* HankenGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2CB149A431BD12B3185AE73E /* HankenGrotesk-Regular.ttf */; };
 		7BD7C644D5CE28EC6F557C53 /* DevelopmentConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C16FE67D865258E6B0C4FE /* DevelopmentConnection.swift */; };
+		899563914DB1A1C876A43A5C /* DemoTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49351EE3926999ECB1BEA139 /* DemoTelemetry.swift */; };
 		93C0FF52D470B1C8141C4C5B /* ScanAndPayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7802D4328E871B743E43D62E /* ScanAndPayApp.swift */; };
 		94E0DE848735B83746839DFC /* ScanAndPayUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04824EE7499435E34A7298F /* ScanAndPayUITests.swift */; };
 		9D64DD26FAA74C3F61C148CB /* ScanAndPayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801A225424A6A56BC82176D9 /* ScanAndPayTests.swift */; };
@@ -48,6 +49,7 @@
 		1EFF2FDECECC6C52D3EF809D /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		2CB149A431BD12B3185AE73E /* HankenGrotesk-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-Regular.ttf"; sourceTree = "<group>"; };
 		40C16FE67D865258E6B0C4FE /* DevelopmentConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevelopmentConnection.swift; sourceTree = "<group>"; };
+		49351EE3926999ECB1BEA139 /* DemoTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTelemetry.swift; sourceTree = "<group>"; };
 		525C726310296005C2C03ACF /* BackendClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendClient.swift; sourceTree = "<group>"; };
 		68CEEEE6BE96B9B68F2E3FCE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7802D4328E871B743E43D62E /* ScanAndPayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanAndPayApp.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				68CEEEE6BE96B9B68F2E3FCE /* Assets.xcassets */,
 				525C726310296005C2C03ACF /* BackendClient.swift */,
 				B80001D8EFFC66EE0F2BBC7A /* Camera.swift */,
+				49351EE3926999ECB1BEA139 /* DemoTelemetry.swift */,
 				40C16FE67D865258E6B0C4FE /* DevelopmentConnection.swift */,
 				785E594F7A036BF483097BF7 /* Info.plist */,
 				1932AB52EBCE7E967D9BFFA7 /* PaymentConfirmation.swift */,
@@ -242,6 +245,7 @@
 			files = (
 				4E027F4D668DAD7515875D00 /* BackendClient.swift in Sources */,
 				DD8ABBCDB34D98060BB1DB6A /* Camera.swift in Sources */,
+				899563914DB1A1C876A43A5C /* DemoTelemetry.swift in Sources */,
 				7BD7C644D5CE28EC6F557C53 /* DevelopmentConnection.swift in Sources */,
 				50A6AE7728FB2DFB96880B98 /* PaymentConfirmation.swift in Sources */,
 				93C0FF52D470B1C8141C4C5B /* ScanAndPayApp.swift in Sources */,
