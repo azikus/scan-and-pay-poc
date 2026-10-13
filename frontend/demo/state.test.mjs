@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { project } from "./state.js";
+import { project, usableProfile, selectedProfile, graphIndex, profileLabel } from "./state.js";
 const state = {
   session_id: "a",
   phone: "reading",
@@ -35,4 +35,22 @@ test("late backend states do not move a reviewing phone backwards", () => {
   assert.equal(show({ phone: "confirmation" }).node, 4);
   assert.equal(show().node, 2);
   assert.equal(show({}, 140).moving, false);
+});
+
+test("provider choice requires ready profiles and the exact saved version", () => {
+  const p={id:"openai",version:"v2",enabled:true,configured:true,implemented:true,provider:"OpenAI",model:"Mini"};
+  assert.equal(usableProfile(p),true);
+  for(const flag of ["enabled","configured","implemented"])assert.equal(usableProfile({...p,[flag]:false}),false);
+  assert.equal(selectedProfile({profiles:[p],default_extract_profile_id:p.id,default_extract_profile_version:"v1"}),undefined);
+  assert.equal(selectedProfile({profiles:[p],default_extract_profile_id:p.id,default_extract_profile_version:"v2"}),p);
+  assert.match(profileLabel({...p,component_ids:["invoice-context@1"]}),/Invoice context/);
+});
+test("hybrid motion follows the active remote stage instead of skipping OCR", () => {
+  const remote=[{state:"request"},{state:"queued"}];
+  assert.equal(graphIndex({node:2},remote),2);
+  remote[0].state="completed";remote[1].state="request";
+  assert.equal(graphIndex({node:2},remote),3);
+  assert.equal(graphIndex({node:3},remote),4);
+  assert.equal(graphIndex({node:4},remote),5);
+  assert.equal(graphIndex({node:-1},remote),-1);
 });

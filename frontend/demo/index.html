@@ -60,8 +60,8 @@
       ><time id="clock"></time>
     </footer>
     <dialog id="controls">
+      <div class="control-heading"><h2>Display controls</h2><button id="close" type="button">Close</button></div>
       <form id="login">
-        <h2>Display controls</h2>
         <label id="token-label"
           >Local access token<input
             id="token"
@@ -69,6 +69,15 @@
             autocomplete="off" /></label
         ><button id="connect" type="submit">Connect</button>
       </form>
+      <section id="next-scan" aria-labelledby="next-scan-title">
+        <h2 id="next-scan-title">Next scan</h2>
+        <p id="current-provider" class="control-note">Connect to choose a provider.</p>
+        <label>Method<select id="next-method" disabled></select></label>
+        <label>Provider / model<select id="next-profile" disabled></select></label>
+        <div class="buttons"><button id="apply-provider" disabled>Use for next scan</button><button id="refresh-providers">Refresh</button></div>
+        <p class="control-note">Applies to the next new Send from a connected mobile phone. An existing scan or saved draft keeps its original provider.</p>
+        <p id="provider-message" role="status" class="control-note"></p>
+      </section>
       <label
         >Follow mobile phone session<select id="sessions">
           <option value="">Select a mobile phone</option>
@@ -91,7 +100,6 @@
         ><button id="configure">Backend connection</button>
       </div>
       <p id="error" role="alert"></p>
-      <button id="close">Close</button>
     </dialog>
     <script type="module" src="/demo/assets/demo.js"></script>
   </body>

@@ -40,6 +40,7 @@ export function project(
   if (!connected || now - s.last_seen > 30 || s.phone === "paused")
     return {
       ...base,
+      node: -1,
       title: connected
         ? "Mobile phone paused or disconnected"
         : "Connection lost",
@@ -134,4 +135,29 @@ export function project(
     node: s.phone === "uploading" ? 1 : 0,
     moving: s.phone === "uploading",
   };
+}
+
+// Exact version is retained when choosing a provider; unavailable profiles never appear.
+export const usableProfile = (p) => Boolean(p?.implemented && p.enabled && p.configured);
+export const providerLabel = (provider) => ({openai:"OpenAI",gemini:"Google",mistral:"Mistral",anthropic:"Anthropic",together:"Together",xai:"xAI",aws:"AWS",azure:"Azure",google:"Google"}[provider] || provider || "Provider");
+export const methodLabel = (method) => ({
+  direct_vision: "Image → LLM",
+  prebuilt_document_mapping: "Image → document extraction",
+  custom_document_mapping: "Image → custom document extraction",
+  document_annotations: "Image → OCR with annotations",
+  direct_image_llm: "Image → AI",
+  managed_ocr_rules: "OCR → rules",
+  managed_ocr_llm: "OCR → AI",
+}[method] || method.replaceAll("_", " "));
+export const profileLabel = (p) => [p.provider ? providerLabel(p.provider) : null, p.processor, p.model].filter(Boolean).join(" · ") +
+  (p.component_ids?.includes("invoice-context@1") ? " · Invoice context" : "");
+export function selectedProfile(data) {
+  return data?.profiles.find(p => p.id === data.default_extract_profile_id && p.version === data.default_extract_profile_version);
+}
+export function graphIndex(model, remote) {
+  if (model.node === 2) {
+    const active = remote.findIndex(s => ["request", "running"].includes(s.state));
+    return 2 + (active >= 0 ? active : Math.max(0, remote.length - 1));
+  }
+  return model.node >= 3 ? model.node + Math.max(0, remote.length - 1) : model.node;
 }

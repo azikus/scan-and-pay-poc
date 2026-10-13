@@ -40,6 +40,7 @@ public class CompanionActivity extends Activity implements SharedPreferences.OnS
       @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r){return !allowed(r.getUrl());}
       @Override public WebResourceResponse shouldInterceptRequest(WebView v,WebResourceRequest r){
         if(allowed(r.getUrl())&&r.getMethod().equals("GET"))return null;
+        if(sameOrigin(r.getUrl()) && "/v1/admin/selection".equals(r.getUrl().getPath()) && r.getMethod().equals("PUT"))return null;
         return new WebResourceResponse("text/plain","UTF-8",403,"Blocked",null,new ByteArrayInputStream(new byte[0]));
       }
       @Override public void onPageFinished(WebView v,String url){
@@ -53,12 +54,19 @@ public class CompanionActivity extends Activity implements SharedPreferences.OnS
     consumeDevelopmentSetup();
     if(prefs.getString("origin","").isEmpty()) settings(); else load();
   }
+  @Override public boolean dispatchTouchEvent(android.view.MotionEvent event){
+    boolean handled=super.dispatchTouchEvent(event);
+    if(event.getAction()==android.view.MotionEvent.ACTION_UP && web!=null &&
+       (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0 && getIntent().getBooleanExtra("capture",false))
+      web.postDelayed(() -> captureOwnWindow(),1500);
+    return handled;
+  }
   private void captureOwnWindow(){
     if(isDestroyed() || web.getWidth()==0 || web.getHeight()==0)return;
     android.graphics.Bitmap bitmap=android.graphics.Bitmap.createBitmap(web.getWidth(),web.getHeight(),android.graphics.Bitmap.Config.ARGB_8888);
     PixelCopy.request(getWindow(),bitmap,result -> {
       if(result==PixelCopy.SUCCESS){
-        try(java.io.FileOutputStream out=new java.io.FileOutputStream(new java.io.File(getFilesDir(),"companion-check.png"))){bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}
+        try(java.io.FileOutputStream out=new java.io.FileOutputStream(new java.io.File(getFilesDir(),primary()?"journey-check.png":"companion-check.png"))){bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}
         catch(java.io.IOException ignored){}
       }
       bitmap.recycle();
@@ -80,10 +88,11 @@ public class CompanionActivity extends Activity implements SharedPreferences.OnS
       prefs.edit().putString("token",encrypt(access)).putString("origin",next).putString("session",session).commit();
     }catch(Exception e){Toast.makeText(this,"Setup unavailable. Open Backend connection.",Toast.LENGTH_LONG).show();}
   }
+  private boolean sameOrigin(Uri uri){return origin.equals(uri.getScheme()+"://"+uri.getEncodedAuthority());}
   private boolean allowed(Uri uri){
-    return origin.equals(uri.getScheme()+"://"+uri.getEncodedAuthority()) &&
+    return sameOrigin(uri) &&
       ("/demo".equals(uri.getPath()) || uri.getPath().startsWith("/demo/assets/") ||
-       "/v1/demo/events".equals(uri.getPath()) || "/v1/demo/snapshot".equals(uri.getPath()));
+       "/v1/profiles".equals(uri.getPath()) || "/v1/demo/events".equals(uri.getPath()) || "/v1/demo/snapshot".equals(uri.getPath()));
   }
   private void showOffline(){
     LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setPadding(60,60,60,60);
