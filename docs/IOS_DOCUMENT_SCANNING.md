@@ -22,9 +22,17 @@ Branch `codex/ios-auto-document-scan` starts from freshly fetched main `269e022`
 
 Final verification on iOS 26.2: **39 native unit/recovery tests and all four existing UI flows passed** (43 total, zero failures). Seven scanning tests cover one-shot stability and rearming, drift/loss/frame gaps, clipped/small/low-confidence paper, preview coordinate mapping, correction orientation, full-photo preservation and the crop/edit/reset handoff without Send. The actual Apple detector also runs on a synthetic paper image; its mask and corrected-image attachments were visually inspected. The earlier failed segmentation-only test is retained in `combined-tests.xcresult`; the fixed final run is `final-tests.xcresult`. Swift formatting and diff checks pass.
 
-The combined signed iPhone build passed and was installed in place on the previously paired iPhone 16 Pro, preserving existing app data. Physical camera detection/stability/mask/rectification acceptance remains for a real-paper check; simulator tests cannot establish it. The previously accepted overall mobile/SUNMI integration is not reopened by that narrow camera check.
+The combined signed iPhone build passed and was installed in place on the previously paired iPhone 16 Pro, preserving existing app data. Markus subsequently confirmed that the new camera flow works on the physical device. This is user acceptance, separate from the measured simulator checks and the previously accepted overall mobile/SUNMI integration.
 
 Private evidence is under the original checkout's `.local/document-scan-2026-10-13/`: final build/test logs, synthetic image attachments, and device installation/launch results. No paid extraction, backend restart, private configuration/selection change or scan/payment confirmation was performed by the agent.
+
+## Subsequent local backend outage
+
+After camera acceptance, Markus reported `Profile execution failed; diagnostic contents are private.` The two latest failed jobs had no provider stage or raw response; both predated installation of this camera update. The running server referenced the removed invoice-context worktree, and admin logs confirmed missing source assets. The generic extraction exception did not retain a traceback, so its exact failing instruction cannot be established retrospectively.
+
+During investigation, the separately authorized website chat restored the backend from a stable Git archive of merged main `269e0223580ecba96793d9382c3efcffa77d720e`, under the original checkout's ignored `.local/runtime-source/` directory, and restarted it while idle. The existing private launcher now points there. Worktree cleanup no longer removes that runtime's source. Historical instructions to retain the invoice-context worktree are superseded by this deployment.
+
+Independent verification passed: authenticated health/profile/catalogue reads, admin/display serving, request preparation for the exact selected OpenAI profile, and 108 offline extended-adapter/invoice-context tests from the deployed source. Jobs, accounting, stages, reviews, selection and backend identity match the pre-restart snapshot. No provider request or failed-job retry was made during verification. Live extraction after repair still requires a new explicit user Send; retained failures are not rewritten as successes.
 
 ## Apple references
 
