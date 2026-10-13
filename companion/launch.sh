@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 adb_tool="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
-device="${DISPLAY_SERIAL:-${SUNMI_SERIAL:-}}"
+device="${DISPLAY_SERIAL:-}"
 if [ -z "$device" ]; then
   devices="$("$adb_tool" devices | awk '$2 == "device" {print $1}')"
   count="$(printf '%s\n' "$devices" | awk 'NF {n++} END {print n+0}')"

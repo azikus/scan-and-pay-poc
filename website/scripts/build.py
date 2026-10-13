@@ -37,9 +37,13 @@ def fragment(markup, style, script):
 
 local = fragment(content, css, js)
 (dist / 'index.html').write_text(wrap(local))
-shutil.copytree(assets, dist / 'assets', dirs_exist_ok=True)
-# Provenance contains local paths; it is an authoring record, not a public asset.
-(dist / 'assets/provenance.json').unlink(missing_ok=True)
+# Recreate the generated asset directory; source assets and provenance stay intact.
+delivery_assets = dist / 'assets'
+if delivery_assets.exists():
+    shutil.rmtree(delivery_assets)
+delivery_assets.mkdir()
+for name in sorted(used | {'OFL.txt'}):
+    shutil.copy2(assets / name, delivery_assets / name)
 
 urls = {name: asset_map.get(name, args.asset_base.rstrip('/') + '/' + name) for name in used}
 embed_content, embed_css = content, css

@@ -132,7 +132,7 @@ import SwiftUI
     defaults.set(address, forKey: "backendURL")
     demoUpdate()
   }
-  // The app cannot identify the Wi-Fi SSID. Accept a local Mac address, with one
+  // The app cannot identify the Wi-Fi SSID. Accept a local server address, with one
   // saved endpoint for the Personal Hotspot workflow; no USB/cloud fallback.
   static func isHotspotAddress(_ address: String) -> Bool {
     guard let url = URL(string: address), url.scheme == "http", let host = url.host else {
@@ -148,7 +148,7 @@ import SwiftUI
     guard !processing, !saving, !reconnecting else { return }
     let address = address.trimmingCharacters(in: .whitespacesAndNewlines)
     guard Self.isHotspotAddress(address) else {
-      throw ClientFailure("Enter the Mac’s local HTTP address from the admin Connection panel.")
+      throw ClientFailure("Enter the server’s local HTTP address from the admin Connection panel.")
     }
     try configure(address: address, token: token)
     hotspotAddress = address
@@ -170,7 +170,7 @@ import SwiftUI
       ?? URLSession(configuration: config, delegate: NoRedirects(), delegateQueue: nil)
     defer { if clientSession == nil { probe.invalidateAndCancel() } }
     let routes = Self.isHotspotAddress(hotspotAddress) ? [("hotspot", hotspotAddress)] : []
-    var lastError = "Enter the Mac’s hotspot address in Connection settings."
+    var lastError = "Enter the server address in Connection settings."
     for (label, route) in routes {
       guard identity == generation, !Task.isCancelled else {
         connectionStatus = nil
@@ -194,7 +194,7 @@ import SwiftUI
               stored["input"]["original_sha256"].string == hash
             else {
               throw ClientFailure(
-                "The Mac could not verify this draft. Its connection is unchanged.")
+                "The backend could not verify this draft. Its connection is unchanged.")
             }
           } else if client.baseURL != URL(string: saved.address) {
             throw ClientFailure(
@@ -495,7 +495,7 @@ import SwiftUI
       message =
         pending == nil
         ? "Ready to send when you return."
-        : "Scan paused on this phone. The Mac may still be processing it."
+        : "Scan paused on this phone. The backend may still be processing it."
     }
   }
   func foreground() {

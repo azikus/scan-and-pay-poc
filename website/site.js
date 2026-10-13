@@ -43,7 +43,7 @@
   $$('[data-spatial]').forEach(b => b.addEventListener('click', () => {
     const n = Number(b.dataset.spatial);
     $$('[data-spatial]').forEach(x => { x.setAttribute('aria-selected', String(x === b)); x.tabIndex = x === b ? 0 : -1; });
-    const img = $('#sp-spatial-screen'); img.src = asset('spatial-' + String(n+1).padStart(2,'0') + '.webp'); img.alt = 'Native Mac UI preview: ' + spatial[n][1];
+    const img = $('#sp-spatial-screen'); img.src = asset('spatial-' + String(n+1).padStart(2,'0') + '.webp'); img.alt = 'Native UI preview: ' + spatial[n][1];
     img.closest('button').setAttribute('aria-label','Enlarge: ' + spatial[n][1]);
     $('[data-spatial-description]').textContent = spatial[n][0];
     $('#sp-spatial-panel').setAttribute('aria-labelledby',b.id); animateImage(img);

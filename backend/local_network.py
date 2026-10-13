@@ -1,4 +1,4 @@
-"""Local interface discovery and live listener state for the Mac demo server."""
+"""Local interface discovery and live listener state for the managed API server."""
 
 import asyncio
 import re

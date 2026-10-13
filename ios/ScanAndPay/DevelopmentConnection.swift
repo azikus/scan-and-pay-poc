@@ -17,7 +17,7 @@
       let data = try Data(contentsOf: setupFile)
       try FileManager.default.removeItem(at: setupFile)
       let setup = try JSONDecoder().decode(Self.self, from: data)
-      guard !setup.addresses.isEmpty else { throw ClientFailure("Missing Mac address.") }
+      guard !setup.addresses.isEmpty else { throw ClientFailure("Missing server address.") }
       for address in setup.addresses { _ = try BackendClient(address: address, token: setup.token) }
       return setup
     }

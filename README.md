@@ -72,7 +72,7 @@ A scan uses one exact, versioned profile. The admin's choice applies to the **ne
 | OCR + annotations | A document service extracts against a requested field schema | Image plus schema |
 | OCR → model | OCR runs first; a separate model interprets the returned content | Image to OCR, then text/layout to the model |
 
-Supported integrations include OpenAI, Gemini, Mistral, Anthropic, Together, xAI, Google Document AI, Azure Document Intelligence, AWS Textract and Mindee. Actual model availability depends on the locally enabled configuration and account access. The [provider guide](docs/DEVELOPMENT.md#providers-and-extraction-profiles) explains profiles, data destinations and request outcomes.
+The system supports multiple hosted vision models and managed OCR/document services. Actual model availability depends on the locally enabled configuration and account access. The [provider guide](docs/DEVELOPMENT.md#providers-and-extraction-profiles) explains profiles, data destinations and request outcomes.
 
 ## What the draft understands
 
@@ -106,7 +106,7 @@ For each saved scan, the inspector can show the exact mobile upload, normalized 
 
 ## The live companion
 
-![Live system journey showing sanitized mobile, backend and provider events](website/assets/sunmi-processing.webp)
+![Live system journey showing sanitized mobile, backend and provider events](website/assets/companion-processing.webp)
 
 The live display companion follows real mobile/backend activity: capture, upload, queued work, provider requests/responses, review and saved confirmation. It shows the selected provider, observed backend elapsed time and recent journey events. Invoice pixels, account details and edited values stay off the shared display.
 

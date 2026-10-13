@@ -1,4 +1,4 @@
-"""One Mac backend process, with listeners following its private network addresses."""
+"""One API process, with listeners following its private network addresses."""
 
 import argparse
 import asyncio

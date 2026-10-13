@@ -22,7 +22,7 @@ private final class StubProtocol: URLProtocol {
   override func stopLoading() {}
 }
 
-private final class FakeMac: @unchecked Sendable {
+private final class FakeBackend: @unchecked Sendable {
   private let lock = NSLock()
   private var seen = [URLRequest]()
   var timeoutUpload = false
@@ -95,13 +95,13 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(recovered.key, "original")
   }
   func testDemoOutageDoesNotBlockReviewOrConfirmation() async throws {
-    let (model, mac, _) = try setup()
+    let (model, backend, _) = try setup()
     model.demoEnabled = true
     model.captured(UIGraphicsImageRenderer(size: CGSize(width: 20, height: 30)).image { ctx in UIColor.white.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 20, height: 30)) })
     model.cropped(model.image!)
     StubProtocol.respond = { request in
       if request.url!.path.hasPrefix("/v1/demo/") { throw URLError(.cannotConnectToHost) }
-      return try mac.respond(request)
+      return try backend.respond(request)
     }
     model.send()
     try await wait { model.phase == .review }
@@ -110,14 +110,14 @@ private final class FakeMac: @unchecked Sendable {
     model.checked = true
     model.confirm()
     try await wait { model.complete }
-    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 1)
+    XCTAssertEqual(backend.requests.filter { $0.httpMethod == "POST" }.count, 1)
     model.demoEnabled = false
   }
   private func setup(
     empty: Bool = false, result: JSONValue? = nil,
     encodeImage: @escaping (UIImage) async throws -> Data = ScanSession.encodePNG
   ) throws -> (
-    ScanSession, FakeMac, URL
+    ScanSession, FakeBackend, URL
   ) {
     let source = try result ?? ScanAndPayTests().fixture()
     var object = source.object
@@ -127,8 +127,8 @@ private final class FakeMac: @unchecked Sendable {
       run["outcome"] = .string("error")
       object["runs"] = .array([.object(run)])
     }
-    let mac = FakeMac(result: .object(object))
-    StubProtocol.respond = mac.respond
+    let backend = FakeBackend(result: .object(object))
+    StubProtocol.respond = backend.respond
     let config = URLSessionConfiguration.ephemeral
     config.protocolClasses = [StubProtocol.self]
     let session = URLSession(configuration: config)
@@ -145,7 +145,7 @@ private final class FakeMac: @unchecked Sendable {
     }
     model.captured(image)
     model.cropped(image)
-    return (model, mac, file)
+    return (model, backend, file)
   }
   private func wait(_ condition: () -> Bool, file: StaticString = #filePath, line: UInt = #line)
     async throws
@@ -159,7 +159,7 @@ private final class FakeMac: @unchecked Sendable {
   func testSendShowsProgressWhileEncodingAndIgnoresDuplicateTaps() async throws {
     var resume: CheckedContinuation<Data, Error>?
     var encodes = 0
-    let (model, mac, file) = try setup { _ in
+    let (model, backend, file) = try setup { _ in
       encodes += 1
       return try await withCheckedThrowingContinuation { resume = $0 }
     }
@@ -172,14 +172,14 @@ private final class FakeMac: @unchecked Sendable {
     model.send()
     try await wait { resume != nil }
     XCTAssertEqual(encodes, 1)
-    XCTAssertTrue(mac.requests.isEmpty)
+    XCTAssertTrue(backend.requests.isEmpty)
     resume?.resume(returning: try XCTUnwrap(image.pngData()))
     try await wait { model.phase == .review }
-    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 1)
+    XCTAssertEqual(backend.requests.filter { $0.httpMethod == "POST" }.count, 1)
   }
   func testBackgroundDuringEncodingDoesNotUploadLateResult() async throws {
     var resume: CheckedContinuation<Data, Error>?
-    let (model, mac, file) = try setup { _ in
+    let (model, backend, file) = try setup { _ in
       try await withCheckedThrowingContinuation { resume = $0 }
     }
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
@@ -193,10 +193,10 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(model.phase, .preview)
     XCTAssertNotNil(model.image)
     XCTAssertNil(model.pending)
-    XCTAssertTrue(mac.requests.isEmpty)
+    XCTAssertTrue(backend.requests.isEmpty)
   }
   func testEncodingFailureKeepsImageAndExplainsRetry() async throws {
-    let (model, mac, file) = try setup { _ in
+    let (model, backend, file) = try setup { _ in
       throw ClientFailure("Could not encode this image.")
     }
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
@@ -205,14 +205,14 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(model.message, "Could not encode this image.")
     XCTAssertNotNil(model.image)
     XCTAssertNil(model.pending)
-    XCTAssertTrue(mac.requests.isEmpty)
+    XCTAssertTrue(backend.requests.isEmpty)
   }
 
   func testUncertainUploadReusesKeyAndConfirmedEditsRemainSeparate() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
-    XCTAssertTrue(mac.requests.isEmpty)
-    mac.timeoutUpload = true
+    XCTAssertTrue(backend.requests.isEmpty)
+    backend.timeoutUpload = true
     model.send()
     model.send()
     try await wait { model.phase == .recovery }
@@ -220,7 +220,7 @@ private final class FakeMac: @unchecked Sendable {
     model.recover()
     model.recover()
     try await wait { model.phase == .review }
-    let uploads = mac.requests.filter { $0.httpMethod == "POST" }
+    let uploads = backend.requests.filter { $0.httpMethod == "POST" }
     XCTAssertEqual(uploads.count, 2)
     XCTAssertEqual(
       uploads.map { $0.value(forHTTPHeaderField: "Idempotency-Key") }, [frozen.key, frozen.key])
@@ -229,7 +229,7 @@ private final class FakeMac: @unchecked Sendable {
     model.edit("/candidates/0/remittance/reference", "0000123")
     XCTAssertEqual(model.response?.pretty, original)
     model.checked = true
-    mac.timeoutConfirmation = true
+    backend.timeoutConfirmation = true
     model.confirm()
     model.confirm()
     try await wait { model.phase == .recovery }
@@ -245,10 +245,10 @@ private final class FakeMac: @unchecked Sendable {
     restored.recover()
     restored.recover()
     try await wait { restored.complete }
-    let puts = mac.requests.filter { $0.httpMethod == "PUT" }
+    let puts = backend.requests.filter { $0.httpMethod == "PUT" }
     XCTAssertEqual(puts.count, 2)
     XCTAssertEqual(puts[0].url, puts[1].url)
-    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 2)
+    XCTAssertEqual(backend.requests.filter { $0.httpMethod == "POST" }.count, 2)
     XCTAssertNil(PendingStore.read(from: file))
     XCTAssertNil(restored.response)
   }
@@ -259,7 +259,7 @@ private final class FakeMac: @unchecked Sendable {
       .replacingPayment(currency + "/state", with: .string("inferred"))
       .replacingPayment(
         recipient + "/normalization", with: .array([.string("draft_beneficiary_from_supplier")]))
-    let (model, mac, file) = try setup(result: source)
+    let (model, backend, file) = try setup(result: source)
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     model.send()
     try await wait { model.phase == .review }
@@ -274,7 +274,7 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(restored.draft?.editedFieldIDs.contains(recipient), false)
     XCTAssertEqual(restored.response, model.response)
     restored.checked = true
-    mac.timeoutConfirmation = true
+    backend.timeoutConfirmation = true
     restored.confirm()
     try await wait { restored.phase == .recovery }
     let saved = try XCTUnwrap(PendingStore.read(from: file))
@@ -287,7 +287,7 @@ private final class FakeMac: @unchecked Sendable {
     let currency = "/candidates/0/amount/currency"
     let source = try ScanAndPayTests().fixture()
       .replacingPayment(currency + "/state", with: .string("inferred"))
-    let (model, mac, file) = try setup(result: source)
+    let (model, backend, file) = try setup(result: source)
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     model.send()
     try await wait { model.phase == .review }
@@ -314,11 +314,11 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(restored.pending?.confirmationID, legacy.confirmationID)
     restored.recover()
     try await wait { restored.complete }
-    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "PUT" }.count, 1)
-    XCTAssertEqual(mac.requests.last?.url?.lastPathComponent, legacy.confirmationID)
+    XCTAssertEqual(backend.requests.filter { $0.httpMethod == "PUT" }.count, 1)
+    XCTAssertEqual(backend.requests.last?.url?.lastPathComponent, legacy.confirmationID)
   }
   func testAcceptedScanResumesPollingAfterBackgroundWithoutUpload() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     let image = try XCTUnwrap(model.image?.pngData())
     try PendingStore.save(
@@ -332,33 +332,33 @@ private final class FakeMac: @unchecked Sendable {
     restored.foreground()
     restored.foreground()
     try await wait { restored.phase == .review }
-    XCTAssertEqual(mac.requests.count, 1)
-    XCTAssertEqual(mac.requests[0].httpMethod, "GET")
+    XCTAssertEqual(backend.requests.count, 1)
+    XCTAssertEqual(backend.requests[0].httpMethod, "GET")
     restored.background()
     restored.foreground()
     XCTAssertEqual(restored.phase, .review)
   }
   func testWrongProfileNeverUploadsEvenAfterRecovery() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
-    mac.correctProfile = false
+    backend.correctProfile = false
     model.send()
     try await wait { model.phase == .preview }
     XCTAssertNil(model.pending)
     model.send()
     try await wait { model.phase == .preview }
-    XCTAssertEqual(mac.requests.count, 2)
-    XCTAssertTrue(mac.requests.allSatisfy { $0.url?.path == "/v1/profiles" })
+    XCTAssertEqual(backend.requests.count, 2)
+    XCTAssertTrue(backend.requests.allSatisfy { $0.url?.path == "/v1/profiles" })
   }
   func testAdminChoiceAppliesOnlyToNewScansAndRecoveryKeepsOriginal() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     let image = try XCTUnwrap(model.image)
-    mac.timeoutUpload = true
+    backend.timeoutUpload = true
     model.send()
     try await wait { model.phase == .recovery }
     let frozen = try XCTUnwrap(PendingStore.read(from: file))
-    mac.selectedProfile = mac.alternateProfile
+    backend.selectedProfile = backend.alternateProfile
     model.recover()
     try await wait { model.phase == .review }
     XCTAssertEqual(model.pending?.options, frozen.options)
@@ -369,7 +369,7 @@ private final class FakeMac: @unchecked Sendable {
     model.cropped(image)
     model.send()
     try await wait { model.phase == .review }
-    XCTAssertEqual(model.pending?.extractionProfile, mac.alternateProfile)
+    XCTAssertEqual(model.pending?.extractionProfile, backend.alternateProfile)
     XCTAssertNotEqual(model.pending?.key, frozen.key)
   }
   func testEmptyOutcomeKeepsImageAndShowsFailure() async throws {
@@ -383,7 +383,7 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertFalse(model.checked)
   }
   func testBackgroundDuringMethodLookupKeepsUnsentPreview() throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     model.send()
     model.background()
@@ -391,7 +391,7 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(model.phase, .preview)
     XCTAssertNotNil(model.image)
     XCTAssertNil(model.pending)
-    XCTAssertTrue(mac.requests.isEmpty)
+    XCTAssertTrue(backend.requests.isEmpty)
   }
   func testHotspotMigrationPreservesWiFiAndDropsAlternatives() throws {
     let name = "hotspot-migration-" + UUID().uuidString
@@ -413,48 +413,48 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertFalse(ScanSession.isHotspotAddress("https://example.com"))
   }
   func testReconnectUsesOnlyHotspotAndDoesNotUpload() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
     XCTAssertEqual(model.address, model.hotspotAddress)
     XCTAssertEqual(model.connectionStatus, "Connected via hotspot")
-    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["172.20.10.2"])
+    XCTAssertEqual(backend.requests.map { $0.url?.host }, ["172.20.10.2"])
     XCTAssertTrue(
-      mac.requests.allSatisfy { $0.httpMethod == "GET" && $0.url?.path == "/v1/profiles" })
+      backend.requests.allSatisfy { $0.httpMethod == "GET" && $0.url?.path == "/v1/profiles" })
     XCTAssertEqual(model.phase, .preview)
     XCTAssertNotNil(model.image)
     XCTAssertNil(model.pending)
   }
   func testReconnectFailureDoesNotTryPreviousAddress() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
-    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["172.20.10.2"])
+    XCTAssertEqual(backend.requests.map { $0.url?.host }, ["172.20.10.2"])
     XCTAssertEqual(model.connectionStatus, "Connected via hotspot")
     XCTAssertEqual(model.address, model.hotspotAddress)
-    mac.blockedHosts.insert("172.20.10.2")
+    backend.blockedHosts.insert("172.20.10.2")
     model.address = "http://169.254.1.2:8000"
     await model.reconnect()
     XCTAssertEqual(model.address, "http://169.254.1.2:8000")
-    XCTAssertEqual(mac.requests.map { $0.url?.host }, ["172.20.10.2", "172.20.10.2"])
+    XCTAssertEqual(backend.requests.map { $0.url?.host }, ["172.20.10.2", "172.20.10.2"])
     XCTAssertTrue(model.connectionStatus?.hasPrefix("Couldn’t reconnect") == true)
     XCTAssertFalse(model.reconnecting)
-    XCTAssertTrue(mac.requests.allSatisfy { $0.httpMethod == "GET" })
+    XCTAssertTrue(backend.requests.allSatisfy { $0.httpMethod == "GET" })
   }
   func testReconnectPreservesPendingConfirmationAndRejectsDifferentBackend() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
     model.send()
     try await wait { model.phase == .review }
     model.edit("/candidates/0/remittance/reference", "0000009")
     model.checked = true
-    mac.timeoutConfirmation = true
+    backend.timeoutConfirmation = true
     model.confirm()
     try await wait { model.phase == .recovery }
     let frozen = try XCTUnwrap(model.pending)
-    let before = mac.requests.count
+    let before = backend.requests.count
     model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
     let saved = try XCTUnwrap(PendingStore.read(from: file))
@@ -467,30 +467,30 @@ private final class FakeMac: @unchecked Sendable {
     XCTAssertEqual(saved.confirmationID, frozen.confirmationID)
     XCTAssertEqual(saved.confirmationBody, frozen.confirmationBody)
     XCTAssertEqual(model.phase, .recovery)
-    XCTAssertTrue(mac.requests.dropFirst(before).allSatisfy { $0.httpMethod == "GET" })
-    mac.serverID = UUID().uuidString
+    XCTAssertTrue(backend.requests.dropFirst(before).allSatisfy { $0.httpMethod == "GET" })
+    backend.serverID = UUID().uuidString
     await model.reconnect()
     XCTAssertTrue(model.connectionStatus?.contains("different backend") == true)
     XCTAssertEqual(PendingStore.read(from: file)?.address, saved.address)
     XCTAssertEqual(PendingStore.read(from: file)?.confirmationBody, saved.confirmationBody)
   }
   func testUncertainUploadReconnectIsReadOnlyAndRecoveryKeepsKey() async throws {
-    let (model, mac, file) = try setup()
+    let (model, backend, file) = try setup()
     defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
-    mac.timeoutUpload = true
+    backend.timeoutUpload = true
     model.send()
     try await wait { model.phase == .recovery }
     let key = model.pending?.key
     model.hotspotAddress = "http://172.20.10.2:8000"
     await model.reconnect()
-    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.count, 1)
+    XCTAssertEqual(backend.requests.filter { $0.httpMethod == "POST" }.count, 1)
     XCTAssertNil(model.pending?.scanID)
     model.recover()
     try await wait { model.phase == .review }
     XCTAssertEqual(model.pending?.key, key)
     XCTAssertEqual(
-      mac.requests.filter { $0.httpMethod == "POST" }.last?.value(
+      backend.requests.filter { $0.httpMethod == "POST" }.last?.value(
         forHTTPHeaderField: "Idempotency-Key"), key)
-    XCTAssertEqual(mac.requests.filter { $0.httpMethod == "POST" }.last?.url?.host, "172.20.10.2")
+    XCTAssertEqual(backend.requests.filter { $0.httpMethod == "POST" }.last?.url?.host, "172.20.10.2")
   }
 }

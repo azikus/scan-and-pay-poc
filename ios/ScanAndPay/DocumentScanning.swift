@@ -103,7 +103,7 @@ enum DocumentDetector {
     if document?.canCapture == true { return document }
 
     // Segmentation can return the frame boundary on plain paper/backgrounds.
-    // Ask Apple's geometric detector for an interior, confidently bounded page.
+    // Ask the native geometric detector for an interior, confidently bounded page.
     let rectangles = VNDetectRectanglesRequest()
     rectangles.minimumConfidence = 0.8
     rectangles.minimumSize = 0.2

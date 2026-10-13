@@ -32,35 +32,35 @@
   {
     "file": "spatial-01.webp",
     "source": "01-accounts-and-scan-dashboard.png",
-    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "kind": "Native UI renderer preview of the application; synthetic data; not a headset capture",
     "sha256": "9d93a2d2fa750f36cdeaa1638beed1bf92753c70c9c0672820c48e9a1c2546d1"
   },
   {
     "file": "spatial-02.webp",
     "source": "02-invoice-detected.png",
-    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "kind": "Native UI renderer preview of the application; synthetic data; not a headset capture",
     "sha256": "be2ee2ff0b6a0c19e5b6ab5e057b66f66e83c1316fbd42749f5b0a823d2a2925"
   },
   {
     "file": "spatial-03.webp",
     "source": "03-review-and-select-account.png",
-    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "kind": "Native UI renderer preview of the application; synthetic data; not a headset capture",
     "sha256": "363880575c8d41b9b915ef137660be6336b51a5f35f6a662b1c1605f409be8bd"
   },
   {
     "file": "spatial-04.webp",
     "source": "04-simulated-payment-receipt.png",
-    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "kind": "Native UI renderer preview of the application; synthetic data; not a headset capture",
     "sha256": "785ceaf2174815a96afbcce7c564450d7847ea2dafa92feabd8972ca3fda6658"
   },
   {
     "file": "spatial-05.webp",
     "source": "05-transaction-history.png",
-    "kind": "Native Mac preview of SwiftUI app; synthetic data; not a headset capture",
+    "kind": "Native UI renderer preview of the application; synthetic data; not a headset capture",
     "sha256": "f78cd29f1641e9e47aba07fd1d7b9661f1ac2caeb2e18cfc3339d5a967dd9103"
   },
   {
-    "file": "sunmi-processing.webp",
+    "file": "companion-processing.webp",
     "source": "scanpay-processing.png",
     "kind": "Existing application QA capture; synthetic or masked content",
     "sha256": "0afeda7f0afafd06578e1efcecfa7bbd9d92fd21f2e2a33e5a33778b952ae272"
