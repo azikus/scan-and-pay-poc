@@ -1,5 +1,9 @@
 # Coding handoff — continue here
 
+## Country context is standard — 13 October
+
+Markus explicitly chose country-aware extraction as standard while retaining method/model selection. Compatible compact LLM methods now always include context; there is one OpenAI mini entry, `openai-mini-image-roles-v3@2-85c414059effa4ad`, with no separate old/context choice. The private configuration and persisted selection were migrated without inference or historical result edits. Latest main/merged SUNMI PR #12 is integrated; its removed checkout was replaced in the launcher by this surviving invoice-context worktree. Keep this worktree available. Combined verification: 792 backend/evaluation tests, seven SUNMI frontend tests, static checks and live authenticated profile/admin/display reads. See INVOICE_CONTEXT.md for exact scope and evidence; dated opt-in/default-preservation notes below are historical. PR #11 remains for review, not an authorized merge.
+
 ## User acceptance and next milestone — 13 October
 
 Markus accepted the updated app on his physical iPhone and confirmed that end-to-end integration testing and the SUNMI live demo are complete. These items must not be proposed again as unfinished work. The app from PR #11 built, installed and launched successfully on the iPhone 16 Pro; private records are in `.local/invoice-context-2026-10-13/device-build.log`, `device-install.json` and `device-launch.json` in the original checkout. SUNMI/integration completion is user-confirmed, without new agent measurements. Next is the Android capture/review app and both-platform testing, followed by the comprehensive final presentation and embeddable HTML. This status correction does not change the selected extraction profile or authorize a PR merge.

@@ -105,6 +105,8 @@ class ModelOption(Model):
     poll_interval_seconds: int = Field(default=1, ge=1, le=10)
     mapping_version: Literal["1", "2"] = "1"
     field_policy: Literal["strict", "partial_v1"] = "strict"
+    # Retained for saved request snapshots. The current registry always enables
+    # invoice context for compatible compact LLM methods, regardless of this value.
     context_policy: Literal["none", "invoice_v1"] = "none"
     interpretation_policy: Literal["strict", "draft_v1", "draft_v2", "draft_v3", "draft_v4"] = (
         "strict"

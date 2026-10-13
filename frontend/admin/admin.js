@@ -15,7 +15,7 @@ const modelNames = {'gpt-4.1-mini-2025-04-14':'OpenAI · GPT-4.1 mini','gemini-3
 const providerNames = {openai:'OpenAI',gemini:'Google',mistral:'Mistral',anthropic:'Anthropic',together:'Together',xai:'xAI'};
 const namedModel = (value,provider) => provider?`${providerNames[provider]||provider} · ${modelNames[value]?.split(' · ').at(-1)||value}`:modelNames[value]||value;
 const methodName = value => methodNames[value] || value || 'Method unavailable';
-const profileName = p => (p.method==='managed_ocr_llm'?`${modelNames[p.processor]||p.processor} → ${modelNames[p.model]||p.model}`:namedModel(p.model||p.processor,p.provider)||p.id)+(p.component_ids?.includes('invoice-context@1')?' · Invoice context':'');
+const profileName = p => p.method==='managed_ocr_llm'?`${modelNames[p.processor]||p.processor} → ${modelNames[p.model]||p.model}`:namedModel(p.model||p.processor,p.provider)||p.id;
 const usable = profile => profile?.implemented && profile.enabled && profile.configured;
 function element(tag,text,className) {const node=document.createElement(tag);node.textContent=text;if(className)node.className=className;return node;}
 function selectedMethodProfile() {return profileData?.profiles.find(p=>p.id===$('extraction-profile').value);}
