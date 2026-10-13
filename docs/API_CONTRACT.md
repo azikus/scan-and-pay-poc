@@ -128,7 +128,7 @@ Generate API models and schemas from one typed source. Validate the two syntheti
 
 ## Private mobile review inspector (additive, 9 October 2026)
 
-The original `GET /v1/scans/{scan_id}` response remains unchanged: all nullable observation values remain explicit `null`, and original candidates, warnings, evidence and decimal/digit strings are preserved. Mobile and admin pretty-print this response without stripping nulls. Null result rows can be omitted in the mobile presentation without changing the JSON.
+All nullable observation values in `GET /v1/scans/{scan_id}` remain explicit `null`, and original candidates, warnings, evidence and decimal/digit strings are preserved. Mobile and admin pretty-print this response without stripping nulls. Null result rows can be omitted in the mobile presentation without changing those observations. The additive 13 October review guidance below is computed at read time.
 
 `GET /admin` serves a private inspector shell with no scan data. Its data requests require the same bearer token as the scan API. The page keeps that token in memory only, uses no-store responses and self-only assets, and never sends extraction requests. It is intended for the trusted local setup, not public hosting.
 
@@ -147,6 +147,14 @@ New submissions accept `X-Scanpay-Client: mobile|automated` (default `automated`
 The app submits edits only after Pay opens a summary and the user presses Confirm. Keystrokes are not logged. The inspector shows original JSON and mobile-confirmed values separately and highlights differences.
 
 The PoC confirmation accepts a checked, selected, reviewable candidate even when payment fields are incomplete. Missing/invalid fields remain visible in the confirmation summary. This records `review_confirmed` with `simulated=true`; it does not change backend review state or make the candidate executable. Empty/error results and unselected candidates cannot be confirmed.
+
+## Invoice review guidance (additive, 13 October 2026)
+
+Scan reads add optional `runs[].review_guidance` when payment extraction is present. `policy_version` is `invoice-fields@1`. `issuer_country` and `language` contain nullable `value`/`label`, `status` (`observed|inferred|derived|unknown|ambiguous`), `reason`, `evidence_ids` and `excerpts`. Each candidate has `candidate_id`, `route`, separate `account_country`, `fields` and `warnings`. Document rules are under `document_fields`. Field maps use JSON pointers into `run.payment`; each rule has `requirement` (`required|optional|not_applicable|unresolved`) and `reason`. They can include virtual other-route pointers absent from the candidate's discriminated destination shape; those are presentation rules, not editable observation nodes.
+
+This guidance is a deep-copy read projection, including for old scans, and does not replace stored observations, validation, outcomes, evidence or confirmations. No new provider call is made by a read. Country suggestions cannot override positive payment-route evidence. Missing context is not a missing payment field; unresolved routes and real missing required data remain review concerns. Clients retain populated/edited/uncertain fields and may hide optional empty observations. Older clients may ignore this additive object; newer clients have a route-based fallback when it is absent. Review uploads still enumerate only actual observation nodes, never virtual guidance pointers.
+
+Opt-in compact extraction profiles can add `diagnostics.context_explanations` with short model-supplied explanations for `language`/`issuer_country` and linked evidence excerpts with `grounding: model_claim`. Historical profiles/results omit that empty dictionary. Country labels and flag glyphs are presentation conveniences; neither proves country, account ownership or payment validity. See [INVOICE_CONTEXT.md](INVOICE_CONTEXT.md) for the single-call prompt and evidence.
 
 ## Local connection status (additive, 9 October 2026)
 

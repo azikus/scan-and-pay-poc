@@ -241,6 +241,37 @@ class Diagnostics(Model):
     validation: list[Finding] = Field(default_factory=list)
     routing: Routing = Field(default_factory=Routing)
     stages: list[Stage] = Field(default_factory=list)
+    context_explanations: dict[str, str] = Field(default_factory=dict, exclude_if=lambda v: not v)
+
+
+class ContextHint(Model):
+    value: str | None = None
+    label: str | None = None
+    status: Literal["observed", "inferred", "derived", "unknown", "ambiguous"] = "unknown"
+    reason: str
+    evidence_ids: list[str] = Field(default_factory=list)
+    excerpts: list[str] = Field(default_factory=list)
+
+
+class FieldRule(Model):
+    requirement: Literal["required", "optional", "not_applicable", "unresolved"]
+    reason: str
+
+
+class CandidateGuidance(Model):
+    candidate_id: str
+    route: str
+    account_country: ContextHint
+    fields: dict[str, FieldRule]
+    warnings: list[Reason] = Field(default_factory=list)
+
+
+class ReviewGuidance(Model):
+    policy_version: Literal["invoice-fields@1"] = "invoice-fields@1"
+    issuer_country: ContextHint
+    language: ContextHint
+    document_fields: dict[str, FieldRule]
+    candidates: list[CandidateGuidance]
 
 
 class Error(Model):
@@ -263,6 +294,8 @@ class Run(Model):
     evidence: list[Evidence] = Field(default_factory=list)
     diagnostics: Diagnostics = Field(default_factory=Diagnostics)
     error: Error | None = None
+    # Read-time projection; never replaces the saved extraction or review snapshot.
+    review_guidance: ReviewGuidance | None = Field(default=None, exclude_if=lambda v: v is None)
     # Optional for historical records; new terminal runs populate this product outcome.
     outcome: Literal["success", "incomplete", "error"] | None = Field(
         default=None, exclude_if=lambda value: value is None

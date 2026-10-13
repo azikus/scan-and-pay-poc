@@ -18,7 +18,7 @@ Both remain enabled. Neither was retried after the failed request. These are dat
 
 Google Document AI OCR and Invoice both passed exact runtime authentication/resource checks and subsequently completed actual processing requests on the approved invoice, in 7.059 and 8.207 seconds. Both produced incomplete drafts requiring review; these are successful API requests. No code or replacement credentials were needed; the earlier pre-dispatch authentication failure’s cause remains unknown. See [Google verification](GOOGLE_VERIFICATION_2026-10-13.md).
 
-AWS’s `scanpay` SDK profile now uses the access key that Markus configured. Read-only STS verified `scanpay-local` in `eu-central-1`. Textract Text and Expense were previously skipped at his request; neither has a new processing result. Authentication success does not establish Textract permissions, processing compatibility or invoice extraction success. Credentials stay SDK-managed; root `.env` selects the profile and region.
+AWS’s `scanpay` SDK profile now uses the access key that Markus configured. Read-only STS verified `scanpay-local` in `eu-central-1`. Textract Text and Expense were previously skipped at his request; neither has a new processing result. Authentication success does not establish Textract permissions, processing compatibility or invoice extraction success. The subsequent env-credential follow-up verified the same AWS identity with explicit .env keys and both Google processor versions using inline credential JSON, with native auth-store lookup blocked. Legacy SDK fallback is retained only if explicit env credentials are absent; see [env authentication](ENV_CLOUD_CREDENTIALS.md).
 
 ## Latest evidence for every current profile
 

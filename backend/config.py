@@ -105,6 +105,7 @@ class ModelOption(Model):
     poll_interval_seconds: int = Field(default=1, ge=1, le=10)
     mapping_version: Literal["1", "2"] = "1"
     field_policy: Literal["strict", "partial_v1"] = "strict"
+    context_policy: Literal["none", "invoice_v1"] = "none"
     interpretation_policy: Literal["strict", "draft_v1", "draft_v2", "draft_v3", "draft_v4"] = (
         "strict"
     )
@@ -121,12 +122,20 @@ class ModelOption(Model):
             exclude.add("mapping_version")
         if self.field_policy == "strict":
             exclude.add("field_policy")
+        if self.context_policy == "none":
+            exclude.add("context_policy")
         if self.interpretation_policy == "strict":
             exclude.add("interpretation_policy")
         return self.model_dump_json(exclude=exclude)
 
     @model_validator(mode="after")
     def compatible(self) -> Self:
+        if self.context_policy == "invoice_v1" and (
+            self.operation not in {"vision", "annotations"}
+            or self.protocol_version not in {"5", "6"}
+            or self.field_policy != "partial_v1"
+        ):
+            raise ValueError("Invoice context requires typed compact partial-field extraction")
         if self.interpretation_policy in {"draft_v1", "draft_v2", "draft_v3", "draft_v4"} and (
             self.operation in {"vision", "annotations"} and self.protocol_version not in {"5", "6"}
         ):
@@ -241,6 +250,10 @@ class Settings(Model):
     openai_key: SecretStr = SecretStr("")
     mistral_key: SecretStr = SecretStr("")
     provider_keys: dict[str, SecretStr] = Field(default_factory=dict)
+    aws_access_key_id: SecretStr = SecretStr("")
+    aws_secret_access_key: SecretStr = SecretStr("")
+    aws_session_token: SecretStr = SecretStr("")
+    google_credentials_json: SecretStr = SecretStr("")
     resources: dict[str, str] = Field(default_factory=dict)
     providers: ProfileConfig = Field(default_factory=ProfileConfig)
     workers: int = Field(default=2, ge=1, le=2)
@@ -274,6 +287,10 @@ class Settings(Model):
             openai_key=SecretStr(os.getenv("OPENAI_API_KEY", "")),
             mistral_key=SecretStr(os.getenv("MISTRAL_API_KEY", "")),
             provider_keys={k: SecretStr(os.getenv(v, "")) for k, v in KEY_ENV.items()},
+            aws_access_key_id=SecretStr(os.getenv("AWS_ACCESS_KEY_ID", "")),
+            aws_secret_access_key=SecretStr(os.getenv("AWS_SECRET_ACCESS_KEY", "")),
+            aws_session_token=SecretStr(os.getenv("AWS_SESSION_TOKEN", "")),
+            google_credentials_json=SecretStr(os.getenv("GOOGLE_CREDENTIALS_JSON", "")),
             resources={k: os.getenv(k, "") for k in RESOURCE_ENV},
             data_dir=Path(os.getenv("SCANPAY_DATA_DIR", ".local/backend")),
             providers=providers,

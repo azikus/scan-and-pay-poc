@@ -6,6 +6,14 @@ Continue in the managed `sunmi-live-companion` worktree on `codex/sunmi-live-com
 
 
 
+
+## Invoice context follow-up — 13 October
+
+Read [INVOICE_CONTEXT.md](INVOICE_CONTEXT.md) for the latest separate PR scope, exact new profile, 37 completed paid runs, verification and preservation audit. Source is in the managed `invoice-context-review` worktree on `codex/invoice-context-review`, based on merged PR #9. The private launcher points there; keep it available. Original selected OpenAI profile remains unchanged. New country/route guidance and admin themes are implemented, with 76/102 reviewed readable fields versus historical 79/102; do not silently promote the context profile, repeat completed calls, or resume the stopped historical comparison. This task authorizes the checked PR, not its merge or later milestones. Older no-inference/31-profile snapshots below belong to completed work.
+
+**Cloud credentials — 13 October:** Markus requested AWS and Google credentials directly in root `.env`, with no interactive setup. Explicit `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (optional `AWS_SESSION_TOKEN`) now override AWS profile lookup. `GOOGLE_CREDENTIALS_JSON` loads authorized-user or service-account credentials in memory and overrides ADC/file lookup. Google Document AI uses OAuth identity credentials, not a Gemini-style API key. Existing credentials were migrated without generating new keys or changing identities; exact profile versions and private accounting/selection were preserved. Legacy SDK fallback remains only when explicit env credentials are absent. See [ENV_CLOUD_CREDENTIALS.md](ENV_CLOUD_CREDENTIALS.md).
+
+
 ## Combined integration verification — 13 October
 
 Markus requested latest `main` merged into this branch, checked, and PR #9 merged. Integrated base: `08de9e15c20e468ea87caf0a5df9132b845c8486` (PR #7), which includes PR #8’s native glass/hotspot/Send changes. Only AGENTS.md and CODING_HANDOFF.md conflicted; both scopes were retained. No application conflict required a code change.

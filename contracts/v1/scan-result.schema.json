@@ -130,6 +130,108 @@
       "title": "Candidate",
       "type": "object"
     },
+    "CandidateGuidance": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "route": {
+          "title": "Route",
+          "type": "string"
+        },
+        "account_country": {
+          "$ref": "#/$defs/ContextHint"
+        },
+        "fields": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FieldRule"
+          },
+          "title": "Fields",
+          "type": "object"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "route",
+        "account_country",
+        "fields"
+      ],
+      "title": "CandidateGuidance",
+      "type": "object"
+    },
+    "ContextHint": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "observed",
+            "inferred",
+            "derived",
+            "unknown",
+            "ambiguous"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "excerpts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Excerpts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "title": "ContextHint",
+      "type": "object"
+    },
     "Cost": {
       "additionalProperties": false,
       "properties": {
@@ -255,6 +357,13 @@
           },
           "title": "Stages",
           "type": "array"
+        },
+        "context_explanations": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Context Explanations",
+          "type": "object"
         }
       },
       "title": "Diagnostics",
@@ -408,6 +517,31 @@
         "reason"
       ],
       "title": "ExcludedProfile",
+      "type": "object"
+    },
+    "FieldRule": {
+      "additionalProperties": false,
+      "properties": {
+        "requirement": {
+          "enum": [
+            "required",
+            "optional",
+            "not_applicable",
+            "unresolved"
+          ],
+          "title": "Requirement",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirement",
+        "reason"
+      ],
+      "title": "FieldRule",
       "type": "object"
     },
     "Finding": {
@@ -819,6 +953,45 @@
       "title": "Review",
       "type": "object"
     },
+    "ReviewGuidance": {
+      "additionalProperties": false,
+      "properties": {
+        "policy_version": {
+          "const": "invoice-fields@1",
+          "default": "invoice-fields@1",
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "issuer_country": {
+          "$ref": "#/$defs/ContextHint"
+        },
+        "language": {
+          "$ref": "#/$defs/ContextHint"
+        },
+        "document_fields": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FieldRule"
+          },
+          "title": "Document Fields",
+          "type": "object"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/CandidateGuidance"
+          },
+          "title": "Candidates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issuer_country",
+        "language",
+        "document_fields",
+        "candidates"
+      ],
+      "title": "ReviewGuidance",
+      "type": "object"
+    },
     "Routing": {
       "additionalProperties": false,
       "properties": {
@@ -897,6 +1070,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/Error"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "review_guidance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReviewGuidance"
             },
             {
               "type": "null"

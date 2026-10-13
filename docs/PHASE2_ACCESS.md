@@ -1,5 +1,8 @@
 # Provider access checklist
 
+**Cloud credentials — 13 October:** Markus requested AWS and Google credentials directly in root `.env`, with no interactive setup. Explicit `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (optional `AWS_SESSION_TOKEN`) now override AWS profile lookup. `GOOGLE_CREDENTIALS_JSON` loads authorized-user or service-account credentials in memory and overrides ADC/file lookup. Google Document AI uses OAuth identity credentials, not a Gemini-style API key. Existing credentials were migrated without generating new keys or changing identities; exact profile versions and private accounting/selection were preserved. Legacy SDK fallback remains only when explicit env credentials are absent. See [ENV_CLOUD_CREDENTIALS.md](ENV_CLOUD_CREDENTIALS.md).
+
+
 Implementation follow-up: the credential gate remains satisfied. New integrations consume the existing settings; current terms/resource checks and outcomes are in [M2_INTEGRATIONS.md](M2_INTEGRATIONS.md) and [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md). The twelve-dispatch account below is the preserved M1 baseline, not the current ledger total.
 
 Updated 6 October 2026. User instruction: request all credentials upfront and **do not proceed with additional implementation, refactoring or provider tests until the complete set is supplied**. Documentation and access preparation record this gate; they do not start implementation. This supersedes earlier just-in-time credential instructions. A missing commercial trial is a blocker unless Markus explicitly changes scope.

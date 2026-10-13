@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Scan & Pay · Inspector</title><link rel="stylesheet" href="/admin/assets/admin.css"><script src="/admin/assets/admin.js" defer></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Scan & Pay · Inspector</title><script src="/admin/assets/theme.js"></script><link rel="stylesheet" href="/admin/assets/admin.css"><script src="/admin/assets/context.js" defer></script><script src="/admin/assets/admin.js" defer></script></head>
 <body>
-<header><div class="brand"><img src="/admin/assets/logo.svg" alt="Azikus"><span>Scan & Pay <small>Inspector</small></span></div><div class="connection"><span id="connection">Disconnected</span><button id="disconnect" hidden>Disconnect</button></div></header>
+<header><div class="brand"><img src="/admin/assets/logo.svg" alt="Azikus"><span>Scan & Pay <small>Inspector</small></span></div><div class="connection"><label class="theme-control" for="theme">Theme <select id="theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label><span id="connection">Disconnected</span><button id="disconnect" hidden>Disconnect</button></div></header>
 <main>
 <section id="login"><h1>Scan &amp; Pay</h1><p>Review extracted data and mobile edits.</p><form id="login-form"><label for="token">Access token</label><div class="login-row"><input id="token" type="password" autocomplete="off" required placeholder="Enter access token"><button type="submit" class="primary">Connect</button></div></form></section>
 <p id="error" role="alert" hidden></p>
@@ -28,6 +28,7 @@
 <article id="detail"><div id="empty"><h2>Select a scan</h2><p>Its provider output, backend JSON and mobile edits appear here.</p></div><div id="selected" hidden>
 <div class="detail-heading"><div><span id="kind" class="badge"></span><h2 id="scan-title"></h2><p id="scan-meta" class="muted"></p></div><button id="copy">Copy JSON</button></div>
 <div id="scan-method" class="scan-method"></div>
+<section id="invoice-context" aria-label="Invoice context"></section>
 <div class="tabs" role="tablist" aria-label="Output"><button role="tab" aria-selected="true" aria-controls="output" id="original-tab">Original JSON</button><button role="tab" aria-selected="false" aria-controls="output" id="provider-tab">Provider output</button><button role="tab" aria-selected="false" aria-controls="output" id="image-tab" hidden>Sent image</button><button role="tab" aria-selected="false" aria-controls="output" id="reviews-tab">Mobile edits <span id="review-count">0</span></button></div>
 <section id="output" role="tabpanel" aria-labelledby="original-tab"><div id="review-controls" hidden><label for="review-choice">Confirmation received</label><select id="review-choice"></select><div class="table-scroll"><table><thead><tr><th>Field</th><th>Extracted</th><th>Confirmed on phone</th></tr></thead><tbody id="changes"></tbody></table></div></div><div id="provider-controls" hidden><label for="provider-choice">Stage / output</label><select id="provider-choice"></select></div><p id="output-note" class="muted" role="status"></p><figure id="sent-image" hidden><img id="uploaded-image" alt="Original image uploaded from the mobile app"><figcaption>The image received from your phone.</figcaption></figure><pre id="json" aria-label="Formatted JSON"></pre></section>
 </div></article></div>

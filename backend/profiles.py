@@ -187,7 +187,24 @@ def registry(settings: Settings) -> dict[str, Definition]:
             name: settings.resources.get(name, "")
             for name in option_resources(option.provider, option.operation)
         }
-        missing.extend(name for name, value in resources.items() if not value)
+        explicit_aws = option.provider == "aws" and any(
+            value.get_secret_value()
+            for value in (
+                settings.aws_access_key_id,
+                settings.aws_secret_access_key,
+                settings.aws_session_token,
+            )
+        )
+        missing.extend(
+            name
+            for name, value in resources.items()
+            if not value and not (explicit_aws and name == "AWS_PROFILE")
+        )
+        if explicit_aws:
+            if not settings.aws_access_key_id.get_secret_value():
+                missing.append("AWS_ACCESS_KEY_ID")
+            if not settings.aws_secret_access_key.get_secret_value():
+                missing.append("AWS_SECRET_ACCESS_KEY")
         resource_hash = hashlib.sha256(json.dumps(resources, sort_keys=True).encode()).hexdigest()
         parameters = {
             "attempts": 1,
@@ -246,6 +263,9 @@ def registry(settings: Settings) -> dict[str, Definition]:
         if option.field_policy == "partial_v1":
             components.append("partial-fields@1")
             parameters["field_policy"] = "partial_v1"
+        if option.context_policy == "invoice_v1":
+            components.append("invoice-context@1")
+            parameters["prompt"] = str(parameters["prompt"]) + "+invoice-context@1"
         if option.operation == "ocr":
             components.insert(1, "label-rules@" + option.rules_version)
             if option.rules_version == "3":

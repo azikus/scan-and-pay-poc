@@ -42,6 +42,10 @@ def vision_request(
             from backend.recipient_roles import prompt_v3, role_schema_v2
 
             instructions, schema = prompt_v3(instructions), role_schema_v2(schema)
+        if option.context_policy == "invoice_v1":
+            from backend.invoice_context import context_prompt, context_schema
+
+            instructions, schema = context_prompt(instructions), context_schema(schema)
         # Together recommends both constrained output and a prompt copy of the schema.
         if provider == "together":
             instructions += "\nJSON schema:\n" + json.dumps(schema)

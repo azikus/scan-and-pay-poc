@@ -16,7 +16,7 @@ final class ScanAndPayTests: XCTestCase {
     draft.edit("/candidates/0/amount/value", value: "89,02")
     XCTAssertEqual(draft.values["/candidates/0/amount/value"], .string("89.02"))
     XCTAssertTrue(draft.canConfirm)
-    XCTAssertFalse(draft.missingFields.isEmpty)
+    XCTAssertFalse(draft.optionalFields.isEmpty)
     XCTAssertTrue(draft.visibleFields.allSatisfy { $0.value != nil })
     let account = try XCTUnwrap(draft.fields.first { $0.id.hasSuffix("/account_number") })
     XCTAssertEqual(account.value, "00000000")
@@ -221,6 +221,73 @@ final class ScanAndPayTests: XCTestCase {
     draft.edit("/candidates/0/amount/value", value: "12.34")
     XCTAssertTrue(draft.canConfirm)
     XCTAssertTrue(draft.paymentIssues.contains("Currency is missing or invalid."))
+  }
+
+  func testRequiredAndOptionalDetailsForSavedIBANDraft() throws {
+    let empty: JSONValue = .object([
+      "value": .null, "state": .string("missing"), "origin": .string("document"),
+    ])
+    let iban: JSONValue = .object([
+      "value": .string("HR1210010051863000160"), "state": .string("observed"),
+      "origin": .string("document"),
+    ])
+    let source = try fixture().replacingPayment(
+      "/candidates/0/destination",
+      with: .object([
+        "kind": .string("iban"), "iban": iban, "bic": empty,
+      ]))
+    var draft = try PaymentDraft(response: source)
+    XCTAssertFalse(draft.fields.contains { $0.id.hasSuffix("/sort_code") })
+    XCTAssertTrue(draft.optionalFields.contains { $0.id.hasSuffix("/bic") })
+    XCTAssertFalse(draft.missingFields.contains { $0.id.hasSuffix("/bic") })
+    let bic = try XCTUnwrap(draft.fields.first { $0.id.hasSuffix("/bic") })
+    XCTAssertFalse(draft.shouldShow(bic, optional: false))
+    XCTAssertTrue(draft.shouldShow(bic, optional: true))
+    draft.edit("/candidates/0/destination/iban", value: "")
+    XCTAssertTrue(draft.missingFields.contains { $0.id.hasSuffix("/iban") })
+    XCTAssertTrue(draft.paymentIssues.contains("IBAN is missing."))
+    XCTAssertEqual(draft.confirmation["values"]["/candidates/0/destination/bic"], .null)
+  }
+
+  func testBackendGuidanceDoesNotHidePopulatedOrEditedFields() throws {
+    var source = try fixture().object
+    var run = source["runs"]!.array[0].object
+    let payment = run["payment"]!
+    let candidateID = payment["candidates"].array[0]["id"]
+    let path = "/candidates/0/destination/sort_code"
+    run["review_guidance"] = .object([
+      "issuer_country": .object(["label": .string("Croatia"), "status": .string("inferred")]),
+      "language": .object(["label": .string("English")]),
+      "candidates": .array([
+        .object([
+          "candidate_id": candidateID,
+          "fields": .object([path: .object(["requirement": .string("not_applicable")])]),
+        ])
+      ]),
+    ])
+    source["runs"] = .array([.object(run)])
+    var draft = try PaymentDraft(response: .object(source))
+    XCTAssertEqual(draft.contextSummary, "Issuer: Croatia (suggested) · Language: English")
+    XCTAssertTrue(
+      draft.shouldShow(try XCTUnwrap(draft.fields.first { $0.id == path }), optional: false))
+    draft.edit(path, value: "")
+    XCTAssertTrue(
+      draft.shouldShow(try XCTUnwrap(draft.fields.first { $0.id == path }), optional: false))
+    XCTAssertFalse(draft.missingFields.contains { $0.id == path })
+    XCTAssertEqual(draft.values[path], .null)
+    XCTAssertNotNil(
+      draft.response["runs"].array[0]["payment"]["candidates"].array[0]["destination"]["sort_code"][
+        "value"
+      ].string)
+  }
+
+  func testUnreadableOptionalFieldRemainsVisibleForReview() throws {
+    let source = try fixture().replacingPayment("/due_date/state", with: .string("unreadable"))
+      .replacingPayment("/due_date/value", with: .null)
+    let draft = try PaymentDraft(response: source)
+    let field = try XCTUnwrap(draft.fields.first { $0.id == "/due_date" })
+    XCTAssertTrue(draft.shouldShow(field, optional: false))
+    XCTAssertFalse(draft.missingFields.contains { $0.id == field.id })
   }
 
 }
