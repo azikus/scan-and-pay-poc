@@ -1,80 +1,61 @@
-# Architecture and data destinations
+# Architecture
 
-**Current continuation — 12 October 2026:** the initial presentation is delivered and its source is in [presentation/](../presentation/README.md). [CURRENT_STATUS.md](CURRENT_STATUS.md) owns the latest operational snapshot and authorized allowance. The dated checkpoints below retain their original values and verification evidence; they do not override the current handoff.
+Scan & Pay runs one Python/FastAPI service on the Mac. The iPhone, admin and SUNMI companion use that service; only explicitly selected provider stages send data to hosted inference APIs.
 
-Current consumers are the native iOS app and authenticated admin inspector. The admin's Next scan form chooses an exact enabled direct-image, OCR/rules or OCR→LLM profile; the persisted selection is Mistral Small at this checkpoint. The historical Phase 2 OpenAI baseline remains documented in [closeout](PHASE2_CLOSEOUT.md). See [mobile checkpoint](MOBILE_CHECKPOINT.md) for accepted behavior and [reorganization handoff](REPOSITORY_REORGANIZATION_HANDOFF.md) for the source-layout change and its verification.
+## Components
 
-Mobile edits and source metadata live separately from immutable extraction records. The inspector reads saved provider responses and exact mobile upload bytes through authenticated endpoints; it does not initiate inference. Backend identity supports safe USB/Wi-Fi reconnection of pending drafts. Frontend/backend remain one local deployment; Android and subsequent features follow the jointly prepared presentation.
+| Component | Source | Responsibility |
+| --- | --- | --- |
+| Native app | `ios/ScanAndPay/` | AVFoundation capture, Apple Vision detection, crop/review, authenticated upload/polling, draft recovery |
+| API and worker runtime | `backend/api.py`, `backend/runtime.py` | Validate requests, resolve exact profiles, persist acceptance, execute bounded work |
+| Provider adapters | `backend/adapters/` | Transport/authentication and provider-specific response mapping |
+| Interpretation | `backend/document_observations.py`, `backend/ocr_rules*.py`, `backend/review.py`, `backend/review_guidance.py` | OCR observations, field associations, normalization and required/optional review guidance |
+| Persistence | `backend/store.py` | SQLite jobs, stages, accounting, frozen profiles, reviews and idempotency |
+| Admin | `frontend/admin/` | Shared next-scan selection and private saved-record inspection |
+| Observation hub | `backend/demo_events.py` | Bounded, sanitized mobile/backend journey snapshots |
+| Display | `frontend/demo/`, `sunmi/companion/` | Live browser views and controlled-origin Android WebView host |
+| Evaluation | `evaluation/` | Input manifests, fresh batches, saved-response scoring and costs |
 
-Source layout: `backend/` owns the Python service, `frontend/admin/` owns the inspector assets, `ios/` owns the native project, and `android/` is a README-only placeholder. Root packaging maps the frontend assets into the Python wheel; source/editable runs read them from `frontend/admin/`. Shared `contracts/`, `docs/` and `evaluation/` remain at the root. This does not change routes, deployment or private storage paths.
+## A scan's lifecycle
 
-The dated architectural notes below retain their original context; earlier "later mobile" and "unvalidated hybrid" descriptions are historical.
+1. The app captures/imports and adjusts an image locally. On explicit Send, it reads the advertised selection and freezes the image, options, exact profile/version and key.
+2. The API authenticates, decodes the JPEG/PNG, preserves original bytes and prepares an oriented metadata-free RGB PNG. It records hashes/transforms and atomically persists a job before dispatch.
+3. A bounded worker executes the selected profile. Compare executes independently selected profiles; it never combines their votes. A hybrid explicitly composes multiple stages.
+4. Adapters and local interpretation create linked payment candidates. Validation records missing/ambiguous/invalid fields while preserving usable observations.
+5. The app polls the accepted scan and renders the editable draft with read-only review guidance. Original extraction/evidence remains immutable.
+6. Confirm writes a separate review snapshot with a stable UUID. It does not execute a payment or change the original extraction's correctness/review outcome.
 
-Updated 7 October 2026. The implemented backend accepts one image and returns separate, reviewable payment drafts. See [implementation status](IMPLEMENTATION_STATUS.md) for measured provider results.
+## Data destinations
 
-Adapters in `backend/adapters/` handle provider requests and responses. `backend/document_observations.py` retains normalized OCR/document observations; local rules and mapping produce the common payment contract. `backend/review.py` applies shared consistency checks. `evaluation/` provides full-corpus execution, saved-response replay and expense summaries. OCR → OpenAI text composition is now offline-tested with separate reservations and recipients; see [M3 interpretation](M3_INTERPRETATION.md). Fresh validation remains M3 work.
+| Stage | External content | Local content |
+| --- | --- | --- |
+| Direct vision model | Provider rendition plus task/schema | Original image, hashes, result, diagnostics and retained response |
+| OCR/document service | Image and, where applicable, requested schema | Returned text/layout/fields and their mapping |
+| Deterministic rules | No new external transfer | Interpretation of returned OCR/document observations |
+| OCR → model | Image to OCR, then text/layout to the interpreter | Separate stage/recipient records and combined timing/cost |
+| Native document detection | No provider transfer | Phone camera frames, document geometry and perspective correction |
+| SUNMI telemetry | No payment fields, image or provider credential | Sanitized identifiers, phases and observed stage events |
 
-```mermaid
-flowchart LR
-    C["API / CLI client<br/>One JPEG or PNG"] --> A
-    subgraph Local["Local backend"]
-        A["Authenticate, decode and persist<br/>FastAPI · SQLite · private files"] --> W["Bounded workers<br/>Selected versioned profiles"]
-        W --> R["Map and validate<br/>UK / HR rules · evidence · review"]
-        R --> P["Persist drafts and diagnostics<br/>Poll results · user confirmation"]
-    end
-    subgraph Hosted["Provider-operated services"]
-        V["Hosted vision / LLM API<br/>Proprietary or open-weight models"]
-        O["Managed OCR / document API"]
-    end
-    W -->|"Image + task/schema"| V
-    V -->|"Field claims"| R
-    W -->|"Image"| O
-    O -->|"Text / layout / fields"| R
-    O -.->|"OCR-to-LLM: explicit profile"| V
-```
+Provider content handling is account/service-specific. The Mac backend is local, but selected inference stages are hosted. Region/retention/training metadata must not be inferred from headquarters, model licensing or a hostname. Unknown processing residency stays unknown.
 
-Inference runs through provider-operated APIs. Self-hosted model servers and weight downloads are excluded. The unused original handoff PNG is preserved privately under `.local/archive/pre-main-*/docs/assets/`; the editable diagram above is the current architecture reference.
+## Storage and isolation
 
-## Reading the flow
+`.local/backend/jobs.sqlite3` stores jobs, immutable request/profile snapshots, stage state, accounting, backend identity, shared selection and separate mobile reviews. Private job directories retain images/renditions and raw outputs. Source samples and labels stay in their private locations.
 
-1. An API/command-line client uploads a JPEG/PNG now. Later the native iOS and Android apps call the same service. A developer's API client is not the customer-facing conference UX.
-2. FastAPI validates/authenticates input, prepares a canonical oriented image and persists an idempotent job/profile snapshot in SQLite. A bounded worker dispatches approved stages with a spend reservation. Start with one process, not a distributed queue.
-3. Extract chooses one pipeline. Compare runs selected profiles independently; it does not merge their votes. Vision receives an image; managed OCR/document services receive an image; An explicitly enabled OCR→LLM profile sends whitelisted text/line layout to a second recipient; the current composition is offline-tested and awaits fresh validation. Only configured stages execute.
-4. Local adapters map observations; UK/HR rules preserve route/amount/reference association, normalize safely and compute review reasons. Language/address are supporting hints, not sufficient account-country evidence. A model claim is not bank verification.
-5. Private results, stage events, timings, usage and destination records persist locally. Polling returns the common contract. Every draft requires review/confirmation. No user corrections are counted as raw extraction accuracy.
+Admin/profile/scan reads use bearer authentication. Public `/admin` and `/demo` shells contain no private records; their data endpoints authenticate. Tokens stay in device Keychain/Keystore or transient admin memory. Provider credentials remain in the private backend environment.
 
-## Stage-level data map
+A process lock prevents two service owners sharing a data directory. Completed work survives restart; unfinished work becomes interrupted, with no automatic inference replay. Scan deletion rejects active work and leaves a minimal hashed idempotency tombstone, so a deleted request cannot silently run again.
 
-| Profile/stage | What leaves the machine | Recipient | What stays local |
-| --- | --- | --- | --- |
-| Direct vision | Canonical/provider rendition plus task/schema | Selected OpenAI, Anthropic, Google, Mistral or other enabled provider-operated endpoint, using proprietary or open-weight models | Input hashes, normalized draft, diagnostics, raw response if retained |
-| Managed OCR → local rules | Image to OCR; rules send nothing | Selected Mistral/Azure/Google OCR endpoint | Returned text/layout, UK/HR logic, validation |
-| Prebuilt document API | Image | Azure Invoice, Google Invoice Parser, Textract or configured commercial API | Raw mapping, missing-field handling, validators |
-| OCR → LLM, offline-tested | Image to OCR, then text/layout (and image only in an explicitly named variant) to model | Two separately recorded services | Stage association and total/individual costs |
-| Local rules | Nothing by themselves | None for the local stage | Mapped fields from OCR observations |
-| Native OCR, mobile phase | Depending on agreed profile, image plus image-linked observations to this backend | Backend, then only configured provider stages | Device work is measured separately |
+## Networking and recovery
 
-Every external stage records actual service/host, account alias, configured region, known/unknown processing residency, payload classes, hashes/renditions and request ID. A local server is not local-only processing; text can contain the same sensitive details as the original image. No model/SDK may introduce an undisclosed remote fallback. Account retention/training settings are verified at integration, not assumed from provider branding.
+`scanpay-serve` keeps loopback and reconciles physical private/link-local IPv4 listeners. The iOS settings expose one saved hotspot address. Reconnect uses authenticated reads and checks the persistent `server_id`; older accepted drafts use scan/image identity checks. Uncertain legacy uploads remain bound to their original address when identity cannot be established safely.
 
-## Persistence and operational boundary
+Two jobs can progress concurrently with bounded outbound calls and queue capacity. Profile stage/job timeouts are explicit. Disconnection is not cancellation, and a timeout does not prove the upstream provider stopped processing. No hidden retry or provider fallback is introduced.
 
-- SQLite: jobs, run/stage status, idempotency, profile/version snapshots, costs and data-destination metadata.
-- .local/: private inputs, renditions, raw responses and evaluation labels. Curated source samples stay in samples/ and are never cleanup targets.
-- Atomic acceptance before dispatch; completed results survive restart. Nonterminal work becomes interrupted and is not automatically replayed. DELETE rejects active work, removes local terminal artifacts and retains a minimal idempotency tombstone; it cannot erase upstream retention.
-- Default loopback binding and local bearer token. Native device access later needs deliberately configured LAN address/security; phone localhost is not laptop localhost.
-- Bounded concurrency, timeouts, explicit retry policy, cost reservations and unknown-charge handling. No provider probes or model downloads at startup.
+## Live observation
 
-## Later consumers, not first-milestone work
+The phone optionally publishes best-effort phase/sequence/journey snapshots. Scan headers bind a real job to that journey. The observation hub also receives real transport/runtime events, then serves complete revisioned snapshots through authenticated SSE or polling.
 
-Native mobile capture/review is designed before implementation, iOS first. The attendee companion later reads safe job/stage events and masks private fields; it is separate from the customer flow. Final HTML findings use measured evaluation outputs and clearly labelled limitations. Neither is needed to get this backend working.
+Phone and backend states stay independent: reset does not cancel accepted extraction, and a prior result cannot replace a new journey. Completion is projected only after a review write succeeds. Persistence is bounded/coalesced and separate from the scan/accounting store; observation failures cannot fail extraction or confirmation. Remote progress percentages are not invented.
 
-The current diagram is editable documentation. Final findings and the [separate cost report](COST_REPORT_PLAN.md) are distinct deliverables.
-
-The user-requested private progress explainer is `reports/overview-2026-10-07/index.html`. It summarizes implementation and processing outcomes; the final findings report and attendee companion remain later deliverables.
-
-
-## SUNMI observation companion — 13 October 2026
-
-The existing API process owns a separate bounded `DemoHub` alongside the scan store. Phone snapshots and additive scan-binding headers join capture/review activity to real runtime/transport events. Independent phone/backend states prevent reset from cancelling jobs or stale results from replacing a new journey. A coalesced writer persists only sanitized demo state outside the original ledger. SSE always resynchronizes with a full revisioned snapshot; authenticated polling is the fallback. See [wire contract](API_CONTRACT.md).
-
-`frontend/demo/` supplies compact/full/customer webpages, bundled as `backend/demo_assets` in wheels. `sunmi/companion/` is a small Android display host with Keystore-protected connection configuration, controlled-origin WebView and manual two-screen placement. AirScreen remains an independent receiver on the main panel in Vision Pro mode. The native iPhone publisher is opt-in, bounded and best-effort; original extraction JSON, frozen retries, confirmation semantics and payment data stay outside the observer. The future Android capture app remains separate. See [setup/evidence](../sunmi/companion/README.md).
+Exact routes and invariants are in the [API contract](API_CONTRACT.md).

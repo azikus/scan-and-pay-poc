@@ -1,11 +1,11 @@
 # Project guidance
 
-## Current scope — 13 October 2026
+## Working scope
 
 - Markus explicitly skipped the Android capture/review PoC and comprehensive final presentation. Do not start either or treat them as remaining acceptance gates. Keep the delivered 25-slide deck and existing Webflow showcase.
 - Markus confirmed the explicit phone Send works after the local backend repair. iOS, backend/admin integration, automatic document capture and SUNMI are accepted for the current PoC scope. User acceptance is not a new measured latency/accuracy study.
-- Repository cleanup/documentation reconciliation is complete. Additional provider runs are the next step; prepare an explicit fresh run plan with selected profiles, images, repeat count and accounting before dispatch. Do not resume the stopped 9 October comparison or retry old jobs. This cleanup makes no inference calls.
-- Read `docs/CURRENT_STATUS.md`, `docs/CODING_HANDOFF.md`, `docs/ROADMAP.md` and the affected platform/source README first. Historical handoffs/results are dated evidence, not current instructions. Earlier project guidance is preserved in Git at main commit `528ad23`.
+- Documentation uses a screenshot-led product README and concise technical guides, with redundant phase/change handoffs removed. Preserve current app/runtime behavior and private evidence. Additional provider runs are separate: use a fresh plan with selected profiles, complete images, repeat count and accounting; never resume the stopped comparison or retry old jobs automatically.
+- Read `README.md`, `docs/SETUP.md`, `docs/ARCHITECTURE.md`, `docs/API_CONTRACT.md` and the affected source README. Providers/evaluation/development each have one focused guide. Do not add phase plans or per-chat/change handoffs; Git holds change history.
 
 ## Runtime and private state
 

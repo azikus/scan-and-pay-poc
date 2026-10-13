@@ -22,7 +22,7 @@ Only dependency installation needs network access. reveal.js is pinned to **6.0.
 - `index.html` is the slide and speaker-note source of truth. Edit it directly.
 - `deck.css` and `deck.js` preserve the approved visual design and interaction.
 - `assets/manifest.json` records the reviewed asset hashes. Original logos and the existing masked/synthetic screenshots are retained byte-for-byte.
-- `npm run content` regenerates [the text companion](../docs/PRESENTATION_CONTENT.md). Do this after changing slide text or notes, then rebuild and check.
+- `npm run content` regenerates [the text companion](CONTENT.md). Do this after changing slide text or notes, then rebuild and check.
 - `dist/index.html` is the presenter version with notes. `dist/Audience.html` is a standalone file containing its own scripts, fonts and images, with speaker notes and the notes plugin removed. It opens without a server.
 - For PDF, open <http://127.0.0.1:8766/?print-pdf> in Chrome/Chromium, choose Print → Save as PDF, landscape, no margins, and enable background graphics. Fragments print together. PDF and generated HTML exports are ignored by Git.
 
@@ -41,6 +41,6 @@ npm run start:private
 
 This writes only `dist-private/`, including its own presenter deck and audience export. These outputs contain readable invoice previews and remain private. The regular build never reads private assets, and the local server cannot serve source files, credentials or the private-assets directory. Building either edition does not publish it.
 
-## Evidence and next work
+## Supporting material
 
-[Authoring evidence](../docs/PRESENTATION_EVIDENCE.md) keeps metric sources and revision history separate from slides. [Current status](../docs/CURRENT_STATUS.md) records the application, allowance and delivery state. The initial deck is retained. Markus skipped Android and the comprehensive final presentation on 13 October; no new deck is pending. The separate existing [Webflow showcase](../website/README.md) is preserved and unpublished.
+[Slide content](CONTENT.md) is generated from the source HTML. [Asset provenance](ASSETS.md) documents the reviewed artwork/screenshots. The [product guide](../README.md) explains the working application, and [evaluation](../docs/EVALUATION.md) holds measured results and limitations. The existing [Webflow showcase](../website/README.md) is a separate local handoff.
