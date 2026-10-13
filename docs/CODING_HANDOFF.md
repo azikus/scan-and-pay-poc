@@ -1,5 +1,9 @@
 # Coding handoff — continue here
 
+## Automatic iOS capture — 13 October
+
+Markus requested Apple-native document detection, a grey live-preview mask and automatic capture into the existing Adjust image screen, then explicitly requested latest main and a separate branch. Continue this scoped change in `codex/ios-auto-document-scan`, based on main `269e022`, at `/Users/markusi/.codex/worktrees/ios-auto-document-scan/scan-and-pay`. Read [IOS_DOCUMENT_SCANNING.md](IOS_DOCUMENT_SCANNING.md). The final 43 iOS tests and signed build pass; the combined update is installed on the existing iPhone. A new real-paper camera check remains; do not reopen already accepted general mobile/SUNMI integration or start Android automatically. Preserve the live backend's invoice-context worktree and private state. The original checkout's temporary scanning edits were moved to this separate branch, with unrelated untracked work retained.
+
 ## PR #11 merge closeout — 13 October
 
 Markus authorized the checked merge. Latest remote main `7d188e7` is already integrated. Final checks and privacy review passed: 792 backend/evaluation tests, seven frontend tests, 96.19% statement / 91.34% branch domain coverage, static/contract/package checks and installed-wheel serving. No new paid calls, phone install, selection change or service restart. The live backend still uses the invoice-context-review worktree; retain it after merging. See INVOICE_CONTEXT.md for the full closeout record.

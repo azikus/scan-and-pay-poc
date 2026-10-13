@@ -1,5 +1,11 @@
 # Current project status — 13 October 2026
 
+## Automatic iOS document capture — 13 October
+
+The requested Apple-native scanning flow is implemented on `codex/ios-auto-document-scan`, based on freshly fetched main `269e022` after PR #11. Apple Vision identifies the paper, greys out its surroundings, and triggers capture after a steady view. The straightened image opens Adjust image; Reset crop/Edit crop can recover the complete original photo. Manual shutter/import and explicit Send remain available. Latest dark mode, invoice applicability and SUNMI telemetry are retained. See [implementation and verification](IOS_DOCUMENT_SCANNING.md).
+
+All 43 offline iOS tests passed, including actual native detection on a synthetic paper image; mask/rectification images were inspected. The signed build passed and was installed in place on the paired iPhone 16 Pro. Real-paper acceptance of this new camera behavior remains distinct from the already accepted mobile/SUNMI integration. No paid extraction, runtime restart or private state/configuration change was performed.
+
 ## PR #11 merge closeout — 13 October
 
 Markus authorized the checked merge. Latest remote main `7d188e7` is already integrated. Final checks and privacy review passed: 792 backend/evaluation tests, seven frontend tests, 96.19% statement / 91.34% branch domain coverage, static/contract/package checks and installed-wheel serving. No new paid calls, phone install, selection change or service restart. The live backend still uses the invoice-context-review worktree; retain it after merging. See INVOICE_CONTEXT.md for the full closeout record.

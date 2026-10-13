@@ -1,92 +1,244 @@
 import AVFoundation
+import CoreImage
 import SwiftUI
+import Vision
 
-final class CameraController: NSObject, ObservableObject, AVCapturePhotoCaptureDelegate {
+final class CameraController: NSObject, ObservableObject, AVCapturePhotoCaptureDelegate,
+  AVCaptureVideoDataOutputSampleBufferDelegate
+{
   let session = AVCaptureSession()
   private let queue = DispatchQueue(label: "com.azikus.scanpay.camera")
   private let output = AVCapturePhotoOutput()
+  private let videoOutput = AVCaptureVideoDataOutput()
+  private let imageContext = CIContext()
   private var configured = false
   private var wantsRunning = false
   private var requested = false
+  // Main-thread lifetime token; queue state is kept on the camera queue.
+  private var generation = UUID()
+  private var runGeneration = UUID()
+  private var captureGeneration: UUID?
+  private var captureID: Int64?
+  private var automaticCapture = false
+  private var autoEnabledOnQueue = true
+  private var gate = DocumentCaptureGate()
+  private var lastDetection: TimeInterval = -.infinity
   @Published var available = false
   @Published var denied = false
   @Published var error: String?
   @Published var takingPhoto = false
-  var captured: ((UIImage) -> Void)?
+  @Published var document: DocumentQuadrilateral?
+  @Published var previewImageSize = CGSize(width: 3, height: 4)
+  @Published var scanHint = "Point the camera at the paper."
+  @Published private(set) var autoEnabled = true
+  var captured: ((UIImage, UIImage?) -> Void)?
+
   func start() {
+    guard !requested else { return }
     requested = true
+    generation = UUID()
+    error = nil
+    denied = false
     switch AVCaptureDevice.authorizationStatus(for: .video) {
     case .authorized: run()
     case .notDetermined:
       AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
         DispatchQueue.main.async {
-          if granted { if self?.requested == true { self?.run() } } else { self?.denied = true }
+          guard let self, self.requested else { return }
+          if granted { self.run() } else { self.denied = true }
         }
       }
     default: denied = true
     }
   }
   private func run() {
+    let token = generation
     queue.async { [weak self] in
       guard let self else { return }
       self.wantsRunning = true
+      self.runGeneration = token
+      self.gate.reset()
+      self.lastDetection = -.infinity
       if !self.configured {
         self.session.beginConfiguration()
         self.session.sessionPreset = .photo
+        self.videoOutput.videoSettings = [
+          kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ]
+        self.videoOutput.alwaysDiscardsLateVideoFrames = true
         guard
           let device = AVCaptureDevice.default(
             .builtInWideAngleCamera, for: .video, position: .back),
           let input = try? AVCaptureDeviceInput(device: device), self.session.canAddInput(input),
-          self.session.canAddOutput(self.output)
+          self.session.canAddOutput(self.output), self.session.canAddOutput(self.videoOutput)
         else {
           self.session.commitConfiguration()
           DispatchQueue.main.async {
+            guard self.generation == token else { return }
             self.error = "Camera unavailable. Choose an image to continue."
           }
           return
         }
         self.session.addInput(input)
         self.session.addOutput(self.output)
-        if let connection = self.output.connection(with: .video),
-          connection.isVideoRotationAngleSupported(90)
-        {
-          connection.videoRotationAngle = 90
+        self.session.addOutput(self.videoOutput)
+        self.videoOutput.setSampleBufferDelegate(self, queue: self.queue)
+        for connection in [
+          self.output.connection(with: .video),
+          self.videoOutput.connection(with: .video),
+        ] {
+          if let connection, connection.isVideoRotationAngleSupported(90) {
+            connection.videoRotationAngle = 90
+          }
         }
         self.output.maxPhotoQualityPrioritization = .quality
         self.session.commitConfiguration()
         self.configured = true
       }
       if self.wantsRunning && !self.session.isRunning { self.session.startRunning() }
-      DispatchQueue.main.async { self.available = self.session.isRunning }
+      DispatchQueue.main.async {
+        guard self.generation == token, self.requested else { return }
+        self.available = self.session.isRunning
+      }
     }
   }
   func stop() {
     requested = false
+    generation = UUID()
     available = false
+    takingPhoto = false
+    document = nil
+    scanHint = "Point the camera at the paper."
     queue.async { [weak self] in
-      self?.wantsRunning = false
-      if self?.session.isRunning == true { self?.session.stopRunning() }
+      guard let self else { return }
+      self.wantsRunning = false
+      self.gate.reset()
+      // Keep an in-flight photo reserved until its delegate completes.
+      if self.session.isRunning { self.session.stopRunning() }
+    }
+  }
+  func setAutomatic(_ enabled: Bool) {
+    autoEnabled = enabled
+    queue.async { [weak self] in
+      self?.autoEnabledOnQueue = enabled
+      self?.gate.reset()
     }
   }
   func capture() {
     guard available, !takingPhoto else { return }
-    takingPhoto = true
+    let token = generation
     queue.async { [weak self] in
-      guard let self else { return }
-      let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
-      settings.photoQualityPrioritization = .quality
-      self.output.capturePhoto(with: settings, delegate: self)
+      guard let self, self.runGeneration == token else { return }
+      self.takePhoto(automatic: false)
+    }
+  }
+  private func takePhoto(automatic: Bool) {
+    guard wantsRunning, captureGeneration == nil else { return }
+    let token = runGeneration
+    captureGeneration = token
+    automaticCapture = automatic
+    DispatchQueue.main.async {
+      guard self.generation == token else { return }
+      self.takingPhoto = true
+      self.scanHint = "Capturing document…"
+    }
+    let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
+    settings.photoQualityPrioritization = .quality
+    captureID = settings.uniqueID
+    output.capturePhoto(with: settings, delegate: self)
+  }
+  func captureOutput(
+    _ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer,
+    from connection: AVCaptureConnection
+  ) {
+    guard wantsRunning, captureGeneration == nil,
+      let pixels = CMSampleBufferGetImageBuffer(sampleBuffer)
+    else { return }
+    let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
+    guard time.isFinite, time - lastDetection >= 0.18 else { return }
+    lastDetection = time
+    let token = runGeneration
+    let size = CGSize(width: CVPixelBufferGetWidth(pixels), height: CVPixelBufferGetHeight(pixels))
+    let detected: DocumentQuadrilateral?
+    do {
+      detected = try DocumentDetector.detect(in: VNImageRequestHandler(cvPixelBuffer: pixels))
+    } catch {
+      gate.reset()
+      DispatchQueue.main.async {
+        guard self.generation == token else { return }
+        self.document = nil
+        self.scanHint = "Auto scan unavailable. Tap the shutter or import an image."
+      }
+      return
+    }
+    let shouldCapture = autoEnabledOnQueue && gate.observe(detected, at: time)
+    DispatchQueue.main.async {
+      guard self.generation == token, self.requested else { return }
+      self.document = detected
+      self.previewImageSize = size
+      self.scanHint =
+        detected == nil
+        ? "Point the camera at the paper."
+        : detected?.canCapture == true
+          ? "Hold steady. Capturing automatically."
+          : "Move back to include all four paper edges."
+    }
+    if shouldCapture { takePhoto(automatic: true) }
+  }
+  func photoOutput(
+    _ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto,
+    error: Error?
+  ) {
+    let data = error == nil ? photo.fileDataRepresentation() : nil
+    let captureID = photo.resolvedSettings.uniqueID
+    queue.async { [weak self] in
+      guard let self, self.captureID == captureID, let token = self.captureGeneration else {
+        return
+      }
+      let automatic = self.automaticCapture
+      self.captureGeneration = nil
+      self.captureID = nil
+      guard self.wantsRunning, self.runGeneration == token else { return }
+      let fullImage = data.flatMap { UIImage(data: $0)?.oriented() }
+      let scanned =
+        automatic
+        ? fullImage.flatMap { DocumentDetector.scannedImage($0, context: self.imageContext) } : nil
+      if fullImage == nil {
+        self.gate.reset()
+        self.lastDetection = -.infinity
+      } else {
+        // Reserve the completed image until ScanHome switches out of capture.
+        self.wantsRunning = false
+      }
+      DispatchQueue.main.async {
+        guard self.generation == token, self.requested else { return }
+        self.takingPhoto = false
+        if let fullImage {
+          self.captured?(fullImage, scanned)
+        } else {
+          self.error = "The photo couldn’t be captured. Try again or import an image."
+        }
+      }
     }
   }
   func photoOutput(
-    _ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?
+    _ output: AVCapturePhotoOutput,
+    didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings,
+    error: Error?
   ) {
-    let image = photo.fileDataRepresentation().flatMap { UIImage(data: $0) }
-    DispatchQueue.main.async {
-      self.takingPhoto = false
-      if let image {
-        self.captured?(image)
-      } else {
+    // Some interrupted captures fail before didFinishProcessingPhoto is delivered.
+    // Match the request ID so a late failure cannot clear a newer capture.
+    guard error != nil else { return }
+    queue.async { [weak self] in
+      guard let self, self.captureID == resolvedSettings.uniqueID,
+        let token = self.captureGeneration
+      else { return }
+      self.captureGeneration = nil
+      self.captureID = nil
+      self.gate.reset()
+      DispatchQueue.main.async {
+        guard self.generation == token, self.requested else { return }
+        self.takingPhoto = false
         self.error = "The photo couldn’t be captured. Try again or import an image."
       }
     }
@@ -158,6 +310,7 @@ extension UIImage {
 
 struct ManualCrop: View {
   @State var image: UIImage
+  @State var uncroppedImage: UIImage?
   let namespace: Namespace.ID
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var rotation = 0.0
@@ -261,6 +414,10 @@ struct ManualCrop: View {
           Spacer()
           Button("Reset crop") {
             withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.88)) {
+              if let uncroppedImage {
+                image = uncroppedImage
+                self.uncroppedImage = nil
+              }
               crop = CGRect(x: 0, y: 0, width: 1, height: 1)
             }
           }.frame(minHeight: 44)
@@ -284,6 +441,7 @@ struct ManualCrop: View {
   private func rotate() {
     guard !rotating else { return }
     let rotatedImage = image.rotated()
+    uncroppedImage = uncroppedImage?.rotated()
     crop = CGRect(x: 0, y: 0, width: 1, height: 1)
     dragStart = nil
     error = nil

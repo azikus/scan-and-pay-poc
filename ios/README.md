@@ -1,6 +1,8 @@
 # Scan & Pay — iOS
 
-Native SwiftUI app for iPhone, iOS 18+. The first design targets iPhone 16 Pro. It uses AVFoundation capture, PhotosPicker import, manual pixel-preserving crop/rotate, an explicit final-image Send action, and the existing Mac API. No third-party mobile SDK is required.
+Native SwiftUI app for iPhone, iOS 18+. The first design targets iPhone 16 Pro. It uses Apple Vision document detection with automatic AVFoundation capture, PhotosPicker import, manual crop/rotate, an explicit final-image Send action, and the existing Mac API. No third-party mobile SDK is required.
+
+**Automatic document scan:** point the camera at the paper and hold steady. The area outside the detected paper turns grey; the app captures and straightens the document, then opens **Adjust image**. Crop/rotate, Retake and explicit Send work as before. **Auto / Manual** toggles automatic capture, and the shutter and Import remain available. Detection runs on the phone. See [scanning behavior and verification](../docs/IOS_DOCUMENT_SCANNING.md).
 
 The 13 October [invoice-context update](../docs/INVOICE_CONTEXT.md) shows issuer/language context and backend field applicability in review. Required blank fields are visible; optional empty fields are under **Add other details**. Populated/edited/uncertain fields and selected-candidate warnings stay visible. Older saved responses use route-based fallback rules. Original JSON, confirmation values and recovery remain separate from presentation guidance.
 
@@ -28,7 +30,7 @@ As of 13 October, the app uses dark mode throughout, with semantic foreground co
 
 Every screen shares the Azikus mark and **Scan & Pay** title, with a subtitle for the current screen or processing state. Header actions move to a separate row at accessibility text sizes.
 
-The scan screen shows the complete camera frame between dark Liquid Glass header and capture panels. Aspect-fit avoids the zoomed preview that previously revealed extra edges after capture. It preserves the full-resolution photo for manual crop. Adjust image, Ready to send, review, confirmation and completion share the glass treatment; settings, JSON navigation and the image viewer use the same dark appearance. Documents and JSON remain sharp and readable. Native Liquid Glass controls are used on iOS 26, with material/solid accessibility fallbacks on older systems. Capture, crop and preview transition together; crop rotation/reset animate and the image carries between crop and preview. Reduce Motion avoids spatial animation. See [behavior, hotspot verification](../docs/IOS_GLASS_AND_MOTION.md).
+The scan screen shows the complete camera frame between dark Liquid Glass header and capture panels. Aspect-fit keeps the full live field of view visible, with the detected-paper mask aligned to it. Automatic scans are straightened from the full-resolution photo before adjustment; manual shutter and imported images retain the complete original for cropping. Adjust image, Ready to send, review, confirmation and completion share the glass treatment; settings, JSON navigation and the image viewer use the same dark appearance. Documents and JSON remain sharp and readable. Native Liquid Glass controls are used on iOS 26, with material/solid accessibility fallbacks on older systems. Capture, crop and preview transition together; crop rotation/reset animate and the image carries between crop and preview. Reduce Motion avoids spatial animation. See [behavior, hotspot verification](../docs/IOS_GLASS_AND_MOTION.md).
 
 ## Optional demo displays
 

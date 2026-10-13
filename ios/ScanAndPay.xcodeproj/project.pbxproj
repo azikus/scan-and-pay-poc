@@ -8,9 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		18020B3B77D359C03AD78A3F /* ScanModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A695FA9B66AD18869A97F03C /* ScanModels.swift */; };
+		227CC9C8523AFEFB75F367E0 /* DocumentScanningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79604A685D78AC39A579092B /* DocumentScanningTests.swift */; };
 		4484F2C600539783F0C6B7C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 68CEEEE6BE96B9B68F2E3FCE /* Assets.xcassets */; };
 		455A757EC996C748FC4059A0 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1EFF2FDECECC6C52D3EF809D /* OFL.txt */; };
 		4E027F4D668DAD7515875D00 /* BackendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C726310296005C2C03ACF /* BackendClient.swift */; };
+		4FD508451FACDD2C99B78404 /* DocumentScanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D19C6879A08730BC34ECAEB /* DocumentScanning.swift */; };
 		50A6AE7728FB2DFB96880B98 /* PaymentConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1932AB52EBCE7E967D9BFFA7 /* PaymentConfirmation.swift */; };
 		58AEC58A6376DD4CDA0F9244 /* ScanSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB88D794FA463D9618D6E3E /* ScanSession.swift */; };
 		6FF06872DF29C5A0E1952E87 /* HankenGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2CB149A431BD12B3185AE73E /* HankenGrotesk-Regular.ttf */; };
@@ -54,7 +56,9 @@
 		68CEEEE6BE96B9B68F2E3FCE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7802D4328E871B743E43D62E /* ScanAndPayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanAndPayApp.swift; sourceTree = "<group>"; };
 		785E594F7A036BF483097BF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		79604A685D78AC39A579092B /* DocumentScanningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentScanningTests.swift; sourceTree = "<group>"; };
 		801A225424A6A56BC82176D9 /* ScanAndPayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanAndPayTests.swift; sourceTree = "<group>"; };
+		8D19C6879A08730BC34ECAEB /* DocumentScanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentScanning.swift; sourceTree = "<group>"; };
 		9333323A02DC56A742B7492D /* uk-extract.synthetic.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "uk-extract.synthetic.json"; sourceTree = "<group>"; };
 		9EB88D794FA463D9618D6E3E /* ScanSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanSession.swift; sourceTree = "<group>"; };
 		A06518FE50DAE2A006FFB41D /* ScanAndPayTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ScanAndPayTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,6 +91,7 @@
 		A85353EC7C1D7C2E461DCD6F /* ScanAndPayTests */ = {
 			isa = PBXGroup;
 			children = (
+				79604A685D78AC39A579092B /* DocumentScanningTests.swift */,
 				AE3025FDA9A3ADB26D49F3CF /* RecoveryTests.swift */,
 				801A225424A6A56BC82176D9 /* ScanAndPayTests.swift */,
 			);
@@ -112,6 +117,7 @@
 				B80001D8EFFC66EE0F2BBC7A /* Camera.swift */,
 				49351EE3926999ECB1BEA139 /* DemoTelemetry.swift */,
 				40C16FE67D865258E6B0C4FE /* DevelopmentConnection.swift */,
+				8D19C6879A08730BC34ECAEB /* DocumentScanning.swift */,
 				785E594F7A036BF483097BF7 /* Info.plist */,
 				1932AB52EBCE7E967D9BFFA7 /* PaymentConfirmation.swift */,
 				7802D4328E871B743E43D62E /* ScanAndPayApp.swift */,
@@ -247,6 +253,7 @@
 				DD8ABBCDB34D98060BB1DB6A /* Camera.swift in Sources */,
 				899563914DB1A1C876A43A5C /* DemoTelemetry.swift in Sources */,
 				7BD7C644D5CE28EC6F557C53 /* DevelopmentConnection.swift in Sources */,
+				4FD508451FACDD2C99B78404 /* DocumentScanning.swift in Sources */,
 				50A6AE7728FB2DFB96880B98 /* PaymentConfirmation.swift in Sources */,
 				93C0FF52D470B1C8141C4C5B /* ScanAndPayApp.swift in Sources */,
 				18020B3B77D359C03AD78A3F /* ScanModels.swift in Sources */,
@@ -258,6 +265,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				227CC9C8523AFEFB75F367E0 /* DocumentScanningTests.swift in Sources */,
 				CB3A0C98468067076C3FCD42 /* RecoveryTests.swift in Sources */,
 				9D64DD26FAA74C3F61C148CB /* ScanAndPayTests.swift in Sources */,
 			);
