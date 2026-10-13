@@ -43,50 +43,11 @@ public class CompanionActivity extends Activity implements SharedPreferences.OnS
         if(sameOrigin(r.getUrl()) && "/v1/admin/selection".equals(r.getUrl().getPath()) && r.getMethod().equals("PUT"))return null;
         return new WebResourceResponse("text/plain","UTF-8",403,"Blocked",null,new ByteArrayInputStream(new byte[0]));
       }
-      @Override public void onPageFinished(WebView v,String url){
-        if((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0 && getIntent().getBooleanExtra("capture",false))
-          v.postDelayed(() -> captureOwnWindow(),4000);
-      }
       @Override public void onReceivedError(WebView v,WebResourceRequest r,WebResourceError error){
         if(r.isForMainFrame()) showOffline();
       }
     });
-    consumeDevelopmentSetup();
     if(prefs.getString("origin","").isEmpty()) settings(); else load();
-  }
-  @Override public boolean dispatchTouchEvent(android.view.MotionEvent event){
-    boolean handled=super.dispatchTouchEvent(event);
-    if(event.getAction()==android.view.MotionEvent.ACTION_UP && web!=null &&
-       (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0 && getIntent().getBooleanExtra("capture",false))
-      web.postDelayed(() -> captureOwnWindow(),1500);
-    return handled;
-  }
-  private void captureOwnWindow(){
-    if(isDestroyed() || web.getWidth()==0 || web.getHeight()==0)return;
-    android.graphics.Bitmap bitmap=android.graphics.Bitmap.createBitmap(web.getWidth(),web.getHeight(),android.graphics.Bitmap.Config.ARGB_8888);
-    PixelCopy.request(getWindow(),bitmap,result -> {
-      if(result==PixelCopy.SUCCESS){
-        try(java.io.FileOutputStream out=new java.io.FileOutputStream(new java.io.File(getFilesDir(),primary()?"journey-check.png":"companion-check.png"))){bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}
-        catch(java.io.IOException ignored){}
-      }
-      bitmap.recycle();
-    },new android.os.Handler());
-  }
-  private void consumeDevelopmentSetup(){
-    if((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)==0)return;
-    java.io.File file=new java.io.File(getFilesDir(),"connection-setup.json");
-    if(!file.exists())return;
-    try{
-      byte[] bytes=java.nio.file.Files.readAllBytes(file.toPath());
-      if(!file.delete())throw new java.io.IOException();
-      JSONObject setup=new JSONObject(new String(bytes,java.nio.charset.StandardCharsets.UTF_8));
-      String next=localOrigin(setup.getString("origin"));
-      String access=setup.getString("token");
-      if(access.isEmpty())throw new IllegalArgumentException();
-      String session=setup.optString("session","");
-      if(!session.isEmpty()&&!session.matches("[0-9a-fA-F-]{36}"))throw new IllegalArgumentException();
-      prefs.edit().putString("token",encrypt(access)).putString("origin",next).putString("session",session).commit();
-    }catch(Exception e){Toast.makeText(this,"Setup unavailable. Open Backend connection.",Toast.LENGTH_LONG).show();}
   }
   private boolean sameOrigin(Uri uri){return origin.equals(uri.getScheme()+"://"+uri.getEncodedAuthority());}
   private boolean allowed(Uri uri){

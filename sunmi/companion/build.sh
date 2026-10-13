@@ -7,16 +7,11 @@ build_tools="$sdk_root/build-tools/36.0.0"
 platform="$sdk_root/platforms/android-33/android.jar"
 output="$task_root/build"
 mkdir -p "$output/classes" "$repo_root/.local/sunmi-companion"
+find "$output/classes" -type f -name '*.class' -delete
 javac --release 8 -classpath "$platform" -d "$output/classes" "$task_root"/src/com/azikus/scanpay/companion/*.java
 find "$output/classes" -name '*.class' -print > "$output/classes.list"
 "$build_tools/d8" --min-api 26 --lib "$platform" --output "$output" @"$output/classes.list"
-manifest="$task_root/AndroidManifest.xml"
-if [ "${SUNMI_DEVELOPMENT_SETUP:-0}" = "1" ]; then
-  mkdir -p "$output/development"
-  sed 's/<application /<application android:debuggable="true" /' "$manifest" > "$output/development/AndroidManifest.xml"
-  manifest="$output/development/AndroidManifest.xml"
-fi
-"$build_tools/aapt" package -f -M "$manifest" -I "$platform" -F "$output/unsigned.apk"
+"$build_tools/aapt" package -f -M "$task_root/AndroidManifest.xml" -I "$platform" -F "$output/unsigned.apk"
 (cd "$output" && "$build_tools/aapt" add unsigned.apk classes.dex)
 "$build_tools/zipalign" -f 4 "$output/unsigned.apk" "$output/aligned.apk"
 signing_key="${SUNMI_SIGNING_KEY:-$repo_root/.local/sunmi-companion/debug.keystore}"

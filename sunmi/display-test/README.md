@@ -1,5 +1,8 @@
 # SUNMI + Vision Pro two-screen test
 
+**Retired 13 October 2026:** Markus requested removal of demo-only code after accepting the live companion. This prototype’s source and installed APK have been removed; the original source remains recoverable in Git history. Instructions below are a dated hardware test record and are no longer runnable from the current checkout. Use [the live companion](../companion/README.md) instead.
+
+
 ## Ready-to-run setup
 
 Prepared on 12 October 2026 on Markus's SUNMI D3 PRO, Android 13. AirScreen 2.16.1 is installed. The companion APK is installed as `com.azikus.scanpay.displaytest` and launched on the smaller panel.

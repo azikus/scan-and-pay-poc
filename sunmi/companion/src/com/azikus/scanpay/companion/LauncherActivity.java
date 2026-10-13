@@ -10,7 +10,6 @@ public final class LauncherActivity extends CompanionActivity {
       android.app.ActivityOptions options=android.app.ActivityOptions.makeBasic();
       options.setLaunchDisplayId(0);
       android.content.Intent journey=new android.content.Intent(this,JourneyActivity.class).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
-      if(getIntent().getBooleanExtra("capture",false))journey.putExtra("capture",true);
       startActivity(journey,options.toBundle());
     }
   }

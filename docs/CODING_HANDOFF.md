@@ -1,5 +1,10 @@
 # Coding handoff — continue here
 
+## Live-only SUNMI display — 13 October
+
+Markus confirmed the feature works and requested removing demo code. Synthetic replay/fabricated state, the standalone rehearsal server, the offline display-test source/app and Android development bootstrap/capture hooks are removed. The rebuilt companion is non-debuggable and installed with its existing saved connection and screen mode. Live circular animations, idle QR, provider selection, reconnect and privacy masking remain. `/demo` and `/v1/demo/*` are retained as compatibility names for actual live telemetry; the existing mobile toggle and separate simulated payment confirmation are unchanged. Six frontend tests and 23 backend review/demo tests passed. Earlier replay/setup references below are historical. See [current setup](../sunmi/companion/README.md#live-only-deployment--13-october).
+
+
 ## SUNMI visual and provider controls update — 13 October
 
 Markus requested improved animations, illustrated components around a circular path with arrows, and next-scan provider selection within the display app. These are implemented and installed on the connected SUNMI. Controls reuses the existing exact-profile selection endpoint, applies only to new Sends, and is disabled in synthetic replay. The original selection was preserved; isolated fake-provider writes verified saving and refresh persistence. Six frontend checks and 23 backend review/demo tests passed. App-owned captures verified actual WebView layout and provider controls; the saved Scan & Pay two-screen mode is restored. See [display details](../frontend/demo/README.md#circular-journey-and-next-scan-controls--13-october). No paid inference, provider/configuration change or backend restart was performed.

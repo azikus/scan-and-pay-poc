@@ -1,5 +1,8 @@
 # SUNMI live demo implementation plan
 
+**13 October live-only follow-up:** after physical acceptance, Markus requested removal of demo-only code. The shipped replay/fixtures, standalone rehearsal server and temporary Android setup/capture helpers have been removed. Live observation and provider controls remain; prospective replay requirements below are historical and superseded.
+
+
 Revised 13 October 2026 around the physically tested two-screen arrangement. Implementation was subsequently authorized in a separate worktree on 13 October. The first source version and offline/browser checks are recorded in [the companion guide](../sunmi/companion/README.md); device installation, the connected idle QR and a user-operated capture/extraction/review/dismissal flow are now verified. Pay confirmation, mode transitions and recovery rehearsal remain open.
 
 Already delivered: AirScreen 2.16.1 and the offline synthetic companion are installed on the SUNMI D3 PRO, Android 13. On 12 October Markus confirmed that simultaneous Vision Pro streaming and smaller-screen companion interaction work. See [setup and acceptance](../sunmi/display-test/README.md). This establishes hardware feasibility; it is not a measured latency or extended stability result. This earlier acceptance establishes only the offline hardware baseline; it does not establish physical acceptance of the new live controller.

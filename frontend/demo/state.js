@@ -49,7 +49,7 @@ export function project(
   if (s.completed_at && now - s.completed_at < 4)
     return {
       ...base,
-      title: "Demo complete",
+      title: "Scan complete",
       node: 4,
       detail: "No payment made",
       complete: true,

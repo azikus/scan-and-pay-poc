@@ -4,12 +4,9 @@ let token = "",
   snapshot = null,
   selected = "",
   connected = false,
-  replay = false,
   controller = null,
   generation = 0;
 let lastPacket = 0,
-  replayStart = 0,
-  liveSelected = "",
   view = new URLSearchParams(location.search).get("view") || "compact";
 const native = window.Scanpay;
 let graphSignature = "", phaseSignature = "";
@@ -115,7 +112,7 @@ function setView(v) {
 setView(view);
 function receive(data) {
   if (data.version !== 1 || !Array.isArray(data.sessions))
-    throw Error("Unsupported demo channel");
+    throw Error("Unsupported display channel");
   snapshot = data;
   connected = true;
   lastPacket = performance.now();
@@ -140,19 +137,15 @@ function render() {
       ? snapshot.server_time + (performance.now() - lastPacket) / 1000
       : Date.now() / 1000,
     liveConnected = connected && performance.now() - lastPacket < 15000;
-  const model = project(snapshot, selected, now, replay || liveConnected);
-  $("connection").textContent = replay
-    ? "SYNTHETIC REPLAY"
-    : !liveConnected
+  const model = project(snapshot, selected, now, liveConnected);
+  $("connection").textContent = !liveConnected
       ? "BACKEND DISCONNECTED"
       : model.session &&
           now - model.session.last_seen < 30 &&
           model.session.phone !== "paused"
         ? "LIVE · MOBILE CONNECTED"
         : "WAITING FOR MOBILE PHONE";
-  $("mode-label").textContent = replay
-    ? "SYNTHETIC REPLAY · NO REQUESTS"
-    : view === "customer"
+  $("mode-label").textContent = view === "customer"
       ? "YOUR SCAN"
       : "LIVE SYSTEM JOURNEY";
   const qr = model.idle && view !== "technical";
@@ -163,7 +156,7 @@ function render() {
   $("detail").textContent = model.detail;
   document.body.classList.toggle(
     "moving",
-    model.moving && (replay || liveConnected),
+    model.moving && (liveConnected),
   );
   document.body.dataset.phase = model.complete ? "complete" : model.session?.phone || "waiting";
   graph(model);
@@ -189,20 +182,18 @@ function render() {
     hour: "2-digit",
     minute: "2-digit",
   });
-  $("footer-note").textContent = replay
-    ? "Synthetic replay · No extraction or payment requests."
-    : "Payment details stay on the mobile phone.";
+
 }
 let providerData = null, providerBusy = false, providerEpoch = 0;
 function updateProviderChoice() {
   const p = providerData?.profiles.find(p => p.id === $("next-profile").value);
   const current = selectedProfile(providerData);
   const same = p && current && p.id===current.id && p.version===current.version;
-  $("apply-provider").disabled = providerBusy || replay || !token || !usableProfile(p) || same;
+  $("apply-provider").disabled = providerBusy || !token || !usableProfile(p) || same;
   $("apply-provider").textContent = providerBusy ? "Please wait…" : same ? "Selected" : "Use for next scan";
-  $("next-method").disabled = providerBusy || replay || !providerData;
-  $("next-profile").disabled = providerBusy || replay || !providerData;
-  $("refresh-providers").disabled = providerBusy || replay || !token;
+  $("next-method").disabled = providerBusy || !providerData;
+  $("next-profile").disabled = providerBusy || !providerData;
+  $("refresh-providers").disabled = providerBusy || !token;
 }
 function populateProviderChoices(preferred) {
   const choices = (providerData?.profiles || []).filter(p => usableProfile(p) && p.method === $("next-method").value);
@@ -220,7 +211,7 @@ async function providerRequest(path, options={}) {
 }
 async function loadProviders() {
   if(providerBusy)return;
-  if(!token || replay){updateProviderChoice();return;}
+  if(!token){updateProviderChoice();return;}
   providerBusy=true;const epoch=++providerEpoch;updateProviderChoice();
   $("provider-message").textContent="";
   try {
@@ -232,7 +223,7 @@ async function loadProviders() {
     $("next-method").replaceChildren(...methods.map(m=>new Option(methodLabel(m),m)));
     if(current && methods.includes(current.method))$("next-method").value=current.method;
     populateProviderChoices(current?.id);
-    if(!methods.length)$("provider-message").textContent="No configured providers on this backend. The isolated rehearsal has no providers.";
+    if(!methods.length)$("provider-message").textContent="No configured providers on this backend.";
   } catch(error){providerData=null;$("current-provider").textContent="Could not load current provider.";$("provider-message").textContent=error.message;}
   finally{providerBusy=false;updateProviderChoice();}
 }
@@ -241,7 +232,7 @@ $("next-profile").onchange=updateProviderChoice;
 $("refresh-providers").onclick=loadProviders;
 $("apply-provider").onclick=async()=>{
   const p=providerData?.profiles.find(p=>p.id===$("next-profile").value);
-  if(providerBusy||replay||!usableProfile(p))return;
+  if(providerBusy||!usableProfile(p))return;
   providerBusy=true;updateProviderChoice();$("provider-message").textContent="Saving…";
   try {
     const saved=await providerRequest("/v1/admin/selection",{method:"PUT",body:JSON.stringify({id:p.id,version:p.version})});
@@ -252,7 +243,7 @@ $("apply-provider").onclick=async()=>{
   finally{providerBusy=false;updateProviderChoice();}
 };
 async function connectionLoop(id) {
-  while (id === generation && !replay) {
+  while (id === generation) {
     const streamController = new AbortController();
     controller = streamController;
     let watchdog = setTimeout(() => streamController.abort(), 14000);
@@ -267,7 +258,7 @@ async function connectionLoop(id) {
         throw Error(
           response.status === 401
             ? "Access token rejected"
-            : "Demo channel unavailable",
+            : "Display channel unavailable",
         );
       if (!response.body?.getReader) throw Error("Streaming unavailable");
       const reader = response.body.getReader(),
@@ -298,7 +289,7 @@ async function connectionLoop(id) {
       streamController.abort();
     }
     // Repeated authenticated snapshots also support WebViews without fetch streaming.
-    for (let n = 0; n < 10 && id === generation && !replay; n++) {
+    for (let n = 0; n < 10 && id === generation; n++) {
       const pollController = new AbortController();
       controller = pollController;
       const timeout = setTimeout(() => pollController.abort(), 3000);
@@ -309,7 +300,7 @@ async function connectionLoop(id) {
           redirect: "error",
           signal: pollController.signal,
         });
-        if (!r.ok) throw Error("Could not read demo state");
+        if (!r.ok) throw Error("Could not read display state");
         const data = await r.json();
         if (id === generation) receive(data);
       } catch {
@@ -322,8 +313,6 @@ async function connectionLoop(id) {
   }
 }
 function startLive() {
-  if (replay) selected = liveSelected;
-  replay = false;
   generation++;
   controller?.abort();
   connected = false;
@@ -353,67 +342,8 @@ $("clear").onclick = () => {
   if (native) native.follow("");
   render();
 };
-$("live").onclick = startLive;
-$("replay").onclick = () => {
-  generation++;
-  controller?.abort();
-  if (!replay) liveSelected = selected;
-  replay = true;
-  updateProviderChoice();
-  replayStart = Date.now();
-  $("controls").close();
-};
-const replaySteps = [
-  ["crop", "none"],
-  ["preview", "none"],
-  ["uploading", "none"],
-  ["queued", "queued"],
-  ["reading", "request"],
-  ["reading", "response"],
-  ["reading", "validation"],
-  ["review", "completed"],
-  ["confirmation", "completed"],
-  ["idle", "completed"],
-  ["idle", "none"],
-];
-setInterval(() => {
-  if (replay) {
-    const index = Math.min(
-      replaySteps.length - 1,
-      Math.floor((Date.now() - replayStart) / 3500),
-    );
-    const [phone, backend] = replaySteps[index];
-    selected = "synthetic";
-    const now = Date.now() / 1000;
-    receive({
-      version: 1,
-      revision: index,
-      sessions: [
-        {
-          session_id: selected,
-          phone,
-          backend,
-          last_seen: now,
-          completed_at: index === 9 ? replayStart / 1000 + 31.5 : null,
-          stages:
-            index >= 4
-              ? [
-                  {
-                    provider: "Example AI",
-                    method: "vision",
-                    model: "Synthetic model",
-                    state: backend,
-                    execution: "external",
-                  },
-                ]
-              : [],
-          events: [{ kind: "request", server_time: replayStart / 1000 + 14 }],
-        },
-      ],
-    });
-  }
-  render();
-}, 250);
+$("reconnect").onclick = startLive;
+setInterval(render, 250);
 if (native) {
   try {
     const config = JSON.parse(native.configuration());
