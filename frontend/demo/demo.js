@@ -95,7 +95,7 @@ function graph(model) {
     n.classList.toggle("transferring", model.moving && !waiting && i===index-1);
   });
   $("orbit-label").textContent = model.complete ? "Complete" : waiting ? "Awaiting provider" : model.moving ? "In transit" : model.node===4 ? "Your review" : model.idle ? "Ready" : "Live journey";
-  $("orbit-note").textContent = waiting ? "Awaiting response" : model.complete ? "No payment made" : "Capture → draft → review";
+  $("orbit-note").textContent = waiting ? "Awaiting response" : model.complete ? "" : "Capture → draft → review";
   const kind = nodes[Math.max(0,index)][2];
   if (kind !== illustrationKind) {
     illustrationKind = kind;

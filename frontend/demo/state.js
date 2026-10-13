@@ -51,7 +51,7 @@ export function project(
       ...base,
       title: "Scan complete",
       node: 4,
-      detail: "No payment made",
+      detail: "",
       complete: true,
     };
   if (s.phone === "idle")

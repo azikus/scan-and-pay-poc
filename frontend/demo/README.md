@@ -22,7 +22,7 @@ Verification: six frontend projection/selection tests and 23 backend review/demo
 
 ## Live-only cleanup — 13 October
 
-At Markus’s request, the shipped display has no synthetic playback, fabricated provider/session data, replay controls or rehearsal server. **Reconnect** reconnects to the authenticated live stream. The QR and animation are driven only by observed phone/backend state. Completion reads **Scan complete** and still states **No payment made**, because the separate payment confirmation remains simulated.
+At Markus’s request, the shipped display has no synthetic playback, fabricated provider/session data, replay controls or rehearsal server. **Reconnect** reconnects to the authenticated live stream. The QR and animation are driven only by observed phone/backend state. Completion reads **Scan complete**. At Markus’s request the payment disclaimer was removed from both completion text locations; the underlying payment confirmation remains simulated.
 
 The existing `/demo` and `/v1/demo/*` addresses, native persisted session keys and internal telemetry names are compatibility identifiers for the real live channel. Renaming them would break the installed mobile app or saved session bindings; they do not enable a simulation. Offline unit fixtures remain test-only. The dated replay/browser checks above describe historical implementation verification, not a retained feature.
 
