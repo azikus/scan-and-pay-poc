@@ -14,7 +14,6 @@ Read the [product guide](../README.md), [setup](SETUP.md) and [API contract](API
 | `contracts/v1/` | Generated API and extraction schemas |
 | `evaluation/` | Corpus/batch/replay/scoring/cost tools |
 | `docs/examples/` | Synthetic contract examples and preserved handoff schema used by tests |
-| `presentation/` | Existing reveal.js deck and local export tooling |
 | `website/` | Existing showcase source, reviewed assets and Webflow packaging |
 
 Python packaging/lockfiles stay at the root. `.env`, `.local/`, `samples/`, `results/`, `reference/`, generated exports and QA captures remain ignored. Do not commit real invoice/banking data or credentials.
@@ -197,4 +196,4 @@ Native build/test commands and signing preservation are in [Setup](SETUP.md#nati
 
 Reuse reviewed assets from `website/assets/` for screenshots. Retain source descriptions/hashes and licences; distinguish synthetic/native screenshots, isolated QA sessions and real-device acceptance. Do not generate a fake application screen or include readable source invoices.
 
-The existing deck's English slides/Croatian notes are preserved. `npm run content` in `presentation/` generates ignored `presentation/CONTENT.md`; source HTML remains the authority. Website source/build/attribution/handoff instructions live in `website/README.md`. The repository keeps eight Markdown files total; add links/sections rather than duplicate READMEs or handoffs.
+Website source/build/attribution/handoff instructions live in `website/README.md`. The repository keeps seven Markdown files total; add links/sections rather than duplicate READMEs or handoffs.
