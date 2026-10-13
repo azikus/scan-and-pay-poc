@@ -12,6 +12,9 @@ struct PaymentConfirmation: View {
       }.padding(.bottom, 12)
       ScrollView {
         VStack(alignment: .leading, spacing: 22) {
+          if let context = draft.contextSummary {
+            Text(context).font(Brand.font(13)).foregroundStyle(.secondary)
+          }
           if let amount = draft.amountField {
             VStack(alignment: .leading, spacing: 6) {
               Text(draft.summaryAmount).font(Brand.font(46, .semibold)).minimumScaleFactor(0.6)
@@ -42,11 +45,14 @@ struct PaymentConfirmation: View {
               }
             }
           }
-          if !draft.paymentIssues.isEmpty {
+          if !draft.paymentIssues.isEmpty || !draft.reasons.isEmpty {
             VStack(alignment: .leading, spacing: 9) {
               Label("Details to note", systemImage: "exclamationmark.circle").font(
                 Brand.font(15, .semibold))
               ForEach(draft.paymentIssues, id: \.self) { Text($0).font(Brand.font(14)) }
+              ForEach(Array(draft.reasons.enumerated()), id: \.offset) { _, reason in
+                Text(reason["message"].string ?? "Check this field.").font(Brand.font(14))
+              }
             }.padding(18).frame(maxWidth: .infinity, alignment: .leading)
               .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
           }

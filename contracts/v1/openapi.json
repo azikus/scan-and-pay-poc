@@ -1084,6 +1084,44 @@
         ],
         "title": "Candidate"
       },
+      "CandidateGuidance": {
+        "properties": {
+          "candidate_id": {
+            "type": "string",
+            "title": "Candidate Id"
+          },
+          "route": {
+            "type": "string",
+            "title": "Route"
+          },
+          "account_country": {
+            "$ref": "#/components/schemas/ContextHint"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldRule"
+            },
+            "type": "object",
+            "title": "Fields"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "candidate_id",
+          "route",
+          "account_country",
+          "fields"
+        ],
+        "title": "CandidateGuidance"
+      },
       "ClientReview": {
         "properties": {
           "schema_version": {
@@ -1233,6 +1271,68 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ConnectionStatus"
+      },
+      "ContextHint": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "inferred",
+              "derived",
+              "unknown",
+              "ambiguous"
+            ],
+            "title": "Status",
+            "default": "unknown"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          },
+          "excerpts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excerpts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ContextHint"
       },
       "Cost": {
         "properties": {
@@ -1408,6 +1508,13 @@
             },
             "type": "array",
             "title": "Stages"
+          },
+          "context_explanations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Context Explanations"
           }
         },
         "additionalProperties": false,
@@ -1617,6 +1724,31 @@
           "deferred"
         ],
         "title": "ExtractionCatalog"
+      },
+      "FieldRule": {
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "enum": [
+              "required",
+              "optional",
+              "not_applicable",
+              "unresolved"
+            ],
+            "title": "Requirement"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "requirement",
+          "reason"
+        ],
+        "title": "FieldRule"
       },
       "Finding": {
         "properties": {
@@ -2248,6 +2380,45 @@
         "type": "object",
         "title": "Review"
       },
+      "ReviewGuidance": {
+        "properties": {
+          "policy_version": {
+            "type": "string",
+            "const": "invoice-fields@1",
+            "title": "Policy Version",
+            "default": "invoice-fields@1"
+          },
+          "issuer_country": {
+            "$ref": "#/components/schemas/ContextHint"
+          },
+          "language": {
+            "$ref": "#/components/schemas/ContextHint"
+          },
+          "document_fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldRule"
+            },
+            "type": "object",
+            "title": "Document Fields"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CandidateGuidance"
+            },
+            "type": "array",
+            "title": "Candidates"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "issuer_country",
+          "language",
+          "document_fields",
+          "candidates"
+        ],
+        "title": "ReviewGuidance"
+      },
       "Routing": {
         "properties": {
           "applied_rule_packs": {
@@ -2324,6 +2495,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Error"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review_guidance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewGuidance"
               },
               {
                 "type": "null"

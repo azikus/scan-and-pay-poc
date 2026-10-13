@@ -540,6 +540,18 @@ struct ReviewSheet: View {
         }
       }.pickerStyle(.menu).tint(.primary).accessibilityIdentifier("payment-option")
     }
+    if let context = draft.contextSummary {
+      Text(context).font(Brand.font(13)).foregroundStyle(.secondary)
+        .accessibilityIdentifier("invoice-context")
+    }
+    if !draft.missingFields.isEmpty {
+      Label(
+        "Missing required details (\(draft.missingFields.count))",
+        systemImage: "exclamationmark.circle"
+      )
+      .font(Brand.font(14)).foregroundStyle(.orange)
+      .accessibilityIdentifier("missing-required-details")
+    }
     ForEach(Array(draft.reasons.enumerated()), id: \.offset) { _, reason in
       Label(
         reason["message"].string ?? "Check this field.",
@@ -549,7 +561,7 @@ struct ReviewSheet: View {
     ForEach(
       draft.sections(
         for: draft.fields.filter {
-          $0.value != nil || missing || focused == $0.id
+          draft.shouldShow($0, optional: missing) || focused == $0.id
         })
     ) { section in
       Text(section.title).font(Brand.font(17, .semibold)).padding(.top, 8)
@@ -557,13 +569,13 @@ struct ReviewSheet: View {
         fieldEditor(field)
       }
     }
-    if !draft.missingFields.isEmpty || missing {
+    if !draft.optionalFields.isEmpty || missing {
       Button {
         missing.toggle()
       } label: {
         Label(
           missing
-            ? "Hide empty fields" : "Add missing details (\(draft.missingFields.count))",
+            ? "Hide optional details" : "Add other details",
           systemImage: missing ? "minus.circle" : "plus.circle"
         )
         .font(Brand.font(14)).frame(minHeight: 44)

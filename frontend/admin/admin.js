@@ -15,7 +15,7 @@ const modelNames = {'gpt-4.1-mini-2025-04-14':'OpenAI · GPT-4.1 mini','gemini-3
 const providerNames = {openai:'OpenAI',gemini:'Google',mistral:'Mistral',anthropic:'Anthropic',together:'Together',xai:'xAI'};
 const namedModel = (value,provider) => provider?`${providerNames[provider]||provider} · ${modelNames[value]?.split(' · ').at(-1)||value}`:modelNames[value]||value;
 const methodName = value => methodNames[value] || value || 'Method unavailable';
-const profileName = p => p.method==='managed_ocr_llm'?`${modelNames[p.processor]||p.processor} → ${modelNames[p.model]||p.model}`:namedModel(p.model||p.processor,p.provider)||p.id;
+const profileName = p => (p.method==='managed_ocr_llm'?`${modelNames[p.processor]||p.processor} → ${modelNames[p.model]||p.model}`:namedModel(p.model||p.processor,p.provider)||p.id)+(p.component_ids?.includes('invoice-context@1')?' · Invoice context':'');
 const usable = profile => profile?.implemented && profile.enabled && profile.configured;
 function element(tag,text,className) {const node=document.createElement(tag);node.textContent=text;if(className)node.className=className;return node;}
 function selectedMethodProfile() {return profileData?.profiles.find(p=>p.id===$('extraction-profile').value);}
@@ -105,6 +105,7 @@ function beginSelection(id,source) {
 function clearSelection() {
   resetArtifacts();selectedSource='automated';$('image-tab').hidden=true;
   selected=null; scan=null; reviews=[]; currentJSON=''; reviewError=''; signature='';
+  renderInvoiceContext(null);
   $('selected').hidden=true; $('empty').hidden=false; $('json').textContent='';
   $('changes').replaceChildren(); $('review-choice').replaceChildren();
 }
@@ -249,7 +250,7 @@ async function loadDetail(id,version) {
   $('review-choice').value=reviews.some(r=>r.id===prior)?prior:(reviews.at(-1)?.id||'');
   $('kind').textContent=scan.execution_kind==='synthetic_fixture'?'Synthetic fixture':'Extraction';
   $('scan-title').textContent=id;$('scan-meta').textContent=`${scan.state} · ${date(scan.created_at)}`;
-  $('empty').hidden=true;$('selected').hidden=false;renderOutput();renderScanMethod();
+  $('empty').hidden=true;$('selected').hidden=false;renderOutput();renderScanMethod();renderInvoiceContext(scan);
 }
 function renderList(items) {
   const nextSignature=pretty([items,selected]);if(signature===nextSignature)return;signature=nextSignature;
@@ -291,4 +292,9 @@ $('source').addEventListener('change',()=>{epoch++;limit=50;clearSelection();ref
 for(const name of ['original','provider','image','reviews'])$(name+'-tab').addEventListener('click',()=>{tab=name;renderOutput();});
 for(const id of ['review-choice','provider-choice'])$(id).addEventListener('change',renderOutput);
 $('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(currentJSON);$('copy').textContent='Copied';setTimeout(()=>$('copy').textContent='Copy JSON',1500);}catch{error('Clipboard is unavailable. Select the JSON text to copy it.');}});
+$('theme').value=adminThemePreference;
+$('theme').addEventListener('change',()=>{
+  applyAdminTheme($('theme').value);
+  try {localStorage.setItem('scanpay-admin-theme',adminThemePreference);} catch { /* Theme remains usable for this visit. */ }
+});
 setInterval(()=>{if(!document.hidden&&token)refresh();},2500);

@@ -33,6 +33,7 @@ class Extraction:
     evidence: list[Evidence]
     routing: Routing
     findings: list[Finding] = field(default_factory=list)
+    context_explanations: dict[str, str] = field(default_factory=dict)
 
 
 def review_extraction(result: Extraction, interpretation_policy: str = "strict") -> Payment:
@@ -204,6 +205,7 @@ class Runtime:
                     raise ProviderError("invalid_provider_output")
                 run.payment, run.evidence = checked.payment, checked.evidence
                 run.diagnostics.routing = result.routing
+                run.diagnostics.context_explanations = result.context_explanations
                 run.diagnostics.validation = [
                     Finding(
                         code="account_ownership",

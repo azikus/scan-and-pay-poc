@@ -1,5 +1,11 @@
 # Current project status — 13 October 2026
 
+## Invoice context follow-up — 13 October
+
+The separately requested [invoice context implementation](INVOICE_CONTEXT.md) starts from merged PR #9. One opt-in extraction call adds issuer/language explanations; backend route rules distinguish missing required fields from optional/not-applicable fields. Admin adds country flags/evidence and System/Light/Dark themes; iOS uses the applicability guidance while preserving original JSON and recovery.
+
+Fresh authorized testing covered all 37 distinct images once: zero API errors, two success/35 incomplete drafts, 76/102 accepted readable reviewed fields (historical same-model baseline 79/102). The new prompt is separately selectable and is not promoted as an accuracy improvement. Original selection remains unchanged; 32 profiles are now configured. Ledger is 2,379 reservations after exactly 37 additions, with all original rows preserved. Service source is this invoice-context worktree. Checks: 752 backend tests, 30 native unit/recovery plus four UI tests, and browser theme/responsive checks. See the linked record for costs, latency, caveats and private evidence locations. This current scope supersedes the completed integration-only restrictions below.
+
 ## Combined integration verification — 13 October
 
 Markus requested latest `main` merged into this branch, checked, and PR #9 merged. Integrated base: `08de9e15c20e468ea87caf0a5df9132b845c8486` (PR #7), which includes PR #8’s native glass/hotspot/Send changes. Only AGENTS.md and CODING_HANDOFF.md conflicted; both scopes were retained. No application conflict required a code change.

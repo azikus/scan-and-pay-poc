@@ -24,6 +24,7 @@ from backend.images import prepare_image
 from backend.local_network import ConnectionStatus, LocalNetwork, manual_status
 from backend.models import Accepted, Error, ErrorResponse, Options, ProfileRef, Scan
 from backend.profiles import Definition, ProfilesResponse, registry, resolve, validate_limits
+from backend.review_guidance import with_guidance
 from backend.runtime import Adapter, Runtime
 from backend.scan_artifacts import ScanArtifacts
 from backend.store import Store, request_digest
@@ -219,6 +220,8 @@ def create_app(
         if name not in {
             "admin.css",
             "admin.js",
+            "theme.js",
+            "context.js",
             "HankenGrotesk-Regular.ttf",
             "HankenGrotesk-Semibold.ttf",
             "logo.svg",
@@ -345,7 +348,8 @@ def create_app(
         dependencies=[Depends(auth)],
     )
     async def get_scan(request: Request, scan_id: str) -> Scan:
-        return await asyncio.to_thread(request.app.state.store.get, scan_id)
+        scan = await asyncio.to_thread(request.app.state.store.get, scan_id)
+        return with_guidance(scan)
 
     @app.delete(
         "/v1/scans/{scan_id}", status_code=204, responses=error_models, dependencies=[Depends(auth)]

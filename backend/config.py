@@ -105,6 +105,7 @@ class ModelOption(Model):
     poll_interval_seconds: int = Field(default=1, ge=1, le=10)
     mapping_version: Literal["1", "2"] = "1"
     field_policy: Literal["strict", "partial_v1"] = "strict"
+    context_policy: Literal["none", "invoice_v1"] = "none"
     interpretation_policy: Literal["strict", "draft_v1", "draft_v2", "draft_v3", "draft_v4"] = (
         "strict"
     )
@@ -121,12 +122,20 @@ class ModelOption(Model):
             exclude.add("mapping_version")
         if self.field_policy == "strict":
             exclude.add("field_policy")
+        if self.context_policy == "none":
+            exclude.add("context_policy")
         if self.interpretation_policy == "strict":
             exclude.add("interpretation_policy")
         return self.model_dump_json(exclude=exclude)
 
     @model_validator(mode="after")
     def compatible(self) -> Self:
+        if self.context_policy == "invoice_v1" and (
+            self.operation not in {"vision", "annotations"}
+            or self.protocol_version not in {"5", "6"}
+            or self.field_policy != "partial_v1"
+        ):
+            raise ValueError("Invoice context requires typed compact partial-field extraction")
         if self.interpretation_policy in {"draft_v1", "draft_v2", "draft_v3", "draft_v4"} and (
             self.operation in {"vision", "annotations"} and self.protocol_version not in {"5", "6"}
         ):

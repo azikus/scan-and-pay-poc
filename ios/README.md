@@ -2,6 +2,8 @@
 
 Native SwiftUI app for iPhone, iOS 18+. The first design targets iPhone 16 Pro. It uses AVFoundation capture, PhotosPicker import, manual pixel-preserving crop/rotate, an explicit final-image Send action, and the existing Mac API. No third-party mobile SDK is required.
 
+The 13 October [invoice-context update](../docs/INVOICE_CONTEXT.md) shows issuer/language context and backend field applicability in review. Required blank fields are visible; optional empty fields are under **Add other details**. Populated/edited/uncertain fields and selected-candidate warnings stay visible. Older saved responses use route-based fallback rules. Original JSON, confirmation values and recovery remain separate from presentation guidance.
+
 Open `ScanAndPay.xcodeproj` in Xcode. `project.yml` is the source for regenerating it with `xcodegen generate --spec ios/project.yml` from the repository root. Build the `ScanAndPay` scheme. For a physical phone, select the intended signing team in Xcode, connect/unlock/trust the phone, enable Developer Mode, and select it as the run destination. No team ID, provisioning profile or signing credential is committed. The initial build was signed locally with the existing Azikus development identity and installed on the connected iPhone 16 Pro; its synthetic UI flow passed on iOS 26.6.1.
 
 ## Connection

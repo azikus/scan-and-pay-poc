@@ -1,5 +1,9 @@
 # Coding handoff — continue here
 
+## Invoice context follow-up — 13 October
+
+Read [INVOICE_CONTEXT.md](INVOICE_CONTEXT.md) for the latest separate PR scope, exact new profile, 37 completed paid runs, verification and preservation audit. Source is in the managed `invoice-context-review` worktree on `codex/invoice-context-review`, based on merged PR #9. The private launcher points there; keep it available. Original selected OpenAI profile remains unchanged. New country/route guidance and admin themes are implemented, with 76/102 reviewed readable fields versus historical 79/102; do not silently promote the context profile, repeat completed calls, or resume the stopped historical comparison. This task authorizes the checked PR, not its merge or later milestones. Older no-inference/31-profile snapshots below belong to completed work.
+
 ## Combined integration verification — 13 October
 
 Markus requested latest `main` merged into this branch, checked, and PR #9 merged. Integrated base: `08de9e15c20e468ea87caf0a5df9132b845c8486` (PR #7), which includes PR #8’s native glass/hotspot/Send changes. Only AGENTS.md and CODING_HANDOFF.md conflicted; both scopes were retained. No application conflict required a code change.
