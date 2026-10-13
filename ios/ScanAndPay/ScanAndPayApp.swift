@@ -481,6 +481,7 @@ struct ReviewSheet: View {
             .font(Brand.font(14)).accessibilityIdentifier("review-confirmation")
           Button {
             focused = nil
+            model.demoConfirmationOpened(true)
             payConfirmation = true
           } label: {
             HStack {
@@ -497,6 +498,7 @@ struct ReviewSheet: View {
       .sheet(
         isPresented: $payConfirmation,
         onDismiss: {
+          model.demoConfirmationOpened(false)
           if confirmAfterDismiss {
             confirmAfterDismiss = false
             model.confirm()
@@ -682,6 +684,12 @@ struct ConnectionSettings: View {
             .accessibilityIdentifier("hotspot-address")
           SecureField("Access token", text: $token).textInputAutocapitalization(.never)
         }.disabled(model.reconnecting)
+        Section {
+          Toggle("Demo displays", isOn: $model.demoEnabled).disabled(model.fixtureMode)
+          if model.demoEnabled { Text("Phone session: " + model.demoSessionLabel).font(.caption) }
+        } footer: {
+          Text("Share scan stages with the SUNMI companion. Invoice images, payment details and edits stay private.")
+        }
         if let message { Text(message).foregroundStyle(.orange) }
       }.scrollContentBackground(.hidden).background(DocumentBackdrop())
         .toolbar(.hidden, for: .navigationBar)

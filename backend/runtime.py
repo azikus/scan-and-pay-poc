@@ -9,6 +9,7 @@ from uuid import uuid4
 from pydantic import ValidationError
 
 from backend.config import Settings
+from backend.demo_events import observe
 from backend.errors import ProviderError
 from backend.models import (
     Error,
@@ -108,7 +109,12 @@ class Context:
         self.store.save(self.scan)
         if external:
             self.store.mark_dispatched(self.run.id, self.slot, stage.id)
+        if not external:
+            self.demo("local", stage)
         return stage
+
+    def demo(self, kind: str, stage: Stage | None = None) -> None:
+        observe(self.store.demo, "backend", self.scan.scan_id, kind, stage, run_id=self.run.id)
 
     def raw(self, data: Any) -> None:
         self.store.save_raw(self.scan.scan_id, self.run.id, data)
@@ -165,6 +171,7 @@ class Runtime:
         self, scan_id: str, definitions: list[Definition], accepted_at: float
     ) -> None:
         scan = self.store.get(scan_id)
+        observe(self.store.demo, "backend", scan_id, "running")
         scan.state = "running"
         self.store.save(scan)
         for run, definition in zip(scan.runs, definitions, strict=True):
@@ -183,6 +190,7 @@ class Runtime:
                     )
                 ):
                     result = await self.adapters[definition.adapter].extract(context)
+                context.demo("validation")
                 postprocess = monotonic()
                 payment = review_extraction(
                     result, str(definition.parameters.get("interpretation_policy", "strict"))
@@ -276,3 +284,14 @@ class Runtime:
             else "failed"
         )
         self.store.save(scan)
+        observe(
+            self.store.demo,
+            "backend",
+            scan_id,
+            scan.state,
+            outcome="error"
+            if all(r.outcome == "error" for r in scan.runs)
+            else "incomplete"
+            if any(r.outcome != "success" for r in scan.runs)
+            else "success",
+        )

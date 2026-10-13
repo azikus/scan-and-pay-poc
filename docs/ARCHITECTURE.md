@@ -71,3 +71,10 @@ Native mobile capture/review is designed before implementation, iOS first. The a
 The current diagram is editable documentation. Final findings and the [separate cost report](COST_REPORT_PLAN.md) are distinct deliverables.
 
 The user-requested private progress explainer is `reports/overview-2026-10-07/index.html`. It summarizes implementation and processing outcomes; the final findings report and attendee companion remain later deliverables.
+
+
+## SUNMI observation companion — 13 October 2026
+
+The existing API process owns a separate bounded `DemoHub` alongside the scan store. Phone snapshots and additive scan-binding headers join capture/review activity to real runtime/transport events. Independent phone/backend states prevent reset from cancelling jobs or stale results from replacing a new journey. A coalesced writer persists only sanitized demo state outside the original ledger. SSE always resynchronizes with a full revisioned snapshot; authenticated polling is the fallback. See [wire contract](API_CONTRACT.md).
+
+`frontend/demo/` supplies compact/full/customer webpages, bundled as `backend/demo_assets` in wheels. `sunmi/companion/` is a small Android display host with Keystore-protected connection configuration, controlled-origin WebView and manual two-screen placement. AirScreen remains an independent receiver on the main panel in Vision Pro mode. The native iPhone publisher is opt-in, bounded and best-effort; original extraction JSON, frozen retries, confirmation semantics and payment data stay outside the observer. The future Android capture app remains separate. See [setup/evidence](../sunmi/companion/README.md).

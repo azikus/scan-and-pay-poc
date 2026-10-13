@@ -26,6 +26,12 @@ Every screen shares the Azikus mark and **Scan & Pay** title, with a subtitle fo
 
 The scan screen shows the complete camera frame between light Liquid Glass header and capture panels. Aspect-fit avoids the zoomed preview that previously revealed extra edges after capture. It preserves the full-resolution photo for manual crop. Adjust image, Ready to send, review, confirmation and completion share the glass treatment; settings, JSON navigation and the image viewer use the same light appearance. Documents and JSON remain sharp and readable. Native Liquid Glass controls are used on iOS 26, with material/solid accessibility fallbacks on older systems. Capture, crop and preview transition together; crop rotation/reset animate and the image carries between crop and preview. Reduce Motion avoids spatial animation. See [behavior, hotspot verification](../docs/IOS_GLASS_AND_MOTION.md).
 
+## Optional demo displays
+
+**Connection → Demo displays** enables a best-effort sanitized lifecycle channel. Select the matching short phone session ID in the SUNMI companion. The setting defaults off. Enabled telemetry sends phase/journey identifiers and foreground heartbeats, never invoice pixels, payment fields, edits or credentials in event bodies. Capture/crop/preview, actual upload, review, confirmation-sheet activity, reset and backgrounding are observed. A backend-confirmed save drives completion; a button tap does not.
+
+Pending uploads freeze optional demo session/journey IDs alongside their existing key/options/profile; recovery retains those headers. Legacy pending records still decode. The observer has independent short timeouts and failures do not change extraction, review or confirmation. The `-synthetic-preview` fixture remains entirely offline, even when the setting is enabled. See [SUNMI setup and testing](../sunmi/companion/README.md).
+
 ## Review and JSON
 
 - The image stays behind the expandable review sheet and can be opened at full size. Editing expands the sheet. Accessibility text sizes use the large detent.

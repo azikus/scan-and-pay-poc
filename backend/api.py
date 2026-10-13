@@ -18,6 +18,7 @@ from starlette.exceptions import HTTPException
 
 from backend.client_reviews import ClientReview, ClientReviews, SavedClientReview, ScanList
 from backend.config import Settings
+from backend.demo_events import DemoHub, install_routes, observe
 from backend.errors import ServiceError
 from backend.extraction_catalog import ExtractionCatalog, catalog
 from backend.images import prepare_image
@@ -55,6 +56,10 @@ def create_app(
         else:
             active_adapters = adapters
         store = Store(active_settings)
+        store.demo = DemoHub(
+            active_settings.data_dir / "demo-state.json", ttl=active_settings.demo_retention_seconds
+        )
+        app.state.demo = store.demo
         runtime = Runtime(store, active_settings, active_adapters)
         app.state.settings, app.state.definitions = active_settings, active_definitions
         app.state.store, app.state.runtime = store, runtime
@@ -64,6 +69,7 @@ def create_app(
             yield
         finally:
             await runtime.stop()
+            await asyncio.to_thread(app.state.demo.close)
             store.close()
 
     # Admin shell contains no data; every data endpoint requires the local bearer token.
@@ -90,6 +96,8 @@ def create_app(
             credentials.credentials, request.app.state.settings.token.get_secret_value()
         ):
             raise ServiceError(401, "unauthorized", "A valid local bearer token is required.")
+
+    install_routes(app, auth)
 
     @app.exception_handler(ServiceError)
     async def service_error(request: Request, exc: ServiceError) -> JSONResponse:
@@ -202,7 +210,7 @@ def create_app(
         response.headers["Cache-Control"] = "no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        if request.url.path.startswith("/admin"):
+        if request.url.path.startswith(("/admin", "/demo")):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'none'; script-src 'self'; style-src 'self'; "
                 "font-src 'self'; img-src 'self' blob:; connect-src 'self'; "
@@ -268,9 +276,11 @@ def create_app(
     async def save_review(
         request: Request, scan_id: str, review_id: UUID, body: ClientReview
     ) -> SavedClientReview:
-        return await asyncio.to_thread(
+        saved: SavedClientReview = await asyncio.to_thread(
             request.app.state.store.save_client_review, scan_id, str(review_id), body
         )
+        observe(request.app.state.demo, "backend", scan_id, "confirmed")
+        return saved
 
     @app.post(
         "/v1/scans",
@@ -285,6 +295,8 @@ def create_app(
         image: Annotated[UploadFile, File()],
         options: Annotated[str, Form()],
         idempotency_key: Annotated[str, Header(min_length=1)],
+        x_scanpay_demo_session: Annotated[UUID | None, Header()] = None,
+        x_scanpay_demo_journey: Annotated[UUID | None, Header()] = None,
         x_scanpay_client: Annotated[Literal["mobile", "automated"], Header()] = "automated",
     ) -> Accepted:
         form = await request.form()
@@ -332,8 +344,20 @@ def create_app(
                     excluded,
                     x_scanpay_client,
                 )
+                if x_scanpay_demo_session and x_scanpay_demo_journey:
+                    observe(
+                        store.demo,
+                        "bind",
+                        scan,
+                        str(x_scanpay_demo_session),
+                        str(x_scanpay_demo_journey),
+                    )
                 if created:
                     runtime.submit(scan.scan_id, resolved)
+        if existing and x_scanpay_demo_session and x_scanpay_demo_journey:
+            observe(
+                store.demo, "bind", scan, str(x_scanpay_demo_session), str(x_scanpay_demo_journey)
+            )
         status_url = "/v1/scans/" + scan.scan_id
         response.headers["Location"] = status_url
         return Accepted(scan_id=scan.scan_id, state=scan.state, status_url=status_url)

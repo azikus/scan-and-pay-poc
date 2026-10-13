@@ -1,5 +1,10 @@
 # Coding handoff — continue here
 
+## Latest authorized work — SUNMI companion, 13 October 2026
+
+Continue in the managed `sunmi-live-companion` worktree on `codex/sunmi-live-companion`, based on `e76e303`. Markus explicitly requested this separate worktree after approving the display plan. This authorization supersedes the historical presentation-import-only gate for this scoped companion work. Read [SUNMI implementation plan](SUNMI_DEMO_IMPLEMENTATION_PLAN.md) and [source implementation/setup/evidence](../sunmi/companion/README.md). Backend, iPhone observer, web views and native host are source-implemented and offline-checked; physical live integration remains pending. Preserve the working AirScreen/offline-test baseline, the current iOS UX and live private state. Do not infer paid-call authorization from display testing or launch a second owner against the live database. No separate chat was created.
+
+
 ## Current scope — 12 October 2026
 
 Read [CURRENT_STATUS.md](CURRENT_STATUS.md) first. **Latest follow-up:** Markus authorized the scoped Liquid Glass/motion update and hotspot verification; see [IOS_GLASS_AND_MOTION.md](IOS_GLASS_AND_MOTION.md). The subsequent user decision keeps only hotspot in the client, with one saved Mac address and no USB fallback; hosting is deferred. The previous import-only limits below describe the completed presentation task. Application PRs #2–#5 are merged. The initial presentation was delivered and revised with Markus on 9 October; it is now maintained in [presentation/](../presentation/README.md). Earlier instructions to start a presentation chat or treat the deck as unstarted are historical.

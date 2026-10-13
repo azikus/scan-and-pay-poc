@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Scan &amp; Pay · Live journey</title>
+    <link rel="stylesheet" href="/demo/assets/demo.css" />
+  </head>
+  <body>
+    <header>
+      <img src="/demo/assets/logo.svg" alt="Azikus" /><span>SCAN &amp; PAY</span
+      ><span id="connection" role="status">CONNECTING</span
+      ><button id="settings">Controls</button>
+    </header>
+    <main>
+      <section id="idle" hidden>
+        <div>
+          <p class="eyebrow">FROM INVOICE TO PAYMENT DRAFT</p>
+          <h1>See what’s<br />possible.</h1>
+          <p>Scan to explore Scan &amp; Pay.</p>
+          <p class="subtle">azikus.com/scan-and-pay-poc</p>
+          <p id="idle-note"></p>
+        </div>
+        <img
+          class="qr"
+          src="/demo/assets/qr.png"
+          alt="QR code to the Scan and Pay information website"
+        />
+      </section>
+      <section id="journey">
+        <p class="eyebrow" id="mode-label">LIVE SYSTEM JOURNEY</p>
+        <h1 id="title">Waiting for mobile phone</h1>
+        <p id="detail"></p>
+        <div id="graph">
+          <div class="node">
+            01<span>Mobile phone</span><small>Capture</small>
+          </div>
+          <i></i>
+          <div class="node">02<span>Backend</span><small>Receive</small></div>
+          <i></i>
+          <div class="node">03<span>Provider</span><small>Read</small></div>
+          <i></i>
+          <div class="node">04<span>Backend</span><small>Check</small></div>
+          <i></i>
+          <div class="node">
+            05<span>Mobile phone</span><small>Review</small>
+          </div>
+        </div>
+        <div id="stages"></div>
+        <div id="summary" hidden>
+          <span>Recipient <b>Private</b></span
+          ><span>Destination <b>•••• ••••</b></span
+          ><span>Reference <b>•••• ••••</b></span>
+        </div>
+        <p id="timing" class="subtle"></p>
+      </section>
+    </main>
+    <footer>
+      <span id="footer-note">Payment details stay on the mobile phone.</span
+      ><time id="clock"></time>
+    </footer>
+    <dialog id="controls">
+      <form id="login">
+        <h2>Display controls</h2>
+        <label id="token-label"
+          >Local access token<input
+            id="token"
+            type="password"
+            autocomplete="off" /></label
+        ><button id="connect" type="submit">Connect</button>
+      </form>
+      <label
+        >Follow mobile phone session<select id="sessions">
+          <option value="">Select a mobile phone</option>
+        </select></label
+      ><label
+        >View<select id="view">
+          <option value="compact">Compact technical journey</option>
+          <option value="technical">Full technical journey</option>
+          <option value="customer">Customer status</option>
+        </select></label
+      >
+      <div class="buttons">
+        <button id="live">Live</button
+        ><button id="replay">Synthetic replay</button
+        ><button id="clear">Clear followed session</button>
+      </div>
+      <div id="native-controls" hidden class="buttons">
+        <button id="vision">Vision Pro mode</button
+        ><button id="scanpay">Scan &amp; Pay mode</button
+        ><button id="configure">Backend connection</button>
+      </div>
+      <p id="error" role="alert"></p>
+      <button id="close">Close</button>
+    </dialog>
+    <script type="module" src="/demo/assets/demo.js"></script>
+  </body>
+</html>

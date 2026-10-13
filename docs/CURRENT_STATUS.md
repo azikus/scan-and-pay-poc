@@ -1,6 +1,14 @@
-# Current project status — 12 October 2026
+# Current project status — 13 October 2026
 
 This file supersedes prospective wording and operational snapshots in the dated 8–9 October handoffs. Historical experiment evidence remains unchanged.
+
+## SUNMI worktree continuation — 13 October
+
+Markus approved starting the SUNMI implementation in a separate worktree. `codex/sunmi-live-companion` starts from iOS commit `e76e303`; the original checkout and live runtime remain unchanged. The first source implementation adds sanitized backend snapshots/SSE, actual transport events, optional iPhone lifecycle telemetry, three Azikus display views with idle website QR, and a separate Android display host with manual Vision Pro / Scan & Pay modes. The approved deck and external static website remain unchanged.
+
+Offline checks passed: 698 backend tests (backend 96.53% statements / 90.91% branches), 29 native unit/recovery tests, four existing native UI tests, four frontend projection tests, static checks, Android build/signature and installed-wheel assets. Browser checks cover both target display sizes, explicit replay and authenticated synthetic idle updates. See [setup and remaining physical checks](../sunmi/companion/README.md) and the [approved plan](SUNMI_DEMO_IMPLEMENTATION_PLAN.md).
+
+This networked package has not yet replaced the accepted offline test on the SUNMI. Physical installation/mode switching, live iPhone/WebView integration and measured display latency remain open. No paid calls, primary-checkout edits, phone migration, live runtime restart or changes to the original ledger/selection were made. The previous AirScreen plus offline-companion hardware acceptance is retained as a separate result.
 
 ## Latest follow-up
 

@@ -173,7 +173,9 @@ class OpenAIAdapter:
                     timeout=90,
                     http_client=http,
                 ) as client:
+                    context.demo("request", stage)
                     response = await client.responses.create(**request)
+                    context.demo("response", stage)
             # SDK models may retain malformed untrusted values; never log serialization warnings.
             context.raw(response.model_dump(mode="json", warnings=False))
             stage.request_id = safe_request_id(response._request_id)
@@ -250,6 +252,7 @@ class OpenAIAdapter:
         except APITimeoutError:
             raise ProviderError("provider_timeout") from None
         except APIStatusError as exc:
+            context.demo("response", stage)
             stage.request_id = safe_request_id(exc.request_id)
             context.raw({"http_status": exc.status_code, "error_body": exc.body})
             raise status_error(exc.status_code) from None
@@ -280,6 +283,7 @@ class MistralAdapter:
             async with httpx.AsyncClient(
                 transport=self.transport, timeout=90, trust_env=False, follow_redirects=False
             ) as client:
+                context.demo("request", stage)
                 response = await client.post(
                     f"https://{config.endpoint_host}/v1/ocr",
                     headers={
@@ -294,6 +298,7 @@ class MistralAdapter:
                         "include_image_base64": False,
                     },
                 )
+            context.demo("response", stage)
             stage.request_id = safe_request_id(response.headers.get("x-request-id"))
             if response.status_code != 200:
                 context.raw({"http_status": response.status_code, "error_body": response.text})

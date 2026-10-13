@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scan &amp; Pay — Display test</title>
+<style>
+@font-face{font-family:Hanken;src:url(HankenGrotesk-Regular.ttf)}
+@font-face{font-family:Hanken;src:url(HankenGrotesk-Semibold.ttf);font-weight:600}
+:root{color-scheme:dark;font-family:Hanken, sans-serif;background:#0a0a0a;color:white}
+*{box-sizing:border-box}body{margin:0;height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;overflow:hidden}
+header,footer{display:flex;align-items:center;justify-content:space-between;gap:20px}
+header{padding-bottom:2.7vh;border-bottom:1px solid #3e4855}header img{width:145px;height:auto}
+.tag{font-size:13px;letter-spacing:.12em;color:#cfe2f6}.tag::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#cfe2f6;margin-right:10px}
+main{flex:1;min-height:0;display:grid;grid-template-columns:1fr .85fr;gap:4vw;align-items:center}
+.eyebrow{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#9bb0cb;margin-bottom:18px}
+h1{font-size:clamp(34px,5vw,68px);font-weight:400;line-height:1.06;letter-spacing:-.035em;margin:0 0 20px}
+p{font-size:clamp(16px,2vw,25px);color:#cfe2f6;line-height:1.4;margin:0 0 18px}
+.url{font-size:14px;color:#9bb0cb}.qr{justify-self:end;background:white;border-radius:16px;padding:14px;width:min(37vw,52vh);height:min(37vw,52vh)}.qr img{width:100%;height:100%;image-rendering:pixelated}
+#journey{display:none;grid-column:1/-1}.flow{display:flex;align-items:center;margin:30px 0 24px;gap:0}
+.node{flex:1;min-width:0;border:1px solid #3e4855;border-radius:14px;padding:20px 8px;text-align:center;color:#9bb0cb;font-size:18px}
+.node.active{border-color:#cfe2f6;background:#17202c;color:#fff;box-shadow:0 0 35px #cfe2f618;animation:pulse 1.5s infinite}
+.node.done{color:#cfe2f6}.link{height:2px;flex:.3;background:#3e4855;position:relative}.link.active::after{content:'';position:absolute;width:9px;height:9px;background:#cfe2f6;border-radius:50%;top:-3.5px;animation:travel 1s linear infinite}
+#stageTitle{font-size:clamp(30px,4.5vw,58px);margin-bottom:10px}#stageInfo{font-size:22px}#timer{font-variant-numeric:tabular-nums;color:#9bb0cb}
+footer{padding-top:2vh;border-top:1px solid #3e4855}.heartbeat{color:#9bb0cb;font-size:14px;font-variant-numeric:tabular-nums}.heartbeat strong{color:#cfe2f6}.controls{display:flex;gap:10px}
+button{font:600 15px Hanken,sans-serif;border:1px solid #3e4855;border-radius:9px;padding:13px 18px;background:#15191f;color:#fff;min-height:48px}button.primary{background:#cfe2f6;color:#0a0a0a;border-color:#cfe2f6}button:focus-visible{outline:3px solid white;outline-offset:3px}
+@keyframes pulse{50%{box-shadow:0 0 40px #cfe2f640}}@keyframes travel{from{left:0}to{left:100%}}
+@media(prefers-reduced-motion:reduce){*,*::after{animation:none!important}}
+@media(max-height:550px){body{padding:3vh 3vw}.flow{margin:20px 0}.node{padding:13px 5px}.qr{width:47vh;height:47vh}header img{width:125px}p{font-size:19px}}
+</style>
+<header><img src="logo.svg" alt="Azikus"><span class="tag">DISPLAY TEST · SYNTHETIC</span></header>
+<main>
+  <section id="idleCopy"><div class="eyebrow">Scan &amp; Pay</div><h1>From invoice<br>to payment draft.</h1><p>Scan to explore the PoC.</p><div class="url">azikus.com/scan-and-pay-poc</div></section>
+  <div class="qr" id="qr"><img src="qr.png" alt="QR code linking to https://www.azikus.com/scan-and-pay-poc"></div>
+  <section id="journey"><div class="eyebrow">Sample journey · no backend requests</div><h1 id="stageTitle"></h1><p id="stageInfo"></p><div class="flow"><div class="node">Mobile phone</div><div class="link"></div><div class="node">Backend</div><div class="link"></div><div class="node">AI provider</div><div class="link"></div><div class="node">Backend</div><div class="link"></div><div class="node">Mobile phone</div></div><div id="timer"></div></section>
+</main>
+<footer><span class="heartbeat">SECOND DISPLAY · <strong id="clock"></strong> · alive <strong id="uptime">0s</strong></span><div class="controls"><button id="idle">Show QR</button><button id="next">Next stage</button><button id="run" class="primary">Run sample journey</button></div></footer>
+<script>
+const stages=[
+ ['Adjusting crop','The user prepares the invoice on their mobile phone.',0,-1],
+ ['Sending invoice','A symbolic transfer from the mobile phone to the backend.',1,0],
+ ['Requesting extraction','The backend sends a request to the AI provider.',2,1],
+ ['Waiting for AI response','This wait is simulated for the display test.',2,-1],
+ ['Response received','Structured fields return to the backend.',3,2],
+ ['Checking extracted fields','The backend prepares a reviewable payment draft.',3,-1],
+ ['Review on your mobile phone','The user checks the draft and any warnings.',4,3],
+ ['Demo complete','No payment made. Returning to the idle QR.',4,-1]
+];
+let stage=-1,interval=null,stageStarted=0;const boot=performance.now();
+const byId=id=>document.getElementById(id);
+function stop(){clearInterval(interval);interval=null;byId('run').textContent='Run sample journey'}
+function render(){const idle=stage<0;byId('idleCopy').style.display=idle?'block':'none';byId('qr').style.display=idle?'block':'none';byId('journey').style.display=idle?'none':'block';if(idle)return;const [title,info,node,link]=stages[stage];byId('stageTitle').textContent=title;byId('stageInfo').textContent=info;document.querySelectorAll('.node').forEach((el,i)=>el.className='node'+(i===node?' active':i<node?' done':''));document.querySelectorAll('.link').forEach((el,i)=>el.className='link'+(i===link?' active':''));stageStarted=performance.now()}
+byId('idle').onclick=()=>{stop();stage=-1;render()};
+byId('next').onclick=()=>{stop();stage=(stage+1)%stages.length;render()};
+byId('run').onclick=()=>{if(interval){stop();return}stage=0;render();byId('run').textContent='Pause sample';interval=setInterval(()=>{stage++;if(stage===stages.length){stop();stage=-1}render()},4000)};
+setInterval(()=>{byId('clock').textContent=new Date().toLocaleTimeString('en-GB');byId('uptime').textContent=Math.floor((performance.now()-boot)/1000)+'s';if(stage>=0)byId('timer').textContent='Sample stage · '+Math.floor((performance.now()-stageStarted)/1000)+'s'},1000);
+render();
+</script>
+</html>
