@@ -61,14 +61,16 @@ inline_js = re.sub(r"  const assetBase = .*\n  const asset = name => assetBase \
 license_note = '<!-- Hanken Grotesk font licence\n' + (assets/'OFL.txt').read_text().replace('--','- -') + '\n-->\n'
 (dist / 'Scan-and-Pay.html').write_text(wrap(license_note + fragment(inline_content,inline_css,inline_js)))
 (dist / 'asset-urls.json').write_text(json.dumps({name: 'https://YOUR-ASSET-HOST/' + name for name in sorted(used)}, indent=2))
-for name in ['README.md','EVIDENCE.md']:
-    if (ROOT/name).exists(): shutil.copy2(ROOT/name,dist/name)
+shutil.copy2(ROOT/'README.md', dist/'README.md')
+# Remove superseded documentation left by an older local build.
+for name in ['EVIDENCE.md', 'HANDOFF.md']:
+    (dist/name).unlink(missing_ok=True)
 with zipfile.ZipFile(dist/'Scan-and-Pay-Webflow.zip','w',zipfile.ZIP_DEFLATED) as z:
     # Explicit allowlist: keep authoring evidence, private paths and stale assets out.
     for name in ['Scan-and-Pay.html', 'index.html', 'webflow-embed.html', 'asset-urls.json']:
         z.write(dist/name, name)
-    z.write(ROOT/'HANDOFF.md', 'START-HERE.md')
-    for name in ['content.html', 'styles.css', 'site.js', 'scripts/build.py', 'HANDOFF.md']:
+    z.write(ROOT/'README.md', 'START-HERE.md')
+    for name in ['content.html', 'styles.css', 'site.js', 'scripts/build.py', 'README.md']:
         z.write(ROOT/name, 'website/' + name)
     for name in sorted(used | {'OFL.txt'}):
         z.write(assets/name, 'assets/' + name)

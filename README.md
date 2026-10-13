@@ -74,7 +74,7 @@ A scan uses one exact, versioned profile. The admin's choice applies to the **ne
 | OCR + annotations | A document service extracts against a requested field schema | Image plus schema |
 | OCR → model | OCR runs first; a separate model interprets the returned content | Image to OCR, then text/layout to the model |
 
-Supported integrations include OpenAI, Gemini, Mistral, Anthropic, Together, xAI, Google Document AI, Azure Document Intelligence, AWS Textract and Mindee. Actual model availability depends on the locally enabled configuration and account access. The [provider guide](docs/PROVIDERS.md) explains profiles, data destinations and request outcomes.
+Supported integrations include OpenAI, Gemini, Mistral, Anthropic, Together, xAI, Google Document AI, Azure Document Intelligence, AWS Textract and Mindee. Actual model availability depends on the locally enabled configuration and account access. The [provider guide](docs/DEVELOPMENT.md#providers-and-extraction-profiles) explains profiles, data destinations and request outcomes.
 
 ## What the draft understands
 
@@ -119,7 +119,7 @@ Two display modes are available:
 
 The idle view shows the website QR. **Controls → Next scan** offers the same shared method/model selection as the admin. Reconnect restores live observation; it cannot submit a scan. A provider response is an observed event, not proof of a correct draft. The capture above comes from an isolated QA session; live integration is separately accepted on hardware.
 
-See [companion setup](sunmi/companion/README.md) for installation and display placement.
+See [companion setup](docs/SETUP.md#sunmi-build-connection-and-displays) for installation and display placement.
 
 ## Recovery without duplicate scans
 
@@ -146,12 +146,10 @@ Extraction can be wrong or incomplete. Reviewed development measurements and the
 | Read | Purpose |
 | --- | --- |
 | [Setup](docs/SETUP.md) | Backend, credentials, hotspot and local operation |
-| [Architecture](docs/ARCHITECTURE.md) | Components, storage, data destinations and recovery |
 | [API contract](docs/API_CONTRACT.md) | Wire semantics, typed observations and review endpoints |
-| [Providers](docs/PROVIDERS.md) | Extraction methods, exact profiles, readiness and accounting |
 | [Evaluation](docs/EVALUATION.md) | Corpus runs, scoring, measurements and known limitations |
-| [Development](docs/DEVELOPMENT.md) | Repository map, offline checks and maintenance |
+| [Development](docs/DEVELOPMENT.md) | Architecture, providers, repository map and checks |
 
-The [native project](ios/README.md), [display frontend](frontend/demo/README.md) and [SUNMI host](sunmi/companion/README.md) retain focused implementation instructions. The existing [25-slide deck](presentation/README.md) and [Webflow showcase](website/README.md) remain available; this guide is the product overview.
+[Setup](docs/SETUP.md) owns native/display build instructions; [Development](docs/DEVELOPMENT.md) covers their implementation. The existing [25-slide deck](presentation/README.md) and [Webflow showcase](website/README.md) remain available; this guide is the product overview.
 
 Screenshot source descriptions and hashes are in [asset provenance](website/assets/provenance.json). Real invoices, credentials, labels, raw provider responses and generated exports remain outside Git.

@@ -43,7 +43,7 @@ for name, content in files.items():
 PYSETUP
 ```
 
-Profiles in shipped examples start disabled. Configure and deliberately enable compatible methods using the [provider guide](PROVIDERS.md). Startup, health, profile listing and offline tests need no provider inference.
+Profiles in shipped examples start disabled. Configure and deliberately enable compatible methods using the [profile configuration](DEVELOPMENT.md#providers-and-extraction-profiles). Startup, health, profile listing and offline tests need no provider inference.
 
 Start one backend:
 
@@ -75,13 +75,57 @@ Keep secrets out of source, request options, URLs, terminal arguments and logs. 
 3. On the phone, open **Connection → Hotspot → Mac address**, paste it, enter the existing local API token and tap **Reconnect**.
 4. Allow local-network access when prompted. Update the address when the Mac IP changes.
 
-There is one saved address, with no USB/cloud selector or automatic discovery. The phone's `localhost` points to the phone. Reconnect makes authenticated reads; it does not send a capture or confirm a draft. See [native build instructions](../ios/README.md).
+There is one saved address, with no USB/cloud selector or automatic discovery. The phone's `localhost` points to the phone. Reconnect makes authenticated reads; it does not send a capture or confirm a draft. Native build/test commands are below.
 
 ## SUNMI and browser inspection
 
-The same backend serves `/demo`. **Connection → Demo displays** on the phone enables sanitized telemetry; the SUNMI follows the matching phone session. Connection credentials are entered in the companion and stored in Android Keystore. See [installation/display placement](../sunmi/companion/README.md).
+The same backend serves `/demo`. **Connection → Demo displays** on the phone enables sanitized telemetry; the SUNMI follows the matching phone session. Connection credentials are entered in the companion and stored in Android Keystore. Installation/display placement is below.
 
 Admin holds its token in memory only. Confirmed edits, uploaded mobile images and retained provider outputs are private authenticated reads. No separate admin/display frontend server or build is required.
+
+## iPhone build and tests
+
+The app requires iOS 18+. Open `ios/ScanAndPay.xcodeproj` and build scheme `ScanAndPay`. `ios/project.yml` is the XcodeGen source; regenerate from the repository root only when needed:
+
+```sh
+xcodegen generate --spec ios/project.yml
+```
+
+Select the existing signing team, connect/unlock/trust the physical phone and enable Developer Mode. Upgrade in place: preserve bundle ID `com.azikus.scanpay.poc`, Keychain and Application Support. Team/provisioning credentials are not committed.
+
+For offline native tests, choose an available simulator:
+
+```sh
+xcrun simctl list devices available
+xcodebuild -project ios/ScanAndPay.xcodeproj -scheme ScanAndPay \
+  -destination 'platform=iOS Simulator,id=SIMULATOR_UUID' \
+  -derivedDataPath .local/ios-build CODE_SIGNING_ALLOWED=NO test
+```
+
+Use `-synthetic-preview` only for the bundled offline fixture flow; remove it for real capture/networking. Fixture timing is not provider performance. Hanken Grotesk is the licensed fallback for ABC Monument Grotesk; the OFL stays with native Resources.
+
+## SUNMI build, connection and displays
+
+Requires Java, Android SDK platform 33 and build-tools 36.0.0. From the repository root:
+
+```sh
+bash sunmi/companion/build.sh
+adb install -r sunmi/companion/build/companion.apk
+bash sunmi/companion/launch.sh
+```
+
+`ANDROID_HOME` can override the SDK path. Preserve `.local/sunmi-companion/debug.keystore`, or point `SUNMI_SIGNING_KEY` to the existing key; updates must keep the installed signing identity. Build outputs and keys are ignored. The ordinary APK has no debug setup/capture hooks.
+
+The launcher uses one attached ADB device or `SUNMI_SERIAL`, discovers the secondary presentation display and places LauncherActivity there. It does not hardcode display IDs or force-stop AirScreen. Run it again after a reboot/customer-panel reconnect; the ordinary app icon cannot guarantee two-screen placement. There is no boot receiver/device-owner/kiosk provisioning.
+
+Enter the advertised Mac URL and existing local bearer token in **Backend connection**. The address is configurable, never embedded in the APK. Android Back opens connection settings if loading fails. Enable phone **Connection → Demo displays** and select its matching short session on SUNMI.
+
+Choose a display mode in Controls:
+
+- **Vision Pro:** AirScreen receives mirroring on the main panel; the companion occupies the customer panel. Use the appropriate shared network and the headset's Mirror My View control.
+- **Scan & Pay:** technical journey on the main panel and simplified status/idle QR on the smaller panel.
+
+Relaunch restores the saved main-screen mode. Display disconnection cannot fail a phone extraction or confirmation. Next scan controls use the same persisted selection as admin and affect only new Sends. Internal isolation and WebView restrictions are documented in [Development](DEVELOPMENT.md#sunmi-host).
 
 ## CLI extraction and recovery
 
