@@ -1,5 +1,13 @@
 # Current project status — 13 October 2026
 
+## SUNMI PR closeout — 13 October
+
+Markus authorized creating and merging the completed SUNMI branch and archiving this chat. Scope includes live-only dual-display telemetry, circular component animations, title transitions, provider choice for the next individual scan, right-hand live scan insights, completion styling and the installed mobile dark theme. Requested footer/completion labels are removed. Running every model for a selected method was estimated only and is not implemented or enabled.
+
+Final checks: 775 offline backend tests; domain/orchestration coverage 96.27% statements / 91.42% branches; 32 native unit/recovery tests; seven frontend tests; Ruff, strict mypy, unchanged generated contracts, normal Android build, and wheel asset/privacy checks. The preceding visual pass also verified four native UI flows, isolated browser layouts and reduced motion. No paid inference or live provider selection change was made during closeout.
+
+Keep the SUNMI worktree at `/Users/markusi/.codex/worktrees/sunmi-live-companion/scan-and-pay`: the existing private backend launcher still serves its source. Archiving the chat must not remove that checkout or stop the running app. Separate PR #11 retains later country-evaluation source/documentation changes not incorporated into this SUNMI branch; its earlier invoice-context implementation was integrated to preserve the installed runtime. Phone foregrounding and real confirmation-animation acceptance remain user checks.
+
 ## Display motion and mobile dark mode — 13 October
 
 The live SUNMI views now animate outgoing/incoming titles, enlarge the circular component illustrations, and show an animated active component in the center. A right-hand panel shows the actual providers/models, observed backend elapsed time and four recent journey events. Heartbeat repetitions are coalesced; prior journeys are excluded; terminal backend timings stop and disconnected timings freeze. The customer view uses one large active illustration. Saved confirmation triggers a drawn checkmark, two expanding rings and 32 particles matching the mobile celebration; provider responses and failures cannot trigger it. Reduced Motion removes spatial/repeating effects. No synthetic playback or new data endpoint was added.
