@@ -21,14 +21,14 @@ struct BackendClient {
       !host.isEmpty,
       url.user == nil, url.password == nil, url.query == nil, url.fragment == nil,
       url.path.isEmpty || url.path == "/", !token.isEmpty
-    else { throw ClientFailure("Enter a Mac base URL and local access token.") }
+    else { throw ClientFailure("Enter a server base URL and local access token.") }
     if url.scheme?.lowercased() == "http" && !Self.isLocal(host) {
-      throw ClientFailure("Use HTTPS, or a local Mac address on your private network.")
+      throw ClientFailure("Use HTTPS, or a local server address on your private network.")
     }
     #if !targetEnvironment(simulator)
       if ["localhost", "127.0.0.1", "::1", "[::1]"].contains(host) {
         throw ClientFailure(
-          "On your iPhone, use your Mac’s LAN address. Localhost points to the phone.")
+          "Use the server’s private network address. Localhost points to this device.")
       }
     #endif
     self.baseURL = url
@@ -67,16 +67,16 @@ struct BackendClient {
     for (key, value) in headers { request.setValue(value, forHTTPHeaderField: key) }
     let (data, response) = try await session.data(for: request)
     guard let http = response as? HTTPURLResponse else {
-      throw ClientFailure("The Mac returned an invalid response.")
+      throw ClientFailure("The backend returned an invalid response.")
     }
     let json = (try? JSONDecoder().decode(JSONValue.self, from: data)) ?? .null
     guard (200..<300).contains(http.statusCode) else {
       let message =
         json["error"]["message"].string
-        ?? "The Mac could not complete the request (\(http.statusCode))."
+        ?? "The backend could not complete the request (\(http.statusCode))."
       throw ClientFailure(message)
     }
-    guard case .object = json else { throw ClientFailure("The Mac returned unreadable JSON.") }
+    guard case .object = json else { throw ClientFailure("The backend returned unreadable JSON.") }
     return (json, data)
   }
   @discardableResult
@@ -86,7 +86,7 @@ struct BackendClient {
   func checkConnection() async throws -> String {
     let (result, _) = try await request("v1/profiles")
     guard let id = result["server_id"].string, UUID(uuidString: id) != nil else {
-      throw ClientFailure("Update the Mac backend before reconnecting.")
+      throw ClientFailure("Update the backend before reconnecting.")
     }
     return id
   }
@@ -136,7 +136,7 @@ struct BackendClient {
       id.range(of: "^scan-[a-zA-Z0-9-]+$", options: .regularExpression) != nil
     else {
       throw ClientFailure(
-        "The Mac did not return a valid scan ID. Recover this upload to check acceptance.")
+        "The backend did not return a valid scan ID. Recover this upload to check acceptance.")
     }
     return id
   }

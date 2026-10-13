@@ -10,7 +10,7 @@ Read the [product guide](../README.md), [setup](SETUP.md) and [API contract](API
 | `frontend/admin/` | Private inspector assets; bundled in wheels as `backend/admin_assets/` |
 | `frontend/demo/` | Live display assets; bundled as `backend/demo_assets/` |
 | `ios/` | Native SwiftUI app, XcodeGen spec/project, resources and tests |
-| `sunmi/companion/` | Android WebView display host and build/launch scripts |
+| `companion/` | Android WebView display host and build/launch scripts |
 | `contracts/v1/` | Generated API and extraction schemas |
 | `evaluation/` | Corpus/batch/replay/scoring/cost tools |
 | `docs/examples/` | Synthetic contract examples and preserved handoff schema used by tests |
@@ -34,7 +34,7 @@ Scan & Pay runs one Python/FastAPI API service. The mobile client, admin and liv
 | Persistence | `backend/store.py` | SQLite jobs, stages, accounting, frozen profiles, reviews and idempotency |
 | Admin | `frontend/admin/` | Shared next-scan selection and private saved-record inspection |
 | Observation hub | `backend/demo_events.py` | Bounded, sanitized mobile/backend journey snapshots |
-| Display | `frontend/demo/`, `sunmi/companion/` | Live browser views and controlled-origin Android WebView host |
+| Display | `frontend/demo/`, `companion/` | Live browser views and controlled-origin Android WebView host |
 | Evaluation | `evaluation/` | Input manifests, fresh batches, saved-response scoring and costs |
 
 ### A scan's lifecycle
@@ -69,7 +69,7 @@ A process lock prevents two service owners sharing a data directory. Completed w
 
 ### Networking and recovery
 
-The ASGI entry point supports an explicit private bind address. Optional `scanpay-serve` reconciles private/link-local IPv4 listeners using macOS interface discovery; this launcher is deployment tooling, not an API requirement. The native settings store one private server address; their hotspot label reflects the current demonstration setup. Reconnect uses authenticated reads and checks the persistent `server_id`; older accepted drafts use scan/image identity checks. Uncertain legacy uploads remain bound to their original address when identity cannot be established safely.
+The ASGI entry point supports an explicit private bind address. Optional `scanpay-serve` reconciles private/link-local IPv4 listeners using `/sbin/ifconfig` discovery for physical `en*` interfaces; this launcher is deployment tooling, not an API requirement. The native settings store one private server address; their hotspot label reflects the current demonstration setup. Reconnect uses authenticated reads and checks the persistent `server_id`; older accepted drafts use scan/image identity checks. Uncertain legacy uploads remain bound to their original address when identity cannot be established safely.
 
 Two jobs can progress concurrently with bounded outbound calls and queue capacity. Profile stage/job timeouts are explicit. Disconnection is not cancellation, and a timeout does not prove the upstream provider stopped processing. No hidden retry or provider fallback is introduced.
 

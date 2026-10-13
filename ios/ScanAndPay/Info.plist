@@ -12,7 +12,7 @@
 <key>UILaunchScreen</key><dict/>
 <key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string></array>
 <key>NSCameraUsageDescription</key><string>Photograph a payment document. Nothing is uploaded until you tap Send.</string>
-<key>NSLocalNetworkUsageDescription</key><string>Send your chosen document to the Scan and Pay backend on your Mac.</string>
+<key>NSLocalNetworkUsageDescription</key><string>Send your chosen document to the Scan and Pay backend on your private network.</string>
 <key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>
 <key>UIAppFonts</key><array><string>HankenGrotesk-Regular.ttf</string><string>HankenGrotesk-Semibold.ttf</string></array>
 </dict></plist>

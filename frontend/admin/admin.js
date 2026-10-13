@@ -128,11 +128,11 @@ async function loadNetwork() {
     const addresses=data.addresses.filter(address=>address.kind!=='link_local');
     $('network-status').textContent=data.warnings.length?'Needs attention':addresses.length?'Ready':'No hotspot address';
     $('network-help').textContent=data.automatic
-      ? 'Connect the Mac to your iPhone’s Personal Hotspot. Enter the Mac address in the app’s Connection settings, then tap Reconnect.'
+      ? 'Connect the server and mobile device to the same private network. Enter the server address in Connection settings, then tap Reconnect.'
       : 'Automatic network updates are off for this server. Use the address below if available.';
     $('network-addresses').replaceChildren(...addresses.map(address=>{
       const row=element('div',undefined,'network-address');
-      const label=element('label','Mac address');
+      const label=element('label','Server address');
       const input=document.createElement('input');input.type='text';input.readOnly=true;input.value=address.url;
       input.setAttribute('aria-label',label.textContent);input.spellcheck=false;
       const copy=element('button','Copy address');copy.type='button';
@@ -148,12 +148,12 @@ async function loadNetwork() {
       });
       label.append(input);row.append(label,copy);return row;
     }));
-    if(!addresses.length)$('network-addresses').append(element('p','Connect the Mac to your iPhone’s Personal Hotspot.','muted'));
+    if(!addresses.length)$('network-addresses').append(element('p','Connect the server and mobile device to the same private network.','muted'));
     $('network-warning').textContent=data.warnings.join(' ');$('network-warning').hidden=!data.warnings.length;
   } catch(e) {
     if(version!==epoch)return;
     clearNetwork();$('network-status').textContent='Unavailable';
-    $('network-warning').textContent='Could not refresh Mac addresses. Keep the admin open on the Mac at 127.0.0.1 to recover after a network change.';
+    $('network-warning').textContent='Could not refresh server addresses. Keep the admin open on the API host at 127.0.0.1 to recover after a network change.';
     $('network-warning').hidden=false;
   } finally {networkBusy=false;}
 }

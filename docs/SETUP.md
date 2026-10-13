@@ -54,7 +54,7 @@ Start one API service with the portable ASGI entry point. Replace `SERVER_PRIVAT
 
 The client needs a reachable address and bearer token, not a particular host vendor or tethering topology. Host firewall/network permissions must allow the intended private connection. This is a local deployment; public hosting is outside this setup.
 
-An optional `scanpay-serve` launcher provides automatic listener updates using macOS interface discovery (`/sbin/ifconfig`). It keeps loopback plus usable private/link-local listeners without restarting jobs. Other compatible hosts use the ASGI command with an explicit bind address. Manual startup reports `automatic=false`; admin Connection displays the actual private listener address. Automatic discovery failure retains previous listeners with a warning, while a failed bind is excluded and retried.
+An optional `scanpay-serve` launcher provides automatic listener updates using `/sbin/ifconfig` discovery for physical `en*` interfaces. It keeps loopback plus usable private/link-local listeners without restarting jobs. Other compatible hosts use the ASGI command with an explicit bind address. Manual startup reports `automatic=false`; admin Connection displays the actual private listener address. Automatic discovery failure retains previous listeners with a warning, while a failed bind is excluded and retried.
 
 ## Credentials
 
@@ -112,9 +112,9 @@ Use `-synthetic-preview` only for the bundled offline fixture flow; remove it fo
 Requires Java, Android SDK platform 33 and build-tools 36.0.0. From the repository root:
 
 ```sh
-bash sunmi/companion/build.sh
-adb install -r sunmi/companion/build/companion.apk
-bash sunmi/companion/launch.sh
+bash companion/build.sh
+adb install -r companion/build/companion.apk
+bash companion/launch.sh
 ```
 
 `ANDROID_HOME` can override the SDK path. Preserve the installed signing key, or point `DISPLAY_SIGNING_KEY` to it; updates must keep the installed signing identity. Build outputs and keys are ignored. The ordinary APK has no debug setup/capture hooks.

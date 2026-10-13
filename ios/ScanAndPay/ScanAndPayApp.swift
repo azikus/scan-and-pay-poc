@@ -197,7 +197,7 @@ struct ScanHome: View {
       .confirmationDialog("Clear this scan?", isPresented: $discard, titleVisibility: .visible) {
         Button("Clear scan", role: .destructive) { model.reset() }
       } message: {
-        Text("This clears the phone’s draft. Processing already accepted by the Mac may continue.")
+        Text("This clears the phone’s draft. Processing already accepted by the backend may continue.")
       }
     }
     .overlay {
@@ -477,7 +477,7 @@ struct ReviewSheet: View {
           if model.processing {
             Text(
               model.phase == .queued
-                ? "The Mac has accepted your image." : "You’ll review the details before finishing."
+                ? "The backend has accepted your image." : "You’ll review the details before finishing."
             ).font(Brand.font(14)).foregroundStyle(.secondary)
             ForEach(
               [
@@ -556,7 +556,7 @@ struct ReviewSheet: View {
       .confirmationDialog("Clear this scan?", isPresented: $discard, titleVisibility: .visible) {
         Button("Clear scan", role: .destructive) { model.reset() }
       } message: {
-        Text("This clears the phone’s draft. It does not cancel work on the Mac.")
+        Text("This clears the phone’s draft. It does not cancel work on the backend.")
       }
   }
   @ViewBuilder private func draftContents(_ draft: PaymentDraft) -> some View {
@@ -719,10 +719,10 @@ struct ConnectionSettings: View {
             .accessibilityIdentifier("reconnect-settings")
           if let status = model.connectionStatus { Text(status).font(.subheadline) }
         } footer: {
-          Text("Connect the Mac to this iPhone’s Personal Hotspot.")
+          Text("Connect the backend host and mobile device to the same private network.")
         }
         Section("Hotspot") {
-          TextField("Mac address", text: $hotspot).keyboardType(.URL)
+          TextField("Server address", text: $hotspot).keyboardType(.URL)
             .textInputAutocapitalization(.never).autocorrectionDisabled()
             .accessibilityIdentifier("hotspot-address")
           SecureField("Access token", text: $token).textInputAutocapitalization(.never)
@@ -732,7 +732,7 @@ struct ConnectionSettings: View {
           if model.demoEnabled { Text("Phone session: " + model.demoSessionLabel).font(.caption) }
         } footer: {
           Text(
-            "Share scan stages with the SUNMI companion. Invoice images, payment details and edits stay private."
+            "Share scan stages with the companion device. Invoice images, payment details and edits stay private."
           )
         }
         if let message { Text(message).foregroundStyle(.orange) }
