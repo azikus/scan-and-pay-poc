@@ -2,10 +2,10 @@
 
 ## Working scope
 
-- Markus explicitly skipped the Android capture/review PoC and comprehensive final presentation. Do not start either or treat them as remaining acceptance gates. Keep the delivered 25-slide deck and existing Webflow showcase.
+- Markus explicitly skipped the Android capture/review PoC and comprehensive final presentation. Do not start either or treat them as remaining acceptance gates. Keep the existing Webflow showcase. Presentation files are kept outside the repository.
 - Markus confirmed the explicit phone Send works after the local backend repair. iOS, backend/admin integration, automatic document capture and live display are accepted for the current PoC scope. User acceptance is not a new measured latency/accuracy study.
 - Documentation uses a screenshot-led product README and concise technical guides, with redundant phase/change handoffs removed. Use mobile client / API service / companion device terminology in product/design documentation, user-facing copy and paths. Do not name a hardware vendor; the companion source lives in `companion/`. Preserve scan/review/runtime behavior and private evidence. Additional provider runs are separate: use a fresh plan with selected profiles, complete images, repeat count and accounting; never resume the stopped comparison or retry old jobs automatically.
-- Read `README.md`, `docs/SETUP.md`, `docs/API_CONTRACT.md` and `docs/DEVELOPMENT.md`. Keep exactly eight maintained Markdown files: root README/AGENTS, docs SETUP/API_CONTRACT/DEVELOPMENT/EVALUATION, and presentation/website READMEs. Merge sections instead of adding wrapper READMEs. Do not add phase plans or per-chat/change handoffs; Git holds change history.
+- Read `README.md`, `docs/SETUP.md`, `docs/API_CONTRACT.md` and `docs/DEVELOPMENT.md`. Keep exactly seven maintained Markdown files: root README/AGENTS, docs SETUP/API_CONTRACT/DEVELOPMENT/EVALUATION, and website README. Merge sections instead of adding wrapper READMEs. Do not add phase plans or per-chat/change handoffs; Git holds change history.
 
 ## Runtime and private state
 
@@ -27,8 +27,8 @@
 
 ## Evidence, source and checks
 
-- Source: `backend/`, `frontend/admin/`, `frontend/demo/`, `ios/`, `companion/`, `presentation/`, `website/`; no Android capture-app placeholder is required. Shared contracts/docs/evaluation stay at root.
-- Keep approved English slides/Croatian notes and dated results unchanged. Apply Azikus branding to designed artifacts, never invoice originals. Commit only reviewed synthetic/masked screenshots. Generated exports/dependencies, raw data, readable invoice galleries and private evidence remain ignored.
+- Source: `backend/`, `frontend/admin/`, `frontend/demo/`, `ios/`, `companion/`, `website/`; no Android capture-app placeholder is required. Shared contracts/docs/evaluation stay at root.
+- Preserve dated evaluation results. Apply Azikus branding to designed artifacts, never invoice originals. Commit only reviewed synthetic/masked screenshots. Generated exports/dependencies, raw data, readable invoice galleries and private evidence remain ignored.
 - Fresh provider evaluations cover the complete agreed input inventory, including JPEG/PNG fixtures, with explicit failures/not-run records and new keys. Do not replay completed requests, silently substitute providers, infer correctness from agreement or silently change the default.
 - Unreviewed labels stay unscored; approved name variants are separate from exact matches. Never fuzzy-match bank/reference/amount fields. Distinguish request success, draft completeness and field correctness. Record latency median/p95/sample/timeout counts; backend timing is not capture-to-review timing; hybrid timing/cost includes every stage.
 - Tests use offline synthetic data. For application changes run meaningful affected checks and retain domain/orchestration coverage ≥90% statements/≥85% branches, excluding generated/vendor code honestly. Use appropriate licensed SDKs and preserve historical reference code privately.

@@ -137,6 +137,6 @@ Extraction can be wrong or incomplete. Reviewed development measurements and the
 | [Evaluation](docs/EVALUATION.md) | Corpus runs, scoring, measurements and known limitations |
 | [Development](docs/DEVELOPMENT.md) | Architecture, providers, repository map and checks |
 
-[Setup](docs/SETUP.md) owns native/display build instructions; [Development](docs/DEVELOPMENT.md) covers their implementation. The existing [25-slide deck](presentation/README.md) and [Webflow showcase](website/README.md) remain available; this guide is the product overview.
+[Setup](docs/SETUP.md) owns native/display build instructions; [Development](docs/DEVELOPMENT.md) covers their implementation. The [Webflow showcase](website/README.md) remains available; this guide is the product overview.
 
 Screenshot source descriptions and hashes are in [asset provenance](website/assets/provenance.json). Real invoices, credentials, labels, raw provider responses and generated exports remain outside Git.
