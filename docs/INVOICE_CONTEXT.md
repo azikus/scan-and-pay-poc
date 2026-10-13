@@ -2,6 +2,8 @@
 
 Markus requested implementation in a separate worktree/PR from latest main, including country explanations/flags and admin light/dark appearance. He explicitly authorized fresh paid calls for every available image. Base: `aabad9f7c64e6bcb3247d0a86bd89114c41313b0` (merged PR #9). The earlier no-inference/handoff restrictions do not apply to this bounded request. The stopped 9 October comparison is untouched.
 
+Before PR creation, main advanced to `814a1f176141335b7a7bec7c624e882fb457e6ab` (PR #10, explicit cloud credentials). That change is merged here. Only the three status/instruction documents conflicted; both scopes were retained. The integrated backend was rechecked and loaded with an idle service restart; every profile version is unchanged. Paid results below remain pinned to the original extraction profile and were not rerun for this integration.
+
 ## Extraction and review policy
 
 One model request extracts payment data **and** document context. There is no preliminary classification call or second country-specific extraction. `context_policy: "invoice_v1"` adds a versioned instruction/schema section to compact protocol 5/6 profiles with `field_policy: "partial_v1"`. This is opt-in; default serialization omits it, preserving historical prompts, profile versions and saved results. Image and annotation adapters support the extension; fresh paid verification below covers direct OpenAI only.
@@ -51,7 +53,7 @@ Ledger audit: 2,342 → 2,379 reservations, exactly 37 additions. Every pre-exis
 
 ## Checks
 
-- 752 backend/evaluation tests pass; domain/orchestration coverage 96.08% statements / 91.45% branches. New cases cover one-call context, invalid/ambiguous context, route-versus-country separation, optional/reference requirements, legacy read immutability and unchanged historical profiles across six direct adapters.
+- 767 backend/evaluation tests pass after integrating PR #10 (752 before integration); domain/orchestration coverage 96.08% statements / 91.49% branches. New cases cover one-call context, invalid/ambiguous context, route-versus-country separation, optional/reference requirements, legacy read immutability and unchanged historical profiles across six direct adapters.
 - 30 native unit/recovery tests and all four existing synthetic UI tests pass on an isolated iPhone 16 Pro / iOS 26.2 simulator. The first parallel Xcode runner stalled after compilation and was stopped; a serial run completed with zero failures. No physical-phone installation or acceptance claim.
 - Admin browser checks cover both appearances, persistence after reload, supporting text, zero console warnings/errors, and 390 px layout with no horizontal overflow. Screenshots use a synthetic invoice fixture, not private invoice data.
 - Ruff, mypy, generated schemas, Swift format, JavaScript syntax and package/privacy checks are recorded with the PR. Raw images, label keys, results, screenshots and test artifacts stay private/ignored.
