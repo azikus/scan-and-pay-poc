@@ -1,8 +1,12 @@
 # Current project status — 13 October 2026
 
+## PR #11 merge closeout — 13 October
+
+Markus authorized the checked merge. Latest remote main `7d188e7` is already integrated. Final checks and privacy review passed: 792 backend/evaluation tests, seven frontend tests, 96.19% statement / 91.34% branch domain coverage, static/contract/package checks and installed-wheel serving. No new paid calls, phone install, selection change or service restart. The live backend still uses the invoice-context-review worktree; retain it after merging. See INVOICE_CONTEXT.md for the full closeout record.
+
 ## Country context is standard — 13 October
 
-Markus explicitly chose country-aware extraction as standard while retaining method/model selection. Compatible compact LLM methods now always include context; there is one OpenAI mini entry, `openai-mini-image-roles-v3@2-85c414059effa4ad`, with no separate old/context choice. The private configuration and persisted selection were migrated without inference or historical result edits. Latest main/merged SUNMI PR #12 is integrated; its removed checkout was replaced in the launcher by this surviving invoice-context worktree. Keep this worktree available. Combined verification: 792 backend/evaluation tests, seven SUNMI frontend tests, static checks and live authenticated profile/admin/display reads. See INVOICE_CONTEXT.md for exact scope and evidence; dated opt-in/default-preservation notes below are historical. PR #11 remains for review, not an authorized merge.
+Markus explicitly chose country-aware extraction as standard while retaining method/model selection. Compatible compact LLM methods now always include context; there is one OpenAI mini entry, `openai-mini-image-roles-v3@2-85c414059effa4ad`, with no separate old/context choice. The private configuration and persisted selection were migrated without inference or historical result edits. Latest main/merged SUNMI PR #12 is integrated; its removed checkout was replaced in the launcher by this surviving invoice-context worktree. Keep this worktree available. Combined verification: 792 backend/evaluation tests, seven SUNMI frontend tests, static checks and live authenticated profile/admin/display reads. See INVOICE_CONTEXT.md for exact scope and evidence; dated opt-in/default-preservation notes below are historical. Markus has now explicitly authorized the final privacy review, checks and merge of PR #11.
 
 ## User acceptance and next milestone — 13 October
 

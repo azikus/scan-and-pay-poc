@@ -58,7 +58,7 @@ Ledger audit: 2,342 → 2,379 reservations, exactly 37 additions. Every pre-exis
 - Admin browser checks cover both appearances, persistence after reload, supporting text, zero console warnings/errors, and 390 px layout with no horizontal overflow. Screenshots use a synthetic invoice fixture, not private invoice data.
 - Ruff, mypy, generated schemas, Swift format, JavaScript syntax and package/privacy checks are recorded with the PR. Raw images, label keys, results, screenshots and test artifacts stay private/ignored.
 
-This PR is for review; merge, Android, hosting and presentation changes are outside this task.
+Markus subsequently authorized updating, sanitizing, checking and merging this PR. Android, hosting and presentation changes remain outside this closeout.
 
 ## Country/scheme evaluation follow-up — 13 October
 
@@ -106,3 +106,9 @@ The private migration enabled context on 20 compatible model options, removed th
 PR #12 merged during this update, and its SUNMI worktree was removed while the launcher still referenced it. Latest main (`7d188e7`) is integrated here, preserving SUNMI and mobile dark mode. The launcher was repaired to use this surviving invoice-context worktree; do not archive it while active. Admin and SUNMI assets and authenticated profile reads pass after the idle restart. Existing jobs, idempotency records, ledger, stage reservations, reviews and backend identity were preserved. The selection/version change was explicit and authorized.
 
 Combined checks: **792 backend/evaluation tests and seven SUNMI frontend tests pass**; domain/orchestration coverage **95.45% statements / 90.55% branches**; Ruff, strict mypy and JavaScript syntax checks pass. Native source comes unchanged from merged main; this follow-up did not reinstall the phone. Private migration/repair records and config backup: `.local/invoice-context-2026-10-13/default-promotion/` in the original checkout.
+
+## Final PR closeout — 13 October
+
+Markus authorized updating, sanitizing and merging PR #11. Refreshed remote main is `7d188e7` (merged SUNMI PR #12), already an ancestor of this branch; no additional merge was needed. Reviewed the remaining 14-file scope: standard country-aware extraction, admin/SUNMI labels, country/scheme evaluation and documentation. Privacy checks found no configured secrets, private invoice/label/result files or local databases in changed files, PR patches or built distributions.
+
+Final checks: 792 offline backend/evaluation tests; domain/orchestration coverage 96.19% statements / 91.34% branches; seven SUNMI frontend tests; Ruff, strict mypy, JavaScript syntax, unchanged generated contracts, wheel/sdist privacy and installed-wheel admin/SUNMI serving checks. No native app source differs from main, so existing native acceptance is retained without a new reinstall/test claim. No inference, private configuration change or runtime restart during closeout. Keep this worktree because the live launcher uses it.
