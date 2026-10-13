@@ -149,8 +149,7 @@ export const methodLabel = (method) => ({
   managed_ocr_rules: "OCR → rules",
   managed_ocr_llm: "OCR → AI",
 }[method] || method.replaceAll("_", " "));
-export const profileLabel = (p) => [p.provider ? providerLabel(p.provider) : null, p.processor, p.model].filter(Boolean).join(" · ") +
-  (p.component_ids?.includes("invoice-context@1") ? " · Invoice context" : "");
+export const profileLabel = (p) => [p.provider ? providerLabel(p.provider) : null, p.processor, p.model].filter(Boolean).join(" · ");
 export function selectedProfile(data) {
   return data?.profiles.find(p => p.id === data.default_extract_profile_id && p.version === data.default_extract_profile_version);
 }

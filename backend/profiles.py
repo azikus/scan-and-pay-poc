@@ -164,6 +164,14 @@ def registry(settings: Settings) -> dict[str, Definition]:
             meta, adapter, config, config.max_call_eur or Decimal("0"), parameters=parameters
         )
     for profile_id, option in settings.providers.options.items():
+        # Current compact LLM extraction always includes invoice context. Keep
+        # legacy option deserialization unchanged for immutable saved snapshots.
+        if (
+            option.operation in {"vision", "annotations"}
+            and option.protocol_version in {"5", "6"}
+            and option.field_policy == "partial_v1"
+        ):
+            option = option.model_copy(update={"context_policy": "invoice_v1"})
         assert option.config is not None
         config = option.config
         missing = []

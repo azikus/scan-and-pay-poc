@@ -43,7 +43,7 @@ test("provider choice requires ready profiles and the exact saved version", () =
   for(const flag of ["enabled","configured","implemented"])assert.equal(usableProfile({...p,[flag]:false}),false);
   assert.equal(selectedProfile({profiles:[p],default_extract_profile_id:p.id,default_extract_profile_version:"v1"}),undefined);
   assert.equal(selectedProfile({profiles:[p],default_extract_profile_id:p.id,default_extract_profile_version:"v2"}),p);
-  assert.match(profileLabel({...p,component_ids:["invoice-context@1"]}),/Invoice context/);
+  assert.equal(profileLabel({...p,component_ids:["invoice-context@1"]}),profileLabel(p));
 });
 test("hybrid motion follows the active remote stage instead of skipping OCR", () => {
   const remote=[{state:"request"},{state:"queued"}];

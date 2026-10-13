@@ -1,5 +1,16 @@
 # Coding handoff — continue here
 
+## PR #11 merge closeout — 13 October
+
+Markus authorized the checked merge. Latest remote main `7d188e7` is already integrated. Final checks and privacy review passed: 792 backend/evaluation tests, seven frontend tests, 96.19% statement / 91.34% branch domain coverage, static/contract/package checks and installed-wheel serving. No new paid calls, phone install, selection change or service restart. The live backend still uses the invoice-context-review worktree; retain it after merging. See INVOICE_CONTEXT.md for the full closeout record.
+
+## Country context is standard — 13 October
+
+Markus explicitly chose country-aware extraction as standard while retaining method/model selection. Compatible compact LLM methods now always include context; there is one OpenAI mini entry, `openai-mini-image-roles-v3@2-85c414059effa4ad`, with no separate old/context choice. The private configuration and persisted selection were migrated without inference or historical result edits. Latest main/merged SUNMI PR #12 is integrated; its removed checkout was replaced in the launcher by this surviving invoice-context worktree. Keep this worktree available. Combined verification: 792 backend/evaluation tests, seven SUNMI frontend tests, static checks and live authenticated profile/admin/display reads. See INVOICE_CONTEXT.md for exact scope and evidence; dated opt-in/default-preservation notes below are historical. Markus has now explicitly authorized the final privacy review, checks and merge of PR #11.
+
+## User acceptance and next milestone — 13 October
+
+Markus accepted the updated app on his physical iPhone and confirmed that end-to-end integration testing and the SUNMI live demo are complete. These items must not be proposed again as unfinished work. The app from PR #11 built, installed and launched successfully on the iPhone 16 Pro; private records are in `.local/invoice-context-2026-10-13/device-build.log`, `device-install.json` and `device-launch.json` in the original checkout. SUNMI/integration completion is user-confirmed, without new agent measurements. Next is the Android capture/review app and both-platform testing, followed by the comprehensive final presentation and embeddable HTML. This status correction does not change the selected extraction profile or authorize a PR merge.
 ## SUNMI PR closeout — 13 October
 
 Markus authorized creating and merging the completed SUNMI branch and archiving this chat. Scope includes live-only dual-display telemetry, circular component animations, title transitions, provider choice for the next individual scan, right-hand live scan insights, completion styling and the installed mobile dark theme. Requested footer/completion labels are removed. Running every model for a selected method was estimated only and is not implemented or enabled.
@@ -40,7 +51,9 @@ Continue in the managed `sunmi-live-companion` worktree on `codex/sunmi-live-com
 
 ## Invoice context follow-up — 13 October
 
-Read [INVOICE_CONTEXT.md](INVOICE_CONTEXT.md) for the latest separate PR scope, exact new profile, 37 completed paid runs, verification and preservation audit. Source is in the managed `invoice-context-review` worktree on `codex/invoice-context-review`, based on merged PR #9. The private launcher points there; keep it available. Original selected OpenAI profile remains unchanged. New country/route guidance and admin themes are implemented, with 76/102 reviewed readable fields versus historical 79/102; do not silently promote the context profile, repeat completed calls, or resume the stopped historical comparison. This task authorizes the checked PR, not its merge or later milestones. Older no-inference/31-profile snapshots below belong to completed work.
+Latest user clarification: add country/scheme score breakdowns now and prepare country labels for review. Implemented in `evaluation.country_scores`; review key/form and both saved-response reports are private under `.local/invoice-context-2026-10-13/`. Markus subsequently approved all 17 country suggestions in chat. The private `country-reviewed-markus-2026-10-13.json` records this approval; `old-country-report-reviewed.json` and `new-country-report-reviewed.json` score 13/17 and 17/17 country matches respectively (16 distinct images). These are user-approved model suggestions, not blind independent labels. Preserve the initial pending key/form and earlier reports. Preserve the original extraction benchmark and use a single shared country key across compared profiles. Read the follow-up section in INVOICE_CONTEXT.md. This evaluation-only update adds no paid calls, runtime changes or default promotion.
+
+Read [INVOICE_CONTEXT.md](INVOICE_CONTEXT.md) for the latest separate PR scope, exact new profile, 37 completed paid runs, verification and preservation audit. Source is in the managed `invoice-context-review` worktree on `codex/invoice-context-review`, based on merged PR #9 with main PR #10 integrated before review. The private launcher points there; keep it available. Original selected OpenAI profile remains unchanged. New country/route guidance and admin themes are implemented, with 76/102 reviewed readable fields versus historical 79/102; do not silently promote the context profile, repeat completed calls, or resume the stopped historical comparison. The later closeout request authorizes merging the checked PR; later development milestones remain separate. Older no-inference/31-profile snapshots below belong to completed work.
 
 **Cloud credentials — 13 October:** Markus requested AWS and Google credentials directly in root `.env`, with no interactive setup. Explicit `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (optional `AWS_SESSION_TOKEN`) now override AWS profile lookup. `GOOGLE_CREDENTIALS_JSON` loads authorized-user or service-account credentials in memory and overrides ADC/file lookup. Google Document AI uses OAuth identity credentials, not a Gemini-style API key. Existing credentials were migrated without generating new keys or changing identities; exact profile versions and private accounting/selection were preserved. Legacy SDK fallback remains only when explicit env credentials are absent. See [ENV_CLOUD_CREDENTIALS.md](ENV_CLOUD_CREDENTIALS.md).
 
@@ -69,7 +82,7 @@ Markus authorized the repository import and the separately requested provider ex
 
 ## What comes next
 
-The initial presentation is available for review and use. Agree the remaining iOS improvements and real-invoice testing with Markus before starting them. Then continue backend/admin work and integration testing, Android and both-platform testing as the final development milestone, and finally the comprehensive final presentation plus embeddable website HTML. See [ROADMAP.md](ROADMAP.md). Do not create another chat automatically.
+The initial presentation is available for review and use. Markus has confirmed integration testing and the SUNMI demo complete. Next is Android and both-platform testing as the final development milestone, then the comprehensive final presentation plus embeddable website HTML. See [ROADMAP.md](ROADMAP.md). Do not create another chat automatically.
 
 ## Runtime and preservation
 

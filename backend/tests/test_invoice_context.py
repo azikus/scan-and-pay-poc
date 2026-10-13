@@ -184,19 +184,25 @@ def test_old_scans_get_readonly_guidance_and_separate_candidate_rules(uk):
 @pytest.mark.parametrize(
     "provider", ["openai", "gemini", "mistral", "anthropic", "together", "xai"]
 )
-def test_context_profile_is_optin_and_does_not_change_existing_requests(settings, provider):
+def test_context_is_standard_but_saved_request_options_remain_immutable(settings, provider):
     configured(settings, provider)
     option = settings.providers.options["test-profile"]
     option.protocol_version, option.field_policy = "5", "partial_v1"
     option.interpretation_policy = "draft_v4"
-    original = registry(settings)["test-profile"].snapshot()
+    original_option = option.snapshot_json()
     old_request = vision_request(option, "synthetic", "secret")
     assert "context_policy" not in option.snapshot_json()
+    definition = registry(settings)["test-profile"]
+    current = ModelOption.model_validate_json(definition.parameters["option"])
+    assert current.context_policy == "invoice_v1"
+    assert "invoice-context@1" in definition.metadata.component_ids
+    assert "ContextReading" in json.dumps(vision_request(current, "synthetic", "secret"))
+    assert option.snapshot_json() == original_option
+    assert "ContextReading" not in json.dumps(old_request)
     option.context_policy = "invoice_v1"
-    assert registry(settings)["test-profile"].metadata.version != original["profile"]["version"]
-    assert "ContextReading" in json.dumps(vision_request(option, "synthetic", "secret"))
+    assert registry(settings)["test-profile"].snapshot() == definition.snapshot()
     option.context_policy = "none"
-    assert registry(settings)["test-profile"].snapshot() == original
+    assert registry(settings)["test-profile"].snapshot() == definition.snapshot()
     assert vision_request(option, "synthetic", "secret") == old_request
 
 
