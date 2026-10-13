@@ -4,3 +4,6 @@ dist-private/
 private-assets/
 *.pdf
 *.zip
+
+# Generated slide text; index.html owns content and notes
+/CONTENT.md

@@ -22,7 +22,7 @@ Only dependency installation needs network access. reveal.js is pinned to **6.0.
 - `index.html` is the slide and speaker-note source of truth. Edit it directly.
 - `deck.css` and `deck.js` preserve the approved visual design and interaction.
 - `assets/manifest.json` records the reviewed asset hashes. Original logos and the existing masked/synthetic screenshots are retained byte-for-byte.
-- `npm run content` regenerates [the text companion](CONTENT.md). Do this after changing slide text or notes, then rebuild and check.
+- `npm run content` generates the ignored local text export `CONTENT.md`. Slide text and Croatian notes remain authoritative in `index.html`; the export is not another maintained document.
 - `dist/index.html` is the presenter version with notes. `dist/Audience.html` is a standalone file containing its own scripts, fonts and images, with speaker notes and the notes plugin removed. It opens without a server.
 - For PDF, open <http://127.0.0.1:8766/?print-pdf> in Chrome/Chromium, choose Print → Save as PDF, landscape, no margins, and enable background graphics. Fragments print together. PDF and generated HTML exports are ignored by Git.
 
@@ -30,7 +30,7 @@ Build output is regenerated, not committed. After `npm ci`, run `npm run build` 
 
 ## Invoice gallery
 
-The repository edition shows a numbered overview of the **17 evaluation inputs**, preserving the study counts without including invoice pixels. Other screenshots were inspected before import: review is synthetic, payment values are already masked, and the admin/production screenshots contain no personal or banking values. See [asset provenance](ASSETS.md).
+The repository edition shows a numbered overview of the **17 evaluation inputs**, preserving the study counts without including invoice pixels. Other screenshots were inspected before import: review is synthetic, payment values are already masked, and the admin/production screenshots contain no personal or banking values. Asset attribution is below.
 
 The full invoice gallery remains an optional **local-only** asset. On the existing Mac it is already copied, unchanged, into ignored `private-assets/corpus-gallery.png`. On another machine, obtain that file from the private original export; do not add it to Git. Then:
 
@@ -41,6 +41,26 @@ npm run start:private
 
 This writes only `dist-private/`, including its own presenter deck and audience export. These outputs contain readable invoice previews and remain private. The regular build never reads private assets, and the local server cannot serve source files, credentials or the private-assets directory. Building either edition does not publish it.
 
+## Asset attribution and licences
+
+The approved image/font bytes are preserved; `assets/manifest.json` records their SHA-256 hashes.
+
+| Asset | Source and treatment |
+| --- | --- |
+| `logo-white.svg`, `logo-dark.svg`, `logomark-white.svg` | Supplied Azikus artwork, unchanged |
+| `aircash-logo.png` | Supplied Aircash logo from the approved reference deck, unchanged |
+| `HankenGrotesk-*.ttf`, `OFL.txt` | Hanken Grotesk under the bundled SIL Open Font License; disclosed fallback for ABC Monument Grotesk |
+| `current-3855.png` | User-supplied production scanner screen, without invoice/payment values |
+| `current-3860.png`, `current-3861.png` | User-supplied production scanner reading a test barcode, without banking data |
+| `current-payment.png` | Previously flattened screenshot with payment values masked; no original unmasked screenshot imported |
+| `review.png` | PoC synthetic preview, explicitly labelled in the image |
+| `admin-selector.png` | Method/model selector, without credentials or payment values |
+| `admin-inspector.png` | Inspector navigation/header, without the invoice, JSON values or raw provider content |
+
+The real invoice montage `corpus-gallery.png` is excluded from version control and from the default build. It can be included only through the explicit local private build. Original source invoices, labels, raw responses and credentials remain outside the presentation source.
+
+reveal.js **6.0.2** is an exact dependency in `package.json` / `package-lock.json`, under its MIT license. Each build copies that license into `vendor/LICENSE`. The font license is included in both distributable folders. Both licenses are also embedded as a comment in each standalone audience HTML. Azikus/Aircash logos and user-supplied product screenshots are project assets, not a grant for unrelated reuse or public publication.
+
 ## Supporting material
 
-[Slide content](CONTENT.md) is generated from the source HTML. [Asset provenance](ASSETS.md) documents the reviewed artwork/screenshots. The [product guide](../README.md) explains the working application, and [evaluation](../docs/EVALUATION.md) holds measured results and limitations. The existing [Webflow showcase](../website/README.md) is a separate local handoff.
+The [product guide](../README.md) explains the application; [evaluation](../docs/EVALUATION.md) records measured scope/results/limits. The [Webflow showcase](../website/README.md) is a separate local handoff. Build/export commands do not publish either artifact.
