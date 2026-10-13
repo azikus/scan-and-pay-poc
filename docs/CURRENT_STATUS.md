@@ -1,5 +1,10 @@
 # Current project status — 13 October 2026
 
+## SUNMI installation — 13 October
+
+Markus authorized and received the connected-device installation. Current main, invoice-context changes and explicit cloud credentials were integrated into the SUNMI worktree before deployment. The original private launcher now runs this worktree’s source while retaining the original environment/database. The existing mobile app was upgraded, Demo displays enabled, and the new SUNMI companion installed beside AirScreen. Real device rendering verifies the connected idle QR; Markus confirmed the screen followed his real scan and returned to the QR after he dismissed the result. All 2,379 original reservations, all 32 profiles, prior reviews, backend identity and the selected OpenAI mini definition were preserved; the user’s single scan brought the reservation count to 2,380. Root environment and provider configuration hashes are unchanged. Pay confirmation and live mode-switch/headset continuity remain unverified in this installation rehearsal. Checks passed: 775 backend tests, 32 native unit/recovery tests, four frontend projection tests, signed device builds. See [installation and launch instructions](../sunmi/companion/README.md#physical-installation--13-october). The earlier “not installed / runtime unchanged” paragraph below records the prior source-only checkpoint. Keep this worktree available while the live backend uses it.
+
+
 ## SUNMI worktree continuation — 13 October
 
 Markus approved starting the SUNMI implementation in a separate worktree. `codex/sunmi-live-companion` starts from iOS commit `e76e303`; the original checkout and live runtime remain unchanged. The first source implementation adds sanitized backend snapshots/SSE, actual transport events, optional iPhone lifecycle telemetry, three Azikus display views with idle website QR, and a separate Android display host with manual Vision Pro / Scan & Pay modes. The approved deck and external static website remain unchanged.
