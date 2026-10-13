@@ -59,3 +59,36 @@ Ledger audit: 2,342 → 2,379 reservations, exactly 37 additions. Every pre-exis
 - Ruff, mypy, generated schemas, Swift format, JavaScript syntax and package/privacy checks are recorded with the PR. Raw images, label keys, results, screenshots and test artifacts stay private/ignored.
 
 This PR is for review; merge, Android, hosting and presentation changes are outside this task.
+
+## Country/scheme evaluation follow-up — 13 October
+
+Markus requested country-based scoring, then chose **add breakdowns now; prepare country labels for review**. `evaluation.country_scores` adds a saved-response report alongside the frozen benchmark. No inference, default change or runtime restart is needed. Both compared profiles use the same country cohort key; the evaluated model cannot change its own cohort or remove an incorrect printed field from its denominator.
+
+The existing answer key has no reviewed issuer-country labels. A separate `country-review@1` key binds to its exact digest and image inventory. Suggestions carry source-profile attribution, but remain pending with expected country null. Country-detection accuracy is unscored (`fraction: null`) until explicit reviewer-attributed labels exist. Invalid countries, altered inventories/hashes, missing attribution and a saved result from the wrong image are rejected.
+
+Payment-scheme breakdowns derive from positive **reviewed printed fields**, not predicted country/language: IBAN, linked UK sort/account pair, or biller identifiers; insufficient/conflicting evidence stays unresolved. Correctly absent other-scheme fields are counted separately as not applicable. Other confirmed absences remain separately visible, including unexpected populated values; none contributes to readable-field accuracy. This is an extraction breakdown, not a payment-readiness metric.
+
+| Provisional country cohort | Input entries | Old accepted/readable | New accepted/readable |
+| --- | ---: | ---: | ---: |
+| Italy | 4 | 33/44 | 29/44 |
+| Greece | 3 | 9/18 | 9/18 |
+| Slovakia | 1 | 6/7 | 6/7 |
+| United Kingdom | 6 | 31/32 | 32/32 |
+| Croatia | 1 | 0/1 | 0/1 |
+| Cyprus | 1 | unscored | unscored |
+| Spain | 1 | unscored | unscored |
+
+These countries are model suggestions shared across the comparison, **not verified country labels**. Sparse or zero readable labels do not support country-wide accuracy claims. The frozen 17-entry manifest includes one explicit exact-image duplicate (16 distinct image hashes); reports expose both counts and preserve the original field denominator. The fresh all-image batch processed each distinct byte sequence once and reused its result for duplicate manifest entries.
+
+Scheme breakdowns, old → new: UK domestic 17/18 → 18/18; IBAN 6/7 → 6/7; biller-reference 31/49 → 27/49; unresolved 10/11 → 10/11; document fields 15/17 → 15/17. Both runs correctly omit 51 labelled inapplicable fields. The overall readable result remains 79/102 → 76/102; the country view does not erase the four extra-digit references on one Italian invoice or the wrong Greek amount. Two beneficiary checks gained credit. The Greek cohort's unchanged total hides one gain and one loss.
+
+Private artifacts in the original checkout's `.local/invoice-context-2026-10-13/`:
+
+- `country-review.json`: all 17 country labels pending, with image paths, suggestions and evidence summaries.
+- `country-review.html`: local review form with invoice previews and an explicit reviewed-label JSON download; no network submission, provider calls or automatic persistence. The form's links, pending labels and JavaScript syntax were checked. Automated visual preview was unavailable because the in-app browser blocks `file:` URLs.
+- `old-country-report-r2.json` / `new-country-report-r2.json`: comparable country/scheme reports, with unchanged original scores.
+- `score-audit.json` / `score-audit-changes.json`: same-image/key/model audit and individual changed-field evidence, retained privately.
+
+After country review, run the CLI from the original data root with this worktree on the Python module path: `python -m evaluation.country_scores --manifest ... --batch ... --key ... --context country-review-completed.json --output NEW_REPORT.json`. Use the same reviewed context file for both batches and a fresh output filename; prior reports are not overwritten. Original reviewed fields/labels remain immutable.
+
+Verification after this evaluation-only follow-up: **784 backend/evaluation tests pass**, including 17 new cases; **95.98% statement / 91.40% branch coverage**. Ruff and strict mypy pass. Native/admin application code and its previously recorded checks are unchanged. No additional paid calls.
