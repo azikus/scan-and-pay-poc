@@ -13,5 +13,5 @@ for (const [index, match] of [...html.matchAll(/<section\b[\s\S]*?<\/section>/g)
   const notes = section.match(/<aside class="notes"[^>]*>([\s\S]*?)<\/aside>/)?.[1] ?? '';
   output.push(`## ${index + 1}. ${plain(title)}`, '### On slide', plain(body), '### Speaker notes — Croatian', plain(notes));
 }
-await writeFile(resolve(root, '../docs/PRESENTATION_CONTENT.md'), output.join('\n\n') + '\n');
-console.log('Updated docs/PRESENTATION_CONTENT.md from the deck source.');
+await writeFile(resolve(root, 'CONTENT.md'), output.join('\n\n') + '\n');
+console.log('Updated presentation/CONTENT.md from the deck source.');

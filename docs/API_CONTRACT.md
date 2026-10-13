@@ -1,6 +1,6 @@
 # API contract v1
 
-## Demo observation channel — 13 October 2026
+## Live observation channel
 
 This additive version-1 channel observes the phone and existing extraction lifecycle. It creates no extraction reservation, changes no profile/selection and executes no payment. All `/v1/demo/*` routes require the same bearer authentication as the existing API and return no-store responses. `/demo` and its allowlisted assets are data-free public shells with a self-only CSP.
 
@@ -13,23 +13,23 @@ Events have `version`, UUID `event_id`, monotonic server `sequence`, `session_id
 
 Separate `demo-state.json` stores only sanitized observation state: up to eight sessions, 128 recent scan bindings and 64 events per session. Default inactivity retention is eight hours (`Settings.demo_retention_seconds`, configurable 60–86,400 seconds). Persistence is coalesced on a single background writer. Observer/storage errors cannot fail extraction or confirmation. Following a restart, phone connection is unknown and unfinished observed stages become interrupted; no job is rerun. A fresh phone snapshot restores presence. A crash can lose the most recent best-effort update; this channel is not an audit ledger. Old mobile drafts without demo association remain valid and simply lack full display telemetry.
 
-Display-only session selection/reset and replay are local operator controls; they never delete sessions/scans or alter the phone. Details and physical acceptance gates are in [SUNMI setup](../sunmi/companion/README.md).
+Display session selection is a local operator control; it never deletes scans or alters the phone. The shipped companion observes live data and has no synthetic playback. See [SUNMI setup](../sunmi/companion/README.md).
 
-## Admin method selection — 9 October 2026
+## Admin method selection
 
 Authenticated `GET /v1/profiles` advertises `default_extract_profile_id` and the additive nullable `default_extract_profile_version`. A persisted admin selection takes precedence over the configured baseline default; changed/disabled/missing selected versions remain explicit and never silently fall back. A new mobile Send fetches this pair, verifies the matching enabled/configured profile, and freezes its ID/version alongside the upload options and idempotency key. Recovery of an existing upload verifies its frozen selection, independent of a newer default.
 
-The additive `server_id` identifies the backend data store with a persisted random UUID. It survives server restarts and is returned only behind existing authentication; it grants no access itself. The mobile app records it alongside new pending uploads so Reconnect can switch USB/Wi-Fi addresses only when they lead to the same backend. This identity is independent of extraction profiles and makes no provider call.
+The additive `server_id` identifies the backend data store with a persisted random UUID. It survives server restarts and is returned only behind existing authentication; it grants no access itself. The mobile app records it alongside new pending uploads so Reconnect can update a saved local address only when it leads to the same backend. This identity is independent of extraction profiles and makes no provider call.
 
 Authenticated `PUT /v1/admin/selection` accepts `{ "id": "<profile-id>", "version": "<exact-version>" }` and returns the same reference. Unknown/disabled/unconfigured profiles return 422; stale versions return 409. The singleton selection persists in SQLite separately from extraction records. Selecting makes no inference call or reservation and never rewrites a scan. Scans still pass an explicit single profile ID in `options.profiles`; existing submit semantics are unchanged.
 
 Authenticated `GET /v1/admin/methods` provides the read-only method guide and sanitized aggregate benchmark snapshot dated 8 October. Those historical results are not a live readiness claim. Runtime availability comes from `/v1/profiles`; timings are backend elapsed time, not mobile capture-to-review time.
 
-Handoff baseline, 1 October 2026, implemented in Milestone 1. This remains the normative v1 wire specification as providers expand. Wire names are snake_case; schema_version is "1.0". See the preserved [handoff result schema](examples/scan-result.schema.json) and [synthetic responses](examples/README.md). Export current Pydantic/OpenAPI contracts from the typed source and keep agreement tests; do not hand-maintain incompatible contracts. The 6 October handoff refresh changes no wire semantics.
+## Contract sources
 
-Implementation note, 5 October 2026: Milestone 1 implements this contract with real UK/HR runs through both starter profiles, corrected bank normalization, successful independent comparison and preserved partial-failure evidence. [Generated result schema](../contracts/v1/scan-result.schema.json) and [OpenAPI](../contracts/v1/openapi.json) are exported from the Python models. The original examples/schema above are the preserved handoff baseline; [acceptance evidence](IMPLEMENTATION_STATUS.md) records validation and known extraction limitations.
+Wire names are snake_case; `schema_version` is `"1.0"`. The [generated result schema](../contracts/v1/scan-result.schema.json) and [OpenAPI](../contracts/v1/openapi.json) come from the typed Python models. [Synthetic responses](examples/README.md) and their [preserved fixture schema](examples/scan-result.schema.json) are checked by agreement tests. Do not hand-maintain incompatible wire contracts.
 
-## Product outcome — 8 October 2026
+## Product outcome
 
 New terminal runs expose `outcome: success | incomplete | error`:
 
@@ -43,7 +43,7 @@ The versioned `field_policy=partial_v1` handles compact protocols 5/6 field by f
 
 ## 1. Transport and requests
 
-Bind to 127.0.0.1 by default. Bearer authentication is required except GET /health. Credentials, arbitrary URLs, local paths, raw prompts and model IDs are never accepted from scan callers. No provider calls on startup, health or profile-list requests.
+The managed service binds loopback and usable private local interfaces. All `/v1/` routes require bearer authentication; `/health` and data-free frontend shells/assets are public. Credentials, arbitrary URLs, local paths, raw prompts and model IDs are never accepted from scan callers. No provider calls on startup, health or profile-list requests.
 
 | Endpoint | Contract |
 | --- | --- |
@@ -71,8 +71,8 @@ State progression: queued → running → completed / partially_completed / fail
 
 - All runs completed: job completed. Mixed completed/failed: partially_completed. All failed: failed. interrupted overrides final aggregation when recovery cannot establish completion.
 - Each run succeeds or fails independently; no majority-vote merge. In compare, final_result_id is always null. In extract, it references the single completed run; otherwise null. Clients read its payment object, not a duplicated second draft.
-- Preserve completed comparison results while other runs execute. No streaming endpoint in v1; polling is sufficient.
-- One API process owns bounded workers; initially at most two outbound calls. Default live smoke profile: one attempt (no auto-retry), 90-second stage timeout, 240-second job deadline. Later transient retries must be explicitly profile-versioned, bounded and charged. Ambiguous billed timeouts are never silently retried.
+- Preserve completed comparison results while other runs execute. Scan results use polling; the separate live observation channel has SSE snapshots.
+- One API process owns bounded workers; initially at most two outbound calls. Default live smoke profile: one attempt (no auto-retry), 90-second stage timeout, 240-second job deadline. Any transient retries must be explicitly profile-versioned, bounded and charged. Ambiguous billed timeouts are never silently retried.
 - Caller disconnect is not cancellation. DELETE rejects active jobs; restart interruption is not proof upstream processing stopped. Keep a minimal idempotency tombstone after local deletion: reuse returns 410, not another paid run. Tombstone retains only key/request digest and deleted marker, not invoice data.
 - Error responses: {error:{code,message,retryable,details}} with sanitized details. 400 malformed bytes/JSON, 401 bad/missing token, 404 missing job, 409 key conflict/active deletion, 410 deleted-key reuse, 415 unsupported image format, 422 options/profile validation, 429 bounded queue full, 503 storage/service unavailable. 413 only for an actual documented enforced infrastructure/provider limit, not an invented product threshold.
 - Per-run error codes include provider_auth, provider_quota, provider_timeout, provider_refusal, provider_unavailable, unsupported_language, invalid_provider_output and internal_error. Preserve safe stage ID/request ID, not provider raw error bodies.
@@ -98,13 +98,13 @@ Candidates represent linked payment options: amount, currency, beneficiary, rout
 
 ## 5. Backend review rules
 
-Every payment.review has user_confirmation_required=true. There is no confirmed or executable-payment flag in v1. Later UI corrections remain separate from the immutable extraction.
+Every payment.review has user_confirmation_required=true. There is no confirmed or executable-payment flag in v1. UI corrections remain separate from the immutable extraction.
 
 - ready_for_review: one justified selected candidate, observed payee, positive amount explicitly marked amount_due, observed unambiguous currency, complete UK/IBAN destination, required reference/model where explicitly stated, and no blocking conflict/format/checksum issue. Critical fields need document evidence; model_claim evidence may qualify but must remain labelled unverified. This is completeness/consistency, not factual verification or bank ownership.
 - needs_review: useful draft with conflicting/missing/unreadable critical values, inferred currency, unresolved beneficiary association, invoice_total under the historical strict policy, uncertain reference requirement, multiple destinations, or nonpositive/credit amount. Do not convert an invoice total into amount_due.
 - insufficient_data: no meaningful payment option can be assembled (for example unrelated image or reference-only bill without routing). Retain successfully extracted observations. Malformed bytes instead fail input validation; unsupported_input is not a payment-review state.
 
-Opt-in `payment-draft@1` accepts `invoice_total` while preserving its role, and can fill a missing beneficiary from supported candidate-linked account-holder or supplier evidence without overriding an explicit recipient. It records the fallback in normalization. It can set `selected_candidate_id` to the preferred bank-transfer option while keeping multiple candidates and `needs_review`; the existing single-candidate `ready_for_review` invariant remains unchanged. Selection never authorizes payment. See [versioned policy](M3_DRAFT_POLICY.md).
+Opt-in `payment-draft@1` accepts `invoice_total` while preserving its role, and can fill a missing beneficiary from supported candidate-linked account-holder or supplier evidence without overriding an explicit recipient. It records the fallback in normalization. It can set `selected_candidate_id` to the preferred bank-transfer option while keeping multiple candidates and `needs_review`; the existing single-candidate `ready_for_review` invariant remains unchanged. Selection never authorizes payment. The selected profile versions this policy; original responses remain immutable.
 
 Review reasons are stable {code,path,message} objects; paths are JSON Pointers relative to payment. Initial codes: missing_required_field, ambiguous_field, conflicting_candidates, unsupported_payment_route, invalid_account_format, failed_iban_checksum, currency_inferred, amount_role_unresolved, nonpositive_amount, beneficiary_unresolved and reference_requirement_unknown.
 
@@ -126,9 +126,9 @@ Shared prerequisites are off by default for v1 comparisons so results have indep
 
 Generate API models and schemas from one typed source. Validate the two synthetic examples, plus negative and boundary fixtures; test unknown fields, enums, decimal strings, evidence IDs/coordinates, missing states, candidate IDs, cross-pair prevention, review rules, extract/compare semantics, idempotency races, restart and deletion tombstones. The supplied JSON Schema validates structural shape; business invariants above require code tests and must not be delegated to an LLM.
 
-## Private mobile review inspector (additive, 9 October 2026)
+## Mobile reviews and admin inspection
 
-All nullable observation values in `GET /v1/scans/{scan_id}` remain explicit `null`, and original candidates, warnings, evidence and decimal/digit strings are preserved. Mobile and admin pretty-print this response without stripping nulls. Null result rows can be omitted in the mobile presentation without changing those observations. The additive 13 October review guidance below is computed at read time.
+All nullable observation values in `GET /v1/scans/{scan_id}` remain explicit `null`, and original candidates, warnings, evidence and decimal/digit strings are preserved. Mobile and admin pretty-print this response without stripping nulls. Null result rows can be omitted in the mobile presentation without changing those observations. Review guidance is computed at read time.
 
 `GET /admin` serves a private inspector shell with no scan data. Its data requests require the same bearer token as the scan API. The page keeps that token in memory only, uses no-store responses and self-only assets, and never sends extraction requests. It is intended for the trusted local setup, not public hosting.
 
@@ -148,15 +148,15 @@ The app submits edits only after Pay opens a summary and the user presses Confir
 
 The PoC confirmation accepts a checked, selected, reviewable candidate even when payment fields are incomplete. Missing/invalid fields remain visible in the confirmation summary. This records `review_confirmed` with `simulated=true`; it does not change backend review state or make the candidate executable. Empty/error results and unselected candidates cannot be confirmed.
 
-## Invoice review guidance (additive, 13 October 2026)
+## Invoice review guidance
 
 Scan reads add optional `runs[].review_guidance` when payment extraction is present. `policy_version` is `invoice-fields@1`. `issuer_country` and `language` contain nullable `value`/`label`, `status` (`observed|inferred|derived|unknown|ambiguous`), `reason`, `evidence_ids` and `excerpts`. Each candidate has `candidate_id`, `route`, separate `account_country`, `fields` and `warnings`. Document rules are under `document_fields`. Field maps use JSON pointers into `run.payment`; each rule has `requirement` (`required|optional|not_applicable|unresolved`) and `reason`. They can include virtual other-route pointers absent from the candidate's discriminated destination shape; those are presentation rules, not editable observation nodes.
 
 This guidance is a deep-copy read projection, including for old scans, and does not replace stored observations, validation, outcomes, evidence or confirmations. No new provider call is made by a read. Country suggestions cannot override positive payment-route evidence. Missing context is not a missing payment field; unresolved routes and real missing required data remain review concerns. Clients retain populated/edited/uncertain fields and may hide optional empty observations. Older clients may ignore this additive object; newer clients have a route-based fallback when it is absent. Review uploads still enumerate only actual observation nodes, never virtual guidance pointers.
 
-Opt-in compact extraction profiles can add `diagnostics.context_explanations` with short model-supplied explanations for `language`/`issuer_country` and linked evidence excerpts with `grounding: model_claim`. Historical profiles/results omit that empty dictionary. Country labels and flag glyphs are presentation conveniences; neither proves country, account ownership or payment validity. See [INVOICE_CONTEXT.md](INVOICE_CONTEXT.md) for the single-call prompt and evidence.
+Compatible compact extraction profiles include `diagnostics.context_explanations` with short model-supplied explanations for `language`/`issuer_country` and linked evidence excerpts with `grounding: model_claim`. Historical profiles/results omit that empty dictionary. Country labels and flag glyphs are presentation conveniences; neither proves country, account ownership or payment validity. See [provider profiles](PROVIDERS.md) for standard context and [evaluation](EVALUATION.md) for measurements.
 
-## Local connection status (additive, 9 October 2026)
+## Local connection status
 
 Authenticated `GET /v1/admin/connection` returns `automatic` (boolean), `refresh_seconds` (nullable integer), `checked_at` (nullable timestamp of the last successful interface check), `addresses` (URL, interface identifier and `network|link_local` kind) and `warnings` (strings). The managed Mac launcher reports only successfully bound private/link-local IPv4 listeners. Loopback is not advertised as a phone URL. Discovery failure retains the previous listener list and check time with an explicit warning; bind failures are excluded and retried by the launcher. Responses are no-store and contain no token. Reads do not enumerate interfaces, dispatch inference, alter selection or change drafts.
 

@@ -1,7 +1,5 @@
-# SUNMI live presentation companion
+# SUNMI live companion
 
-The [live companion](companion/README.md) shows authenticated scan stages, the idle website QR and next-scan provider controls. It supports Vision Pro mirroring on the main screen or a full technical journey with customer status on the smaller screen. This is separate from the Android mobile capture app, which Markus skipped on 13 October; `android/` records that scope decision.
+The [companion](companion/README.md) shows the real mobile/backend journey, selected provider and observed timing with private fields masked. It supports technical/customer panels or Vision Pro mirroring alongside the live customer panel.
 
-Synthetic playback, the rehearsal server and the obsolete offline display-test app were removed on 13 October at Markus’s request. The [dated hardware acceptance record](display-test/README.md) is retained as evidence; its old source is recoverable from Git history. Tests remain offline and synthetic, outside the shipped display.
-
-See [the implementation plan](../docs/SUNMI_DEMO_IMPLEMENTATION_PLAN.md) for the original scope and dated milestones.
+Build/launch instructions are in [companion/README.md](companion/README.md); the [product guide](../README.md#the-live-companion) includes a screenshot and behavior. The Android display host is supported; the separate Android capture app is outside this delivery.
