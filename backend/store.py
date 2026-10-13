@@ -204,25 +204,6 @@ class Store:
                 ).fetchone()[0]
                 if active >= self.settings.queue_capacity + self.settings.workers:
                     raise ServiceError(429, "queue_full", "The bounded job queue is full.", True)
-                holds = [
-                    int((ceiling * 1_000_000).to_integral_value(rounding=ROUND_CEILING))
-                    for d in definitions
-                    if not d.synthetic
-                    for ceiling in d.reservations
-                ]
-                used, count = db.execute(
-                    "SELECT COALESCE(SUM(hold_microeur),0), COUNT(*) FROM budget"
-                ).fetchone()
-                if holds and (
-                    used + sum(holds) > int(self.settings.smoke_budget_eur * 1_000_000)
-                    or count + len(holds) > self.settings.max_calls
-                    or any(h <= 0 for h in holds)
-                ):
-                    raise ServiceError(
-                        422,
-                        "budget_exceeded",
-                        "The entire batch exceeds the remaining call or EUR reservation budget.",
-                    )
                 now = utcnow()
                 runs = [
                     Run(

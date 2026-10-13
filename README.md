@@ -4,9 +4,9 @@ Independent Azikus backend for turning one JPEG/PNG invoice image into an editab
 
 **Current checkpoint — 9 October 2026:** the native iOS capture/crop → Send → editable review → confirmation/reset flow and the authenticated admin inspector are implemented. Markus confirmed that his real-invoice iPhone testing is complete. This is PoC acceptance, not a production accuracy or measured end-to-end latency claim. See [mobile checkpoint](docs/MOBILE_CHECKPOINT.md), [mobile implementation](docs/MOBILE_IMPLEMENTATION.md) and [iOS setup](ios/README.md).
 
-The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. Seven tested profiles are enabled under the existing bounded mobile allowance. The latest persisted selection is recorded in [current status](docs/CURRENT_STATUS.md); pending drafts retain their original profile. The historical Phase 2 baseline is described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
+The admin selects the next scan's method/model, filters mobile/automated scans, and shows normalized JSON, saved provider outputs, exact mobile uploads and separate confirmed mobile edits. The configured choices are listed by the live admin. The latest persisted selection is recorded in [current status](docs/CURRENT_STATUS.md); pending drafts retain their original profile. The historical Phase 2 baseline is described in [selection and limitations](docs/PHASE2_CLOSEOUT.md).
 
-The latest operational snapshot, current bounded mobile allowance and selection are in [current status](docs/CURRENT_STATUS.md). Historical experiment holds and current allowances are distinct from actual provider bills. Private samples, labels, raw responses and credentials remain outside Git.
+The latest operational snapshot and selection are in [current status](docs/CURRENT_STATUS.md). Private samples, labels, raw responses and credentials remain outside Git.
 
 The mobile/admin checkpoint merged in [PR #2](https://github.com/azikus/scan-and-pay-poc/pull/2). Repository reorganization is [PR #3](https://github.com/azikus/scan-and-pay-poc/pull/3), with its checks recorded in the [reorganization handoff](docs/REPOSITORY_REORGANIZATION_HANDOFF.md).
 
@@ -41,7 +41,7 @@ python3.12 -m venv .venv
 
 Configure a random `SCANPAY_TOKEN` in `.env` using [.env.example](.env.example). A private `.env` with a generated token has already been prepared in this workspace; keep it. For a fresh checkout, the commands in [operations](docs/OPERATIONS.md) create it without printing the token or replacing an existing file. Provider keys are unnecessary for startup, health, profiles and tests.
 
-Use this same root `.env` for all credentials and connection settings. See the [access checklist](docs/PHASE2_ACCESS.md). Billing tiers and access notes belong in private integration evidence. Credentials alone do not enable a profile; each option requires explicit readiness metadata and a bounded plan.
+Use this same root `.env` for all credentials and connection settings. See the [access checklist](docs/PHASE2_ACCESS.md). Billing tiers and access notes belong in private integration evidence. Credentials alone do not enable a profile; each option requires explicit operator enablement and account/data-terms readiness metadata.
 
 ```sh
 .venv/bin/scanpay-serve
@@ -54,7 +54,7 @@ In another terminal:
 .venv/bin/scanpay profiles
 ```
 
-The following are individual CLI syntax examples from completed Milestone 1, not a new evaluation batch. Every new provider evaluation must use the full prepared corpus and a new bounded plan; the old twelve-call cap is exhausted. Once the respective profiles are deliberately configured/enabled and the batch is authorized by its recorded plan:
+The following are individual CLI syntax examples from completed Milestone 1, not a new evaluation batch. Provider evaluations use the full prepared corpus with pinned profiles and saved request keys. Once the respective profiles are deliberately configured/enabled and the batch is authorized:
 
 ```sh
 .venv/bin/scanpay upload samples/variants/uk-continental-reference.png --profiles openai-luna-vision --key uk-vision-smoke-1
@@ -64,6 +64,14 @@ The following are individual CLI syntax examples from completed Milestone 1, not
 ```
 
 The CLI prints the accepted scan ID and a safe summary, polls by default, and saves the complete result under `.local/client/`. Use the actual returned `scan-…` ID for `get` and `delete`. A failed upload is never automatically retried. Reuse its original key and bytes/options to recover acceptance; a new key intentionally creates a new run. `--no-wait` returns after acceptance. Compare also accepts `--profiles all_enabled`.
+
+## European endpoints and training controls
+
+OpenAI and Mistral profiles support explicitly configured European endpoints alongside their existing global endpoints. Missing account approval or an unknown verified region does not block a profile locally. Provider account requirements, training opt-outs and dated checks are documented in [European hosting and model-training controls](docs/EUROPEAN_DATA_POLICY.md).
+
+## Request admission
+
+The backend does not enforce local spending or cumulative call limits. Pricing-review dates and per-call ceilings are optional accounting metadata; absent values do not disable profiles. Legacy settings and retained records remain compatible. Authentication, explicit operator enablement, supported endpoints, queue capacity and idempotent request handling still apply.
 
 ## Offline verification
 
@@ -102,7 +110,7 @@ A localhost service accepts one JPEG/PNG, persists a job and returns a payment d
 - Managed OCR/document APIs and local rules are first-class. Hybrid does not mean every tool runs on every request.
 - Preserve paired UK bank details, IBAN, Croatian model/poziv na broj, amount/currency and required references. Customer numbers are not bank routing.
 - Every draft requires review/confirmation. No silent banking-digit repairs, model-confidence guarantees or majority-vote truth.
-- Up to €500 and client-sample provider testing are authorized. Configure secrets locally; no automatic subscription purchases. Public use requires separate permission.
+- Configure secrets locally; no automatic subscription purchases. Live experiments and public use require their own authorization.
 - Native iOS is implemented. The initial presentation is delivered; further mobile/backend improvements follow, with Android last. Final findings and the separate attendee display remain distinct deliverables.
 
 ## Existing material
@@ -114,3 +122,7 @@ A localhost service accepts one JPEG/PNG, persists a job and returns a payment d
 - `docs/`: current handoff and synthetic contract examples, without real bank details.
 
 Original source material also remains at `/Users/markusi/Developer/Azikus/Aircash/scan_pay_phase1`. The missing client screenshot is not a backend blocker. Ask for more photos only for specific test needs.
+
+## Additional LLM choices
+
+[LLM expansion](docs/LLM_EXPANSION.md) documents the separate provider work, Grok charge accounting and 13 opt-in example presets in `providers.expanded.example.json`. Multiple models from one provider remain independently versioned choices in the admin once configured and enabled. [Provider API status](docs/API_CONNECTION_STATUS.md) distinguishes completed requests, remaining API failures and untested processing.

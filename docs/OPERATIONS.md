@@ -1,5 +1,7 @@
 # Local backend operations
 
+**Source update, 12 October:** local spending and cumulative call limits are removed in PR #7 at Markus's explicit request. Configuration-plan values are retained for compatibility, not enforced. Missing pricing-review dates or per-call ceilings do not disable profiles. Historical plans and recorded amounts below remain dated evidence. The source change does not restart or deploy the running service.
+
 ## Current mobile demo launcher
 
 Run `.venv/bin/scanpay-serve` from the root, or continue using the existing private launcher, which now delegates to `backend.local_server`. This macOS launcher keeps `127.0.0.1:8000` available and automatically reconciles physical private/link-local IPv4 listeners every two seconds without restarting jobs. Open the Mac admin at `http://127.0.0.1:8000/admin` and expand **Connection** for the current phone URL. Copy changed URLs into the existing mobile Connection settings and Reconnect. See [setup and verification](CONNECTION_SETUP.md). The following older launcher/network notes are historical; manual Uvicorn startup remains supported but does not provide automatic listener updates.
@@ -39,7 +41,7 @@ PY
 
 Handoff checkpoint, 6 October: the requested credential set is already present. Do not run fresh-checkout initialization over existing files or copy `.env.example` onto `.env`. Google uses local ADC; AWS uses the temporary `scanpay` profile in `eu-central-1`, verified as `scanpay-local`. Reauthenticate only if needed, with the same identity/permissions; never copy SDK cache secrets into `.env`. New-provider adapters remain unimplemented. Current starting tasks and evidence paths are in CODING_HANDOFF.md.
 
-Shipped profile examples start disabled; the private starter profiles were deliberately configured and live-validated during Milestone 1. Enabling a new profile requires a local key/authentication mechanism, model-access check date, data-terms check date and note, pricing check date and a conservative `max_call_eur` ceiling. Record configured region as `unknown` when unknown; `verified_processing_region` stays null without evidence. Public rate research does not establish account settings. No subscription is purchased by this backend. See [integration checks](INTEGRATIONS.md).
+Shipped profile examples start disabled; the private starter profiles were deliberately configured and live-validated during Milestone 1. Enabling a new profile requires a local key/authentication mechanism, model-access check date, and data-terms check date and note. Pricing dates and `max_call_eur` values are optional accounting metadata, not readiness requirements. Record configured region as `unknown` when unknown; `verified_processing_region` stays null without evidence. Public rate research does not establish account settings. No subscription is purchased by this backend. See [integration checks](INTEGRATIONS.md).
 
 ## API and inspection
 
@@ -51,17 +53,17 @@ Full responses are private `.local/client/scan-….json` files. Bank details are
 
 The canonical rendition is oriented, metadata-free RGB PNG, with transparency flattened on white and no resize. The original bytes are privately preserved. Identity hashes and transforms are recorded. Pillow's decoder resource protection remains enabled. Supplier image constraints are checked separately; exceeding one rejects the entire selection, without silently dropping that profile. The initial OCR rules use general labels and paragraph/table-row positions, retain raw OCR privately, and omit boxes when no verified coordinate mapping is available. Complex layouts can return incomplete drafts.
 
-## Queue, money and recovery
+## Queue and recovery
 
 Two workers, at most two outbound calls, ten waiting slots plus two active slots. Profiles run independently, sequentially within a job; two jobs can progress concurrently. A comparison exposes each completed result while later profiles run. It has no overall winner. Each live profile makes one attempt, with a 90-second run/stage boundary and a 240-second job deadline including queue wait. There are no SDK retries or hidden fallback providers.
 
-Acceptance atomically reserves every selected live call in SQLite. Default initial caps are 12 calls and €30, within the €500 project authorization. `max_call_eur` is a conservative operator ceiling including output, FX/tax uncertainty and possible charges; it is not a reported fee. USD estimates remain USD. Held EUR ceilings remain charged against the local smoke budget after dispatch, including failures/timeouts and successful USD estimates, until an operator can reconcile actual billing. No automatic FX conversion or refund is assumed. Never reset the database to evade a cap. An undispatched interrupted run can safely release its hold.
+Acceptance atomically persists the selected calls and their accounting metadata in SQLite without comparing cumulative counts or amounts against limits. Unknown prices and missing per-call ceilings do not reject a request. Legacy `max_calls`, `smoke_budget_eur` and plan fields are accepted for compatibility; their values do not control admission. Existing accounting records, stage dispatch markers and actual/estimated/unknown cost reporting are preserved. An undispatched interrupted run can still release its provisional accounting record.
 
 The process lock prevents two servers sharing the same data directory. Completed jobs survive restart. Queued/running work becomes `interrupted`; earlier completed comparison results remain. Upstream processing might continue after a local timeout or restart. Reusing the same key returns the prior job, including an interrupted one; it never restarts inference. A deliberately new key makes a new potentially billed call.
 
 ## Deletion
 
-`scanpay delete <scan_id>` returns 204 only for a terminal job after local job artifacts and rows are removed. Active jobs return 409; unknown/deleted IDs return 404. A minimal hashed-key/request-digest tombstone returns 410 on reuse. Anonymous budget/cost records remain to prevent rebilling beyond the cap. This endpoint does not remove `.local/client/` exports; remove those manually when desired. Source samples, answer keys and historical references are never cleanup targets. Local deletion does not delete provider-held data or promise forensic secure erasure.
+`scanpay delete <scan_id>` returns 204 only for a terminal job after local job artifacts and rows are removed. Active jobs return 409; unknown/deleted IDs return 404. A minimal hashed-key/request-digest tombstone returns 410 on reuse. Anonymous accounting records remain for historical reporting; they do not enforce spending limits. This endpoint does not remove `.local/client/` exports; remove those manually when desired. Source samples, answer keys and historical references are never cleanup targets. Local deletion does not delete provider-held data or promise forensic secure erasure.
 
 ## Dependency changes
 

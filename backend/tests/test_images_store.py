@@ -77,43 +77,57 @@ def test_gif_animated_png_and_truncated(png):
     assert e.value.status == 400
 
 
-def test_budget_batch_atomic_no_partial_dispatch(settings, definitions, png):
+def test_compare_accepts_above_legacy_limits_and_preserves_existing_records(
+    settings, definitions, png
+):
+    settings.max_calls = 0
+    settings.smoke_budget_eur = Decimal("0")
     store = Store(settings)
     try:
+        with store.connection() as db:
+            db.execute(
+                "INSERT INTO budget(run_id,hold_microeur,dispatched,cost) VALUES(?,?,?,?)",
+                ("historical", 900_000_000, 1, '{"status":"unknown"}'),
+            )
+            original = dict(db.execute("SELECT * FROM budget WHERE run_id='historical'").fetchone())
         image = prepare_image(png, Hints())
         options = Options(mode="compare", profiles=["success", "failure"])
         ds = [replace(d, synthetic=False, ceiling_eur=Decimal("20")) for d in definitions.values()]
-        with pytest.raises(ServiceError) as error:
-            store.accept("k", request_digest(png, options), image, options, ds, [])
-        assert error.value.error.code == "budget_exceeded"
+        scan, created = store.accept("k", request_digest(png, options), image, options, ds, [])
+        assert created and len(scan.runs) == 2
+        again, created = store.accept("k", request_digest(png, options), image, options, ds, [])
+        assert not created and again.scan_id == scan.scan_id
         with store.connection() as db:
-            assert db.execute("SELECT COUNT(*) FROM jobs").fetchone()[0] == 0
-            assert db.execute("SELECT COUNT(*) FROM budget").fetchone()[0] == 0
-        assert list(store.artifacts.iterdir()) == []
+            assert db.execute("SELECT COUNT(*) FROM jobs").fetchone()[0] == 1
+            assert db.execute("SELECT COUNT(*) FROM budget").fetchone()[0] == 3
+            assert (
+                dict(db.execute("SELECT * FROM budget WHERE run_id='historical'").fetchone())
+                == original
+            )
     finally:
         store.close()
 
 
-def test_call_count_and_missing_ceiling(settings, definitions, png):
+def test_call_count_and_missing_ceiling_do_not_block_acceptance(settings, definitions, png):
     settings.max_calls = 1
     store = Store(settings)
     try:
         image = prepare_image(png, Hints())
         options = Options(mode="extract", profiles=["success"])
         d = replace(definitions["success"], synthetic=False, ceiling_eur=Decimal("1"))
-        store.accept("one", request_digest(png, options), image, options, [d], [])
-        with pytest.raises(ServiceError):
-            store.accept("two", request_digest(png, options), image, options, [d], [])
-        store.recover()  # No dispatch means safe release, no upstream charge.
-        with pytest.raises(ServiceError):
-            store.accept(
-                "three",
-                request_digest(png, options),
-                image,
-                options,
-                [replace(d, ceiling_eur=Decimal("0"))],
-                [],
-            )
+        one, _ = store.accept("one", request_digest(png, options), image, options, [d], [])
+        two, _ = store.accept("two", request_digest(png, options), image, options, [d], [])
+        assert one.scan_id != two.scan_id
+        store.recover()
+        three, created = store.accept(
+            "three",
+            request_digest(png, options),
+            image,
+            options,
+            [replace(d, ceiling_eur=Decimal("0"))],
+            [],
+        )
+        assert created and three.state == "queued"
     finally:
         store.close()
 

@@ -79,7 +79,8 @@ def test_extended_vision_actual_protocol_and_evidence(settings, png, uk, provide
 
 
 @pytest.mark.parametrize(
-    "provider", ["anthropic", "gemini", "xai", "together", "mistral", "azure", "mindee"]
+    "provider",
+    ["anthropic", "gemini", "xai", "together", "mistral", "azure", "mindee"],
 )
 @pytest.mark.parametrize(
     "status,code", [(401, "provider_auth"), (429, "provider_quota"), (500, "provider_unavailable")]
@@ -106,7 +107,8 @@ def test_extended_failures_redacted_once(settings, png, provider, status, code):
 
 
 @pytest.mark.parametrize(
-    "provider", ["anthropic", "gemini", "xai", "together", "mistral", "openai"]
+    "provider",
+    ["anthropic", "gemini", "xai", "together", "mistral", "openai"],
 )
 @pytest.mark.parametrize(
     "kind", ["malformed", "refusal", "truncated", "changed_model", "negative_usage", "tool"]
