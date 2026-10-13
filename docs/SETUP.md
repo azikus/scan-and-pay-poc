@@ -4,7 +4,7 @@
 
 Preserve the existing `.env`, `.local/providers.json`, data directory, phone data and signing identities. Use the current private launcher/source deployment; do not start a second backend or reinstall/uninstall the phone to check connectivity. The active deployment path is documented in `AGENTS.md`.
 
-Open `http://127.0.0.1:8000/admin` on the Mac. Read-only checks use the local CLI:
+Open `http://127.0.0.1:8000/admin` on the API host. Read-only checks use the local CLI:
 
 ```sh
 .venv/bin/scanpay health
@@ -45,13 +45,16 @@ PYSETUP
 
 Profiles in shipped examples start disabled. Configure and deliberately enable compatible methods using the [profile configuration](DEVELOPMENT.md#providers-and-extraction-profiles). Startup, health, profile listing and offline tests need no provider inference.
 
-Start one backend:
+Start one API service with the portable ASGI entry point. Replace `SERVER_PRIVATE_IP` with the host's actual private network address; use `127.0.0.1` for same-host inspection only:
 
 ```sh
-.venv/bin/scanpay-serve
+.venv/bin/python -m uvicorn backend.api:create_app --factory \
+  --host SERVER_PRIVATE_IP --port 8000 --workers 1 --no-access-log --no-proxy-headers
 ```
 
-The managed macOS launcher keeps `127.0.0.1:8000` available and follows usable private/link-local IPv4 interfaces without restarting jobs. Admin **Connection** advertises successfully bound addresses, refresh state and warnings. Interface discovery failure retains the previous listener state with a warning; a failed bind is excluded and retried.
+The client needs a reachable address and bearer token, not a particular host vendor or tethering topology. Host firewall/network permissions must allow the intended private connection. This is a local deployment; public hosting is outside this setup.
+
+An optional `scanpay-serve` launcher provides automatic listener updates using macOS interface discovery (`/sbin/ifconfig`). It keeps loopback plus usable private/link-local listeners without restarting jobs. Other compatible hosts use the ASGI command with an explicit bind address. Manual startup reports `automatic=false`; admin Connection displays the actual private listener address. Automatic discovery failure retains previous listeners with a warning, while a failed bind is excluded and retried.
 
 ## Credentials
 
@@ -68,22 +71,22 @@ Google inline JSON accepts authorized-user or service-account credentials, loade
 
 Keep secrets out of source, request options, URLs, terminal arguments and logs. Region/endpoints and data-terms readiness belong to provider configuration; billing notes and verification evidence stay private.
 
-## iPhone hotspot
+## Client networking
 
-1. Enable Personal Hotspot on the iPhone; connect the Mac and keep it awake.
-2. In Mac admin **Connection**, copy the current Mac address.
-3. On the phone, open **Connection → Hotspot → Mac address**, paste it, enter the existing local API token and tap **Reconnect**.
-4. Allow local-network access when prompted. Update the address when the Mac IP changes.
+1. Put the API host, mobile client and display client on a reachable shared private network.
+2. Copy the server base URL from admin Connection, or use the explicitly configured private bind address.
+3. Enter that URL and the existing local bearer token in the client's Connection settings, then Reconnect.
+4. Allow local-network access when prompted and update the saved URL when the server address changes.
 
-There is one saved address, with no USB/cloud selector or automatic discovery. The phone's `localhost` points to the phone. Reconnect makes authenticated reads; it does not send a capture or confirm a draft. Native build/test commands are below.
+The current native client stores one private server address, without automatic discovery or a public/cloud endpoint selector. Its hotspot-labelled settings reflect the existing demonstration configuration; a phone hotspot is one transport choice rather than an architectural dependency. The host and client still need compatible network settings. A client's localhost is not the API host. Reconnect makes authenticated reads and does not submit a capture or confirmation.
 
-## SUNMI and browser inspection
+## Display and browser inspection
 
-The same backend serves `/demo`. **Connection → Demo displays** on the phone enables sanitized telemetry; the SUNMI follows the matching phone session. Connection credentials are entered in the companion and stored in Android Keystore. Installation/display placement is below.
+The same backend serves `/demo`. **Connection → Demo displays** on the phone enables sanitized telemetry; the display follows the matching phone session. Connection credentials are entered in the companion and stored in Android Keystore. Installation/display placement is below.
 
 Admin holds its token in memory only. Confirmed edits, uploaded mobile images and retained provider outputs are private authenticated reads. No separate admin/display frontend server or build is required.
 
-## iPhone build and tests
+## Native client build and tests
 
 The app requires iOS 18+. Open `ios/ScanAndPay.xcodeproj` and build scheme `ScanAndPay`. `ios/project.yml` is the XcodeGen source; regenerate from the repository root only when needed:
 
@@ -104,7 +107,7 @@ xcodebuild -project ios/ScanAndPay.xcodeproj -scheme ScanAndPay \
 
 Use `-synthetic-preview` only for the bundled offline fixture flow; remove it for real capture/networking. Fixture timing is not provider performance. Hanken Grotesk is the licensed fallback for ABC Monument Grotesk; the OFL stays with native Resources.
 
-## SUNMI build, connection and displays
+## Display client build, connection and panels
 
 Requires Java, Android SDK platform 33 and build-tools 36.0.0. From the repository root:
 
@@ -114,18 +117,15 @@ adb install -r sunmi/companion/build/companion.apk
 bash sunmi/companion/launch.sh
 ```
 
-`ANDROID_HOME` can override the SDK path. Preserve `.local/sunmi-companion/debug.keystore`, or point `SUNMI_SIGNING_KEY` to the existing key; updates must keep the installed signing identity. Build outputs and keys are ignored. The ordinary APK has no debug setup/capture hooks.
+`ANDROID_HOME` can override the SDK path. Preserve the installed signing key, or point `DISPLAY_SIGNING_KEY` to it; updates must keep the installed signing identity. Build outputs and keys are ignored. The ordinary APK has no debug setup/capture hooks.
 
-The launcher uses one attached ADB device or `SUNMI_SERIAL`, discovers the secondary presentation display and places LauncherActivity there. It does not hardcode display IDs or force-stop AirScreen. Run it again after a reboot/customer-panel reconnect; the ordinary app icon cannot guarantee two-screen placement. There is no boot receiver/device-owner/kiosk provisioning.
+The launcher uses one attached ADB device or `DISPLAY_SERIAL`, discovers the secondary presentation display and places LauncherActivity there. It does not hardcode secondary display IDs or control another application. Run it again after a reboot/customer-panel reconnect; the ordinary app icon cannot guarantee two-screen placement. There is no boot receiver/device-owner/kiosk provisioning.
 
-Enter the advertised Mac URL and existing local bearer token in **Backend connection**. The address is configurable, never embedded in the APK. Android Back opens connection settings if loading fails. Enable phone **Connection → Demo displays** and select its matching short session on SUNMI.
+Enter the advertised API URL and existing local bearer token in **Backend connection**. The address is configurable, never embedded in the APK. Android Back opens connection settings if loading fails. Enable phone **Connection → Demo displays** and select its matching short session on the display.
 
-Choose a display mode in Controls:
+The primary panel always shows the technical system journey; the secondary panel shows customer status and the idle website QR. The launcher opens both application views, and obsolete saved mode preferences are removed without changing saved connection/session data.
 
-- **Vision Pro:** AirScreen receives mirroring on the main panel; the companion occupies the customer panel. Use the appropriate shared network and the headset's Mirror My View control.
-- **Scan & Pay:** technical journey on the main panel and simplified status/idle QR on the smaller panel.
-
-Relaunch restores the saved main-screen mode. Display disconnection cannot fail a phone extraction or confirmation. Next scan controls use the same persisted selection as admin and affect only new Sends. Internal isolation and WebView restrictions are documented in [Development](DEVELOPMENT.md#sunmi-host).
+Display disconnection cannot fail a mobile extraction or confirmation. Next scan controls use the same persisted selection as admin and affect only new Sends. Internal isolation and WebView restrictions are documented in [Development](DEVELOPMENT.md#display-host).
 
 ## CLI extraction and recovery
 

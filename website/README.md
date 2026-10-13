@@ -37,7 +37,7 @@ Build output and QA captures are ignored. The ZIP is a developer handoff, not a 
    A map stored elsewhere can use an absolute path. Mapping rewrites CSS fonts, initial screenshots and interactive gallery URLs together.
 5. Paste the resulting **`website/dist/webflow-embed.html`** into the page's Code Embed. Do not paste the standalone document or unstyled content source.
 6. To use an existing licensed site font, remove the three fallback `@font-face` declarations and add `#az-scan-pay { --sp-font: "YOUR WEBFLOW FONT FAMILY", sans-serif; }` after the embed's styles. The mapping workflow still expects valid HTTPS URLs for every supplied key.
-7. Set title to **Scan & Pay | Azikus** and description to **From a paper invoice to a reviewed payment draft. Explore Azikus native mobile, AI and spatial banking proofs of concept.** Use the site's canonical domain/redirects; the SUNMI QR targets the `www` form.
+7. Set title to **Scan & Pay | Azikus** and description to **From a paper invoice to a reviewed payment draft. Explore Azikus native mobile, AI and spatial banking proofs of concept.** Use the site's canonical domain/redirects; the display QR targets the `www` form.
 8. Verify on Webflow staging: desktop/mobile layouts, all mobile dark/light and spatial tabs, screenshot enlargement/Escape/focus restoration, extraction disclosure, repository/contact links and reduced motion. Designer view may not execute scripts; inspect staging before normal publication.
 
 If all assets share one HTTPS directory, build with:
@@ -60,12 +60,12 @@ Keyboard tabs, visible focus, native disclosures and an Escape/focus-restoring s
 | --- | --- |
 | Dark mobile walkthrough | Actual native iOS UI-test captures; synthetic invoice/account values |
 | Light mobile walkthrough | Supplied original native iPhone captures; synthetic values |
-| Spatial gallery | Supplied SwiftUI Mac renderer previews of a separate app; demo accounts/receipts, not headset or passthrough captures |
-| SUNMI journey | Real companion webpage rendered with an isolated QA session; not a fresh live provider/latency study |
+| Spatial gallery | Supplied native UI renderer previews of a separate app; demo accounts/receipts, not headset or passthrough captures |
+| Live display journey | Real companion webpage rendered with an isolated QA session; not a fresh live provider/latency study |
 | Admin context | Production renderer with an isolated synthetic UK fixture |
 | Admin selector | Authenticated admin cropped to method/model controls; no private scan list/document/token |
 
-`assets/provenance.json` retains source filenames/descriptions, treatment and hashes. Resized/compressed delivery copies preserve screenshot content. Full local source paths and readable source invoices/corpus galleries are excluded. Physical user acceptance of the mobile/backend/SUNMI journey is distinct from screenshot attribution or measured accuracy/latency.
+`assets/provenance.json` retains source filenames/descriptions, treatment and hashes. Resized/compressed delivery copies preserve screenshot content. Full local source paths and readable source invoices/corpus galleries are excluded. Physical user acceptance of the mobile/backend/display journey is distinct from screenshot attribution or measured accuracy/latency.
 
 Use original Azikus artwork and near-black/white/ice-blue styling. Bundled Hanken Grotesk is the disclosed fallback for ABC Monument Grotesk; retain its SIL OFL when redistributing. Product screenshots retain their actual appearance. Event mention does not imply sponsorship or partnership, and project assets are not a grant for unrelated reuse/publication.
 

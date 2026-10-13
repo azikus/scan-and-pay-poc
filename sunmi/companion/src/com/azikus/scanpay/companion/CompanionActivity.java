@@ -29,6 +29,7 @@ public class CompanionActivity extends Activity implements SharedPreferences.OnS
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     getWindow().getDecorView().setSystemUiVisibility(5894);
     prefs=getSharedPreferences("connection",MODE_PRIVATE);
+    prefs.edit().remove("mode").apply();
     prefs.registerOnSharedPreferenceChangeListener(this);
     web=new WebView(this); web.setBackgroundColor(Color.rgb(16,17,19)); setContentView(web);
     WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(false);
@@ -64,12 +65,11 @@ public class CompanionActivity extends Activity implements SharedPreferences.OnS
   private void load(){
     origin=prefs.getString("origin","");if(origin.isEmpty())return;
     setContentView(web);
-    String view=primary()?"technical":prefs.getString("mode","vision").equals("vision")?"compact":"customer";
+    String view=primary()?"technical":"customer";
     web.loadUrl(origin+"/demo?view="+view);
   }
   @Override public void onSharedPreferenceChanged(SharedPreferences p,String key){
-    if(primary() && p.getString("mode","vision").equals("vision")){finish();return;}
-    if(key.equals("origin")||key.equals("token")||key.equals("mode")||key.equals("session"))load();
+    if(key.equals("origin")||key.equals("token")||key.equals("session"))load();
   }
   @Override public void onBackPressed(){settings();}
   @Override protected void onDestroy(){prefs.unregisterOnSharedPreferenceChangeListener(this);web.removeJavascriptInterface("Scanpay");web.destroy();super.onDestroy();}
@@ -111,18 +111,10 @@ public class CompanionActivity extends Activity implements SharedPreferences.OnS
       catch(Exception e){address.setError("Enter a private backend HTTP address and access token.");}
     }));dialog.show();
   }
-  private void switchMode(String mode){
-    if(!mode.equals("vision")&&!mode.equals("scanpay"))return;
-    prefs.edit().putString("mode",mode).apply();
-    ActivityOptions options=ActivityOptions.makeBasic();options.setLaunchDisplayId(0);
-    Intent next=mode.equals("scanpay")?new Intent(this,JourneyActivity.class):getPackageManager().getLaunchIntentForPackage("com.ionitech.airscreen");
-    if(next!=null){try{startActivity(next.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),options.toBundle());}catch(RuntimeException e){Toast.makeText(this,"Open the main-screen app manually.",Toast.LENGTH_LONG).show();}}
-  }
   public final class Bridge {
     @JavascriptInterface public String configuration(){
       try{JSONObject result=new JSONObject();result.put("token",token());result.put("session",prefs.getString("session",""));return result.toString();}catch(Exception e){return "{}";}
     }
-    @JavascriptInterface public void mode(String mode){runOnUiThread(()->switchMode(mode));}
     @JavascriptInterface public void follow(String session){if(session.isEmpty()||session.matches("[0-9a-fA-F-]{36}"))runOnUiThread(()->prefs.edit().putString("session",session).apply());}
     @JavascriptInterface public void settings(){runOnUiThread(()->CompanionActivity.this.settings());}
   }
