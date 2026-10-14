@@ -113,7 +113,7 @@ The live display companion follows real mobile/backend activity: capture, upload
 
 The primary display shows the technical system journey, while the secondary display shows simplified customer status.
 
-The idle view shows the website QR. **Controls → Next scan** offers the same shared method/model selection as the admin. Reconnect restores live observation; it cannot submit a scan. A provider response is an observed event, not proof of a correct draft. The capture above comes from an isolated QA session; live integration is separately accepted on hardware.
+The idle view shows the website QR. **Controls → Next scan** offers the same shared method/model selection as the admin. Reconnect restores live observation; it cannot submit a scan. A provider response is an observed event, not proof of a correct draft. The screenshot uses an isolated QA session.
 
 See [companion setup](docs/SETUP.md#display-client-build-connection-and-panels) for installation and display placement.
 
@@ -125,7 +125,7 @@ The backend uses Python 3.12 and can be started through its ASGI entry point on 
 
 ## Scope
 
-This is a working local PoC for single-image capture, extraction and human review. The backend accepts JPEG/PNG; the iOS app uploads an oriented PNG. It does not execute payments, decode payment QR/barcode payloads or accept multipage/HEIC API uploads. The Android capture app is outside this delivery; the Android-based display companion is supported.
+This is a working local PoC for single-image capture, extraction and human review. The backend accepts JPEG/PNG; the iOS app uploads an oriented PNG. It does not execute payments, decode payment QR/barcode payloads or accept multipage/HEIC API uploads. The Android capture app is outside scope; the Android-based display companion is supported.
 
 Extraction can be wrong or incomplete. Reviewed development measurements and their limits are in the [evaluation guide](docs/EVALUATION.md). No production accuracy, latency or availability guarantee is implied.
 
@@ -138,6 +138,6 @@ Extraction can be wrong or incomplete. Reviewed development measurements and the
 | [Evaluation](docs/EVALUATION.md) | Corpus runs, scoring, measurements and known limitations |
 | [Development](docs/DEVELOPMENT.md) | Architecture, providers, repository map and checks |
 
-[Setup](docs/SETUP.md) owns native/display build instructions; [Development](docs/DEVELOPMENT.md) covers their implementation. The [Webflow showcase](website/README.md) remains available; this guide is the product overview.
+[Setup](docs/SETUP.md) owns native/display build instructions; [Development](docs/DEVELOPMENT.md) covers their implementation. The [Webflow showcase guide](website/README.md) covers website packaging and integration.
 
 Screenshot source descriptions and hashes are in [asset provenance](website/assets/provenance.json). Real invoices, credentials, labels, raw provider responses and generated exports remain outside Git.
