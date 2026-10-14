@@ -194,6 +194,96 @@ The earlier two-pass sample scores 161/192 readable fields (83.9%) and 112/120 c
 
 **Latency and accounting.** Pooled backend latency over all **85 timing samples** is **5.79 s median / 25.95 s p95**, with a **33.01 s maximum**. Provider-stage median/p95 is **5.74 / 25.79 s**. The p95 uses nearest rank over individual request timings, rather than averaging pass percentiles; with 17 samples, each pass's p95 equals its maximum. Backend timings include queue, preprocessing, provider and postprocessing, and exclude mobile capture/upload/review/rendering. Timeout rate is **0/85**. All **85 external stages** have token-based estimates totalling **USD 0.2732056**, with zero unestimated stage charges. Settled billing, tax, FX and credits remain unknown. Each fresh request is counted once.
 
+### Approved roster: all configured LLM models, five passes
+
+The 14 October 2026 study planned **19 distinct configured direct-image models × 17 approved images × five passes = 1,615 fresh requests**. It retains **1,383 recorded results**, comprising **1,204 completed extraction requests, 179 unsuccessful outcomes and 232 unevaluated cases**. No prior response is reused, no failed request is retried and no model is substituted. The current expanded Luna profile is used once; the duplicate legacy Luna transport is excluded. The preceding OpenAI-only study remains separate.
+
+**Evaluation coverage.** Thirteen models completed the full five-pass protocol, with 85 recorded attempts per model. Evaluation coverage for the remaining six models is partial or unavailable. Comparative conclusions are restricted to models with complete coverage; partial results describe only the evaluated subset and are excluded from the full five-pass ranking.
+
+All models use the current compact partial-field extraction, invoice-context v4 and payment-draft v4 policies. Exact model/profile versions, provider settings, reasoning modes, tariffs and response identities are frozen in the private plan. Gemini uses protocol 6 and the other selected models protocol 5. Provider-specific reasoning settings differ; this compares the configured extraction profiles, not model weights under identical inference settings. Each provider has a separate API data directory with at most two active requests; up to 12 requests run across the six providers. The evaluation uses isolated service instances and never writes to the live service. Selected profile, server identity and provider configuration fingerprints are unchanged. The live review-table fingerprint changed during the study, so unchanged review data is not asserted; no rollback is attempted.
+
+**Request outcomes and reviewed fields.** Complete drafts still require review. Readable and critical acceptance use the same frozen labels and canonical source bindings as the earlier approved-roster studies: 15 labelled image records, two unlabelled images; 96 readable and 60 critical fields per pass. A full five-pass result therefore has 480 readable and 300 critical observations. Errors contribute missing/error observations; not-run cells are excluded and do not form a comparable full five-pass score. Accepted counts combine exact matches and approved name variants, detailed separately below.
+
+| Model | Complete / incomplete / error / not run | Readable accepted | Critical accepted | Critical positions accepted in all five /60 |
+| --- | --- | --- | --- | ---: |
+| `gpt-4.1-mini-2025-04-14` | 30 / 53 / 2 / 0 | 378/480 (78.8%) | 256/300 (85.3%) | 42 |
+| `gemini-3.5-flash-lite` | 35 / 49 / 1 / 0 | 376/480 (78.3%) | 232/300 (77.3%) | 40 |
+| `mistral-small-2603` | 37 / 47 / 1 / 0 | 352/480 (73.3%) | 229/300 (76.3%) | 31 |
+| `claude-haiku-4-5-20251001` | 25 / 57 / 3 / 0 | 333/480 (69.4%) | 201/300 (67.0%) | 34 |
+| `Qwen/Qwen3.5-9B` | 14 / 59 / 12 / 0 | 300/480 (62.5%) | 189/300 (63.0%) | 14 |
+| `gpt-6-luna` | 37 / 46 / 2 / 0 | 376/480 (78.3%) | 235/300 (78.3%) | 40 |
+| `gpt-6.1-sol` | 30 / 53 / 2 / 0 | 391/480 (81.5%) | 243/300 (81.0%) | 48 |
+| `gpt-6-astra` | 30 / 55 / 0 / 0 | 397/480 (82.7%) | 246/300 (82.0%) | 49 |
+| `gemini-3.8-flash` | 41 / 42 / 2 / 0 | 385/480 (80.2%) | 243/300 (81.0%) | 46 |
+| `gemini-3.1-pro-preview` | 15 / 15 / 41 / 14 | 157/413 (38.0%) | 100/261 (38.3%) | Not measured |
+| `claude-haiku-5-5` | 39 / 44 / 2 / 0 | 392/480 (81.7%) | 249/300 (83.0%) | 43 |
+| `claude-sonnet-5-5` | 20 / 30 / 2 / 33 | 247/319 (77.4%) | 157/200 (78.5%) | Not measured |
+| `claude-opus-5-5` | 0 / 0 / 2 / 83 | 0/42 (0.0%) | 0/32 (0.0%) | Not measured |
+| `mistral-medium-2604` | 16 / 67 / 2 / 0 | 333/480 (69.4%) | 215/300 (71.7%) | 35 |
+| `mistral-large-4` | 0 / 0 / 77 / 8 | 0/447 (0.0%) | 0/280 (0.0%) | Not measured |
+| `ministral-8b-2512` | 0 / 0 / 0 / 85 | Not scored | Not scored | Not measured |
+| `moonshotai/Kimi-K3` | 32 / 30 / 23 / 0 | 309/480 (64.4%) | 191/300 (63.7%) | 23 |
+| `MiniMaxAI/MiniMax-M3` | 18 / 58 / 0 / 9 | 338/440 (76.8%) | 205/275 (74.5%) | Not measured |
+| `grok-4.7` | 36 / 44 / 5 / 0 | 372/480 (77.5%) | 232/300 (77.3%) | 40 |
+
+**Aggregate resource usage.** The primary study comprises 1,383 attempts. Four supplementary attempts are included in resource accounting and excluded from field scoring. Across both groups, 1,387 attempts have estimated or provider-reported costs totalling **USD 26.298427125**, with **170 stage charges unconfirmed**. Unsubmitted supplementary cases are excluded from the original 1,615-case evaluation target. Detailed records are retained in the private evaluation archive.
+
+**Latency and accounting.** Backend total timing includes queue, preprocessing, provider and postprocessing, including failed attempts with a timing sample. It excludes capture, upload and user review. Medians and nearest-rank p95 pool individual requests rather than averaging pass percentiles. Cost subtotals include every recorded external stage once. Unknown charges are additional to known subtotals, not zero; settled billing, tax, FX and credits remain unknown. Tariffs are the saved configured pricing basis, not newly verified price quotes.
+
+| Model | Timing samples | Median / p95 | Timeouts | Estimated/reported subtotal | Unknown stage charges |
+| --- | ---: | --- | ---: | --- | ---: |
+| `gpt-4.1-mini-2025-04-14` | 85 | 5.76 / 14.39 s | 2 | 0.2677116 USD | 2 |
+| `gemini-3.5-flash-lite` | 85 | 4.41 / 7.75 s | 1 | 0.3063081 USD | 1 |
+| `mistral-small-2603` | 85 | 5.04 / 11.44 s | 1 | 0.10070460 USD | 1 |
+| `claude-haiku-4-5-20251001` | 85 | 9.72 / 26.17 s | 3 | 0.965872 USD | 3 |
+| `Qwen/Qwen3.5-9B` | 85 | 11.95 / 28.32 s | 1 | 0.10696571 USD | 12 |
+| `gpt-6-luna` | 85 | 7.90 / 15.04 s | 0 | 0.084542675 USD | 2 |
+| `gpt-6.1-sol` | 85 | 11.40 / 19.70 s | 2 | 1.6645940 USD | 2 |
+| `gpt-6-astra` | 85 | 13.84 / 23.30 s | 0 | 8.6725850 USD | 0 |
+| `gemini-3.8-flash` | 85 | 22.08 / 44.47 s | 2 | 1.16229300 USD | 2 |
+| `gemini-3.1-pro-preview` | 71 | 90.05 / 90.09 s | 41 | 2.508640 USD | 41 |
+| `claude-haiku-5-5` | 85 | 11.39 / 19.19 s | 2 | 0.9183875 USD | 2 |
+| `claude-sonnet-5-5` | 52 | 6.21 / 19.59 s | 0 | 1.646710 USD | 2 |
+| `claude-opus-5-5` | 2 | 0.89 / 0.90 s | 0 | Unknown | 2 |
+| `mistral-medium-2604` | 85 | 7.26 / 14.85 s | 2 | 1.1476440 USD | 2 |
+| `mistral-large-4` | 77 | 90.06 / 90.17 s | 63 | 0.46607484 USD | 64 |
+| `ministral-8b-2512` | 0 | — / — s | 0 | Unknown | 0 |
+| `moonshotai/Kimi-K3` | 85 | 65.40 / 90.08 s | 23 | 3.9219039 USD | 23 |
+| `MiniMaxAI/MiniMax-M3` | 76 | 10.27 / 18.95 s | 0 | 0.2383062 USD | 0 |
+| `grok-4.7` | 85 | 31.86 / 90.07 s | 5 | 2.119184 USD | 5 |
+
+**Score audit.** Each full five-pass model excludes 615 field observations, including 370 pending labels; confirmed absences are scored separately over 450 checks. Notice/tax/reference/condition/date fields without approved labels remain unscored. Repeated observations are correlated, and the corpus was used during prompt development. These measurements do not establish production accuracy or a statistically significant ranking.
+
+| Model | Readable exact + approved variants | Critical exact + approved variants | Confirmed absences correct | Profile version |
+| --- | --- | --- | --- | --- |
+| `gpt-4.1-mini-2025-04-14` | 378 + 0 | 256 + 0 | 434/450 | `2-80e48b9875949eb2` |
+| `gemini-3.5-flash-lite` | 376 + 0 | 232 + 0 | 422/450 | `2-740688db840c087a` |
+| `mistral-small-2603` | 348 + 4 | 225 + 4 | 402/450 | `2-9126c573871f62ac` |
+| `claude-haiku-4-5-20251001` | 333 + 0 | 201 + 0 | 408/450 | `2-23b5efa6a250959a` |
+| `Qwen/Qwen3.5-9B` | 300 + 0 | 189 + 0 | 320/450 | `2-fba0cbd55996ea54` |
+| `gpt-6-luna` | 375 + 1 | 234 + 1 | 438/450 | `2-e985bfb5907538dd` |
+| `gpt-6.1-sol` | 391 + 0 | 243 + 0 | 431/450 | `2-3c552a260337f8f0` |
+| `gpt-6-astra` | 397 + 0 | 246 + 0 | 445/450 | `2-eab3749909f91a86` |
+| `gemini-3.8-flash` | 385 + 0 | 243 + 0 | 435/450 | `2-a5aec0ba3be8d84e` |
+| `gemini-3.1-pro-preview` | 157 + 0 | 100 + 0 | 175/394 | `2-f010cec94d1cbaaf` |
+| `claude-haiku-5-5` | 390 + 2 | 247 + 2 | 430/450 | `2-bca670dda0156711` |
+| `claude-sonnet-5-5` | 247 + 0 | 157 + 0 | 294/308 | `2-1bdd72e473515f01` |
+| `claude-opus-5-5` | 0 + 0 | 0 + 0 | 0/56 | `2-d607e837c105dac3` |
+| `mistral-medium-2604` | 333 + 0 | 215 + 0 | 427/450 | `2-b82e45d706e76ee9` |
+| `mistral-large-4` | 0 + 0 | 0 + 0 | 0/424 | `2-dcc6e8a5f3731fa7` |
+| `ministral-8b-2512` | 0 + 0 | 0 + 0 | 0/0 | `2-490d051d4085cbff` |
+| `moonshotai/Kimi-K3` | 309 + 0 | 191 + 0 | 321/450 | `2-5d4a02e9cab0144e` |
+| `MiniMaxAI/MiniMax-M3` | 338 + 0 | 205 + 0 | 398/417 | `2-24e140d430f167dd` |
+| `grok-4.7` | 372 + 0 | 232 + 0 | 420/450 | `2-2bf95b7836a9a88e` |
+
+**Evaluation limitations.** Unsuccessful outcomes include processing timeouts, service availability constraints and response-processing limitations. These outcomes are included in the reported results for the tested configurations and do not independently establish a model's extraction accuracy. Timeout counts are reported in the latency table; detailed diagnostics are retained in the private evaluation archive.
+
+Mistral Large results are affected by processing timeouts, output-token limits and an adapter compatibility issue involving structured response content. Its results therefore reflect the tested integration as well as model behaviour. No corrected responses or subsequent reruns are substituted into the reported study.
+
+Sonnet and Opus have incomplete evaluation coverage and are excluded from comparative conclusions. Their recorded unsuccessful attempts do not provide sufficient evidence to assess extraction quality.
+
+The complete five-pass outputs are retained without best-of-five selection or majority voting. Profile-specific payment-fingerprint consistency, pass-level results, usage and stage accounting remain in the private report. Identical outputs alone do not establish correctness.
+
 ## Timing and costs
 
 Record total backend elapsed time, queue/provider/local-stage breakdown, sample count, p95 method and timeout rate. Hybrids include all stages. Provider/backend timing excludes capture, upload, user review and rendering; no measured capture-to-review study is claimed. Include failed/timeout observations when explaining latency coverage.
@@ -218,5 +308,7 @@ Reports retain exact dates, profile definitions, source hashes, labels, request 
 | Payment-route audit | `.local/paid-review-fixes-2026-10-13-27da0194/route-audit.json` |
 | Approved-roster field-policy study | `.local/paid-approved-2026-10-13-4be9019b/` |
 | Approved-roster payment-option study | `.local/paid-bill-options-2026-10-14-d35bc0ca/` |
+| Supplementary evaluation records | `.local/paid-anthropic-completion-2026-10-14-073ede9d/`, `.local/paid-anthropic-completion-2026-10-14-031f05f1/` |
+| All configured LLMs, five passes | `.local/paid-all-llms-2026-10-14-52a90ac7/` |
 | Approved-roster five-pass repeatability | `.local/paid-five-pass-2026-10-14-17022aef/` |
 | Approved source/page/variant mappings and exclusions | `.local/evaluation/active-inventory.json` |
