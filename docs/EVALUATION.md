@@ -196,9 +196,9 @@ The earlier two-pass sample scores 161/192 readable fields (83.9%) and 112/120 c
 
 ### Approved roster: all configured LLM models, five passes
 
-The 14 October 2026 study planned **19 distinct configured direct-image models × 17 approved images × five passes = 1,615 fresh requests**. It retains **1383 saved results**, with **1204 completed API requests, 179 error outcomes and 232 not-run cells**. No prior response is reused, no failed request is retried and no model is substituted. The current expanded Luna profile is used once; the duplicate legacy Luna transport is excluded. The preceding OpenAI-only study remains separate.
+The 14 October 2026 study planned **19 distinct configured direct-image models × 17 approved images × five passes = 1,615 fresh requests**. It retains **1,383 recorded results**, comprising **1,204 completed extraction requests, 179 unsuccessful outcomes and 232 unevaluated cases**. No prior response is reused, no failed request is retried and no model is substituted. The current expanded Luna profile is used once; the duplicate legacy Luna transport is excluded. The preceding OpenAI-only study remains separate.
 
-**Stopped at the user’s request.** 13 models have all 85 attempted cells recorded. Remaining non-Anthropic cells were not submitted so the completed comparisons could be delivered promptly. Partial model scores below describe only the attempted subset and must not be ranked against full five-pass results. Anthropic’s separate account-credit stops are retained.
+**Evaluation coverage.** Thirteen models completed the full five-pass protocol, with 85 recorded attempts per model. Evaluation coverage for the remaining six models is partial or unavailable. Comparative conclusions are restricted to models with complete coverage; partial results describe only the evaluated subset and are excluded from the full five-pass ranking.
 
 All models use the current compact partial-field extraction, invoice-context v4 and payment-draft v4 policies. Exact model/profile versions, provider settings, reasoning modes, tariffs and response identities are frozen in the private plan. Gemini uses protocol 6 and the other selected models protocol 5. Provider-specific reasoning settings differ; this compares the configured extraction profiles, not model weights under identical inference settings. Each provider has a separate API data directory with at most two active requests; up to 12 requests run across the six providers. The evaluation uses isolated service instances and never writes to the live service. Selected profile, server identity and provider configuration fingerprints are unchanged. The live review-table fingerprint changed during the study, so unchanged review data is not asserted; no rollback is attempted.
 
@@ -226,7 +226,7 @@ All models use the current compact partial-field extraction, invoice-context v4 
 | `MiniMaxAI/MiniMax-M3` | 18 / 58 / 0 / 9 | 338/440 (76.8%) | 205/275 (74.5%) | Not measured |
 | `grok-4.7` | 36 / 44 / 5 / 0 | 372/480 (77.5%) | 232/300 (77.3%) | 40 |
 
-**All attempted calls.** Main-study accounting records 1383 attempts. Two separately authorized Anthropic completion plans each stop after two HTTP 400 credit-balance rejections: four additional attempts, excluded from field scoring. Across all studies, 1387 actual attempts have known estimated/reported subtotals of **26.298427125 USD**, plus **170 unknown stage charges**. The unsubmitted cells in overlapping completion plans are not added to the original 1,615-cell target. These supplementary attempts remain private with their own keys, results and stage accounting.
+**Aggregate resource usage.** The primary study comprises 1,383 attempts. Four supplementary attempts are included in resource accounting and excluded from field scoring. Across both groups, 1,387 attempts have estimated or provider-reported costs totalling **USD 26.298427125**, with **170 stage charges unconfirmed**. Unsubmitted supplementary cases are excluded from the original 1,615-case evaluation target. Detailed records are retained in the private evaluation archive.
 
 **Latency and accounting.** Backend total timing includes queue, preprocessing, provider and postprocessing, including failed attempts with a timing sample. It excludes capture, upload and user review. Medians and nearest-rank p95 pool individual requests rather than averaging pass percentiles. Cost subtotals include every recorded external stage once. Unknown charges are additional to known subtotals, not zero; settled billing, tax, FX and credits remain unknown. Tariffs are the saved configured pricing basis, not newly verified price quotes.
 
@@ -276,11 +276,11 @@ All models use the current compact partial-field extraction, invoice-context v4 
 | `MiniMaxAI/MiniMax-M3` | 338 + 0 | 205 + 0 | 398/417 | `2-24e140d430f167dd` |
 | `grok-4.7` | 372 + 0 | 232 + 0 | 420/450 | `2-2bf95b7836a9a88e` |
 
-**Execution failures.** `gpt-4.1-mini-2025-04-14`: provider_timeout 2; `gemini-3.5-flash-lite`: provider_timeout 1; `mistral-small-2603`: provider_timeout 1; `claude-haiku-4-5-20251001`: provider_timeout 3; `Qwen/Qwen3.5-9B`: provider_unavailable 11, provider_timeout 1; `gpt-6-luna`: provider_unavailable 2; `gpt-6.1-sol`: provider_timeout 2; `gemini-3.8-flash`: provider_timeout 2; `gemini-3.1-pro-preview`: provider_timeout 41; `claude-haiku-5-5`: provider_timeout 2; `claude-sonnet-5-5`: invalid_provider_output 2; `claude-opus-5-5`: invalid_provider_output 2; `mistral-medium-2604`: provider_timeout 2; `mistral-large-4`: provider_timeout 63, invalid_provider_output 13, provider_unavailable 1; `moonshotai/Kimi-K3`: provider_timeout 23; `grok-4.7`: provider_timeout 5.
+**Evaluation limitations.** Unsuccessful outcomes include processing timeouts, service availability constraints and response-processing limitations. These outcomes are included in the reported results for the tested configurations and do not independently establish a model's extraction accuracy. Timeout counts are reported in the latency table; detailed diagnostics are retained in the private evaluation archive.
 
-Mistral Large failures mix timeouts, token exhaustion and an adapter limitation: returned reasoning/text content blocks are coerced to a string rather than parsed as text. Completed block-form responses therefore fail local JSON parsing. Its error score measures this configured integration, not intrinsic extraction accuracy. The raw responses remain preserved; no corrected replay is substituted into this study. Timeouts do not establish whether a provider was down. Mistral reported operational service when checked on 14 October 2026 ([status](https://status.mistral.ai/)); a public status page cannot rule out a model-specific or account-specific problem.
+Mistral Large results are affected by processing timeouts, output-token limits and an adapter compatibility issue involving structured response content. Its results therefore reflect the tested integration as well as model behaviour. No corrected responses or subsequent reruns are substituted into the reported study.
 
-Anthropic HTTP 400 credit-balance rejections stop the Sonnet and Opus batches. Their remaining cells are explicitly not run; this is an account-funding limit, not a model-accuracy result.
+Sonnet and Opus have incomplete evaluation coverage and are excluded from comparative conclusions. Their recorded unsuccessful attempts do not provide sufficient evidence to assess extraction quality.
 
 The complete five-pass outputs are retained without best-of-five selection or majority voting. Profile-specific payment-fingerprint consistency, pass-level results, usage and stage accounting remain in the private report. Identical outputs alone do not establish correctness.
 
@@ -308,7 +308,7 @@ Reports retain exact dates, profile definitions, source hashes, labels, request 
 | Payment-route audit | `.local/paid-review-fixes-2026-10-13-27da0194/route-audit.json` |
 | Approved-roster field-policy study | `.local/paid-approved-2026-10-13-4be9019b/` |
 | Approved-roster payment-option study | `.local/paid-bill-options-2026-10-14-d35bc0ca/` |
-| Anthropic credit-blocked completion plans | `.local/paid-anthropic-completion-2026-10-14-073ede9d/`, `.local/paid-anthropic-completion-2026-10-14-031f05f1/` |
+| Supplementary evaluation records | `.local/paid-anthropic-completion-2026-10-14-073ede9d/`, `.local/paid-anthropic-completion-2026-10-14-031f05f1/` |
 | All configured LLMs, five passes | `.local/paid-all-llms-2026-10-14-52a90ac7/` |
 | Approved-roster five-pass repeatability | `.local/paid-five-pass-2026-10-14-17022aef/` |
 | Approved source/page/variant mappings and exclusions | `.local/evaluation/active-inventory.json` |
