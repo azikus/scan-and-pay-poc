@@ -2,7 +2,7 @@
 
 ## Existing installation
 
-Preserve the existing `.env`, `.local/providers.json`, data directory, phone data and signing identities. Use the current private launcher/source deployment; do not start a second backend or reinstall/uninstall the phone to check connectivity. The active deployment path is documented in `AGENTS.md`.
+Preserve the existing `.env`, `.local/providers.json`, data directory, phone data and signing identities. Use the configured private launcher/source deployment; do not start a second backend or reinstall/uninstall the phone to check connectivity. The active deployment path is documented in `AGENTS.md`.
 
 Open `http://127.0.0.1:8000/admin` on the API host. Read-only checks use the local CLI:
 
@@ -78,7 +78,7 @@ Keep secrets out of source, request options, URLs, terminal arguments and logs. 
 3. Enter that URL and the existing local bearer token in the client's Connection settings, then Reconnect.
 4. Allow local-network access when prompted and update the saved URL when the server address changes.
 
-The current native client stores one private server address, without automatic discovery or a public/cloud endpoint selector. Its hotspot-labelled settings reflect the existing demonstration configuration; a phone hotspot is one transport choice rather than an architectural dependency. The host and client still need compatible network settings. A client's localhost is not the API host. Reconnect makes authenticated reads and does not submit a capture or confirmation.
+The mobile client stores one private server address, without automatic discovery or a public/cloud endpoint selector. The connection settings use a hotspot label; any reachable shared private network is supported. The host and client need compatible network settings. A client's localhost is not the API host. Reconnect makes authenticated reads and does not submit a capture or confirmation.
 
 ## Display and browser inspection
 
@@ -123,7 +123,7 @@ The launcher uses one attached ADB device or `DISPLAY_SERIAL`, discovers the sec
 
 Enter the advertised API URL and existing local bearer token in **Backend connection**. The address is configurable, never embedded in the APK. Android Back opens connection settings if loading fails. Enable phone **Connection → Demo displays** and select its matching short session on the display.
 
-The primary panel always shows the technical system journey; the secondary panel shows customer status and the idle website QR. The launcher opens both application views, and obsolete saved mode preferences are removed without changing saved connection/session data.
+The primary panel always shows the technical system journey; the secondary panel shows customer status and the idle website QR. The launcher opens both application views using the saved connection/session data.
 
 Display disconnection cannot fail a mobile extraction or confirmation. Next scan controls use the same persisted selection as admin and affect only new Sends. Internal isolation and WebView restrictions are documented in [Development](DEVELOPMENT.md#display-host).
 

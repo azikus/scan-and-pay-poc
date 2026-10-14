@@ -1,10 +1,10 @@
-# Scan & Pay showcase and Webflow handoff
+# Scan & Pay showcase and Webflow integration
 
 A content-only showcase for `azikus.com/scan-and-pay-poc`: actual application UI, synthetic/demo data, scoped styles and lightweight JavaScript. It supplies the page content, not navigation or a replacement site footer. Building it does not upload or publish anything. This README owns build, integration and screenshot attribution.
 
 ## Build and preview
 
-Requires Python 3 only, with no packages to install. From the repository root, or the root of the extracted handoff ZIP:
+Requires Python 3 only, with no packages to install. From the repository root, or the root of the extracted source ZIP:
 
 ```sh
 python3 website/scripts/build.py
@@ -21,7 +21,7 @@ Open `http://127.0.0.1:8778`. Edit `website/content.html`, `styles.css` and `sit
 | `dist/asset-urls.json` | Filename-to-hosted-URL template |
 | `dist/Scan-and-Pay-Webflow.zip` | Preview, embed, used assets/licence and editable source; this README becomes START-HERE.md |
 
-Build output and QA captures are ignored. The ZIP is a developer handoff, not a Webflow project-import file. The source HTML/CSS/JS, screenshots, licences and provenance stay in Git. `assets/provenance.json` is excluded from the public package.
+Build output and QA captures are ignored. The ZIP contains source and preview files; Webflow integration uses the Code Embed fragment. The source HTML/CSS/JS, screenshots, licences and provenance stay in Git. `assets/provenance.json` is excluded from the public package.
 
 ## Install in Webflow
 
@@ -61,12 +61,12 @@ Keyboard tabs, visible focus, native disclosures and an Escape/focus-restoring s
 | Dark mobile walkthrough | Actual native iOS UI-test captures; synthetic invoice/account values |
 | Light mobile walkthrough | Supplied original native iPhone captures; synthetic values |
 | Spatial gallery | Supplied native UI renderer previews of a separate app; demo accounts/receipts, not headset or passthrough captures |
-| Live display journey | Real companion webpage rendered with an isolated QA session; not a fresh live provider/latency study |
+| Live display journey | Real companion webpage rendered with an isolated QA session; not a provider/latency measurement |
 | Admin context | Production renderer with an isolated synthetic UK fixture |
 | Admin selector | Authenticated admin cropped to method/model controls; no private scan list/document/token |
 
-`assets/provenance.json` retains source filenames/descriptions, treatment and hashes. Resized/compressed delivery copies preserve screenshot content. Full local source paths and readable source invoices/corpus galleries are excluded. Physical user acceptance of the mobile/backend/display journey is distinct from screenshot attribution or measured accuracy/latency.
+`assets/provenance.json` retains source filenames/descriptions, treatment and hashes. Resized/compressed delivery copies preserve screenshot content. Full local source paths and readable source invoices/corpus galleries are excluded. Screenshots illustrate the interface and do not measure extraction accuracy or latency.
 
 Use original Azikus artwork and near-black/white/ice-blue styling. Bundled Hanken Grotesk is the disclosed fallback for ABC Monument Grotesk; retain its SIL OFL when redistributing. Product screenshots retain their actual appearance. Event mention does not imply sponsorship or partnership, and project assets are not a grant for unrelated reuse/publication.
 
-The showcase describes working capture/review/configurable extraction and potential payment-service integration. It promises neither Android delivery nor a further presentation. Confirmation remains simulated; no money moves or production quality guarantee is claimed. The repository's main README owns the product explanation, and `docs/EVALUATION.md` owns measurements/limits.
+The showcase describes working capture/review/configurable extraction and potential payment-service integration. Android capture/review and presentation materials are outside scope. Confirmation remains simulated; no money moves or production quality guarantee is claimed. The repository's main README owns the product explanation, and `docs/EVALUATION.md` owns measurements/limits.

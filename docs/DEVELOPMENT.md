@@ -1,6 +1,6 @@
 # Development
 
-Read the [product guide](../README.md), [setup](SETUP.md) and [API contract](API_CONTRACT.md). This guide owns architecture, provider profiles and development checks. `AGENTS.md` contains workspace preservation and task-specific guidance.
+Read the [product guide](../README.md), [setup](SETUP.md) and [API contract](API_CONTRACT.md). This guide owns architecture, provider profiles and development checks. `AGENTS.md` contains workspace preservation and contribution guidance.
 
 ## Repository map
 
@@ -13,8 +13,8 @@ Read the [product guide](../README.md), [setup](SETUP.md) and [API contract](API
 | `companion/` | Android WebView display host and build/launch scripts |
 | `contracts/v1/` | Generated API and extraction schemas |
 | `evaluation/` | Corpus/batch/replay/scoring/cost tools |
-| `docs/examples/` | Synthetic contract examples and preserved handoff schema used by tests |
-| `website/` | Existing showcase source, reviewed assets and Webflow packaging |
+| `docs/examples/` | Synthetic contract examples and fixture schema used by tests |
+| `website/` | Showcase source, reviewed assets and Webflow packaging |
 
 Python packaging/lockfiles stay at the root. `.env`, `.local/`, `samples/`, `results/`, `reference/`, generated exports and QA captures remain ignored. Do not commit real invoice/banking data or credentials.
 
@@ -68,13 +68,13 @@ A process lock prevents two service owners sharing a data directory. Completed w
 
 ### Networking and recovery
 
-The ASGI entry point supports an explicit private bind address. Optional `scanpay-serve` reconciles private/link-local IPv4 listeners using `/sbin/ifconfig` discovery for physical `en*` interfaces; this launcher is deployment tooling, not an API requirement. The native settings store one private server address; their hotspot label reflects the current demonstration setup. Reconnect uses authenticated reads and checks the persistent `server_id`; older accepted drafts use scan/image identity checks. Uncertain legacy uploads remain bound to their original address when identity cannot be established safely.
+The ASGI entry point supports an explicit private bind address. Optional `scanpay-serve` reconciles private/link-local IPv4 listeners using `/sbin/ifconfig` discovery for physical `en*` interfaces; this launcher is deployment tooling, not an API requirement. The mobile settings store one private server address under a hotspot label. Reconnect uses authenticated reads and checks the persistent `server_id`; accepted drafts without that identifier use scan/image identity checks. Uncertain uploads remain bound to their original address when identity cannot be established safely.
 
-Two jobs can progress concurrently with bounded outbound calls and queue capacity. Profile stage/job timeouts are explicit. Disconnection is not cancellation, and a timeout does not prove the upstream provider stopped processing. No hidden retry or provider fallback is introduced.
+Two jobs can progress concurrently with bounded outbound calls and queue capacity. Profile stage/job timeouts are explicit. Disconnection is not cancellation, and a timeout does not prove the upstream provider stopped processing. There is no hidden retry or provider fallback.
 
 ### Live observation
 
-The phone optionally publishes best-effort phase/sequence/journey snapshots. Scan headers bind a real job to that journey. The observation hub also receives real transport/runtime events, then serves complete revisioned snapshots through authenticated SSE or polling.
+The phone optionally publishes best-effort phase/sequence/journey snapshots. Scan headers bind a real job to that journey. The observation hub also receives real transport/runtime events, then serves complete snapshots through authenticated SSE or polling.
 
 Phone and backend states stay independent: reset does not cancel accepted extraction, and a prior result cannot replace a new journey. Completion is projected only after a review write succeeds. Persistence is bounded/coalesced and separate from the scan/accounting store; observation failures cannot fail extraction or confirmation. Remote progress percentages are not invented.
 
@@ -107,7 +107,7 @@ The admin and live display **Next scan** controls share the same persisted selec
 
 Extract runs one profile. Compare resolves explicit profile IDs or `all_enabled` into an immutable eligible roster. Disabled, missing, unconfigured or image-incompatible explicit choices fail before dispatch. Compare returns independent results, with no vote or automatic winning result. No provider fallback or substitution is hidden in a method.
 
-Compatible compact LLM definitions include document country/language context as standard. The current `invoice-context@4` prompt separates Croatian remittance models from foreign identifiers and extracts pagoPA/CBILL draft identifiers without confusing payment channels with separate bills. `review@5` and normalization revision 3 are included in profile identity; new definitions get new versions without rewriting saved results or frozen request options. `backend/billers.py` owns scheme requirements, conservative identifier formatting and printed-channel guidance. Per-option labels, dates and conditions are retained. Exact duplicated pagoPA notices merge evidence only when field recovery has no findings; instalment choices retain distinct identifiers and are not labelled extraction conflicts. No payment-provider API is invoked. Account-country evidence and actual payment-route guidance remain separate; country/language alone never selects a biller scheme. Original v1/v2/v3 context prompts and schemas remain available for historical request reconstruction.
+Compatible compact LLM definitions include document country/language context as standard. The extraction prompt separates Croatian remittance models from foreign identifiers and extracts pagoPA/CBILL draft identifiers without confusing payment channels with separate bills. Review and normalization rules are part of the immutable profile identity. `backend/billers.py` owns scheme requirements, conservative identifier formatting and printed-channel guidance. Per-option labels, dates and conditions are retained. Exact duplicated pagoPA notices merge evidence only when field recovery has no findings; instalment choices retain distinct identifiers and are not labelled extraction conflicts. No payment-provider API is invoked. Account-country evidence and actual payment-route guidance remain separate; country/language alone never selects a biller scheme. Saved prompt/schema definitions support exact request reconstruction.
 
 ### Readiness and endpoints
 
@@ -128,7 +128,7 @@ A regional hostname, account headquarters or open-weight licence does not establ
 
 API completion, draft completeness and extraction correctness are different measurements. A timeout does not establish bad credentials or prove upstream processing stopped. Invalid individual fields can be quarantined while recoverable observations remain visible under the selected partial-field policy.
 
-Existing evidence gaps, not newly tested in this guide: Haiku 4.5 has a retained availability/connection failure, Mistral Large 4 has a retained timeout, and two AWS processing profiles have authenticated but untested processing. These are latest recorded outcomes, not claims of current provider outage. Google OCR/Invoice have completed processing evidence.
+Provider readiness requires profile-specific evidence of authenticated processing. A successful authentication check alone does not validate extraction; recorded failures do not establish an ongoing provider outage.
 
 ### Accounting and destinations
 
@@ -193,8 +193,8 @@ Native build/test commands and signing preservation are in [Setup](SETUP.md#nati
 
 ## Documentation
 
-`README.md` is the screenshot-led explanation. Keep the four focused technical guides current rather than adding another phase plan, change log or per-chat handoff. Git stores the change history. Benchmark measurements belong in EVALUATION.md with exact scope/caveats; private reports retain full provenance.
+`README.md` is the screenshot-led product explanation. The four technical guides cover setup, API contracts, development and evaluation. Use impersonal descriptions of behavior and scope. Benchmark measurements belong in EVALUATION.md with exact scope and limitations; private reports retain full provenance.
 
-Reuse reviewed assets from `website/assets/` for screenshots. Retain source descriptions/hashes and licences; distinguish synthetic/native screenshots, isolated QA sessions and real-device acceptance. Do not generate a fake application screen or include readable source invoices.
+Reuse reviewed assets from `website/assets/` for screenshots. Retain source descriptions/hashes and licences; identify synthetic/native screenshots and isolated QA sessions accurately. Do not generate a fake application screen or include readable source invoices.
 
-Website source/build/attribution/handoff instructions live in `website/README.md`. The repository keeps seven Markdown files total; add links/sections rather than duplicate READMEs or handoffs.
+Website source/build/attribution/integration instructions live in `website/README.md`. The repository keeps seven Markdown files total; add links/sections rather than duplicate guides.
