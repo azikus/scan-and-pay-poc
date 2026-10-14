@@ -143,11 +143,11 @@ Readable acceptance totals **144/192 (75.0%)**, comprising 142 exact matches and
 
 Backend total latency across 34 requests was **6.00 s median / 15.11 s p95**, with an 81.99 s maximum; p95 uses nearest rank. The slow request completed without retry. All 34 external stages have estimates totalling **USD 0.1052000**; settled billing, tax, FX and credits remain unknown.
 
-### Approved roster: Italian payment options
+### Approved roster: payment-option revision
 
-This study evaluates per-option printed labels, dates and conditions; exact duplicate-notice evidence merging; and the `payment_option_required` reason for distinct pagoPA notices. It uses `openai-mini-image-roles-v3@2-80e48b9875949eb2` with `gpt-4.1-mini-2025-04-14` on the same approved 17 images and frozen labels as the field-policy study (`2-5454a65805fbdae9`). Two passes use separate storage, with no retries or provider/model substitutions. All **34 requests completed, with zero errors, zero timeouts and zero not-run rows**.
+The shared extraction definition handles every country in the approved roster, including Italian bill-payment notices, without a separate country choice. This study evaluates per-option printed labels, dates and conditions; exact duplicate-notice evidence merging; and the `payment_option_required` reason for distinct pagoPA notices. It uses `openai-mini-image-roles-v3@2-80e48b9875949eb2` with `gpt-4.1-mini-2025-04-14` on the same approved 17 images and frozen labels as the field-policy study (`2-5454a65805fbdae9`). Two passes use separate storage, with no retries or provider/model substitutions. All **34 requests completed, with zero errors, zero timeouts and zero not-run rows**.
 
-| Measure | Field-policy study | Italian-options study |
+| Measure | Field-policy study | Payment-option revision |
 | --- | ---: | ---: |
 | Complete drafts (`success`, still requiring review) | 10/34 (29.4%) | 14/34 (41.2%) |
 | Incomplete drafts | 24/34 | 20/34 |
@@ -156,7 +156,7 @@ This study evaluates per-option printed labels, dates and conditions; exact dupl
 | Confirmed absences handled correctly | 145/180 | 173/180 |
 | Backend latency median / nearest-rank p95 | 6.00 / 15.11 s | 5.92 / 11.18 s |
 
-Each Italian-options pass produced **7 complete / 10 incomplete** drafts. Readable acceptance was **81/96** and **80/96**; critical acceptance was **56/60** in both passes. Aggregate accepted counts comprise 159 readable exact matches plus two approved name variants, and 110 critical exact matches plus two approved variants. Fifteen images have frozen labels; Milan page 7 and A2A page 2 remain unlabelled. Notice/tax/reference/condition/date fields do not have approved labels and are not included in these correctness scores. Two correlated passes provide descriptive evidence, not a statistically established improvement or proof of correct whole invoices.
+Each payment-option pass produced **7 complete / 10 incomplete** drafts. Readable acceptance was **81/96** and **80/96**; critical acceptance was **56/60** in both passes. Aggregate accepted counts comprise 159 readable exact matches plus two approved name variants, and 110 critical exact matches plus two approved variants. Fifteen images have frozen labels; Milan page 7 and A2A page 2 remain unlabelled. Notice/tax/reference/condition/date fields do not have approved labels and are not included in these correctness scores. Two correlated passes provide descriptive evidence, not a statistically established improvement or proof of correct whole invoices.
 
 The difference in complete-draft counts involves the Slovak school invoice, two UK pages and the Croatian invoice. **No Italian example produced a complete draft in these runs.** There were **zero choice-only incomplete runs**: every incomplete extraction also had a route, missing-field, uncertainty or format issue. Exact duplicate merging deliberately did not erase conflicting provider readings.
 
@@ -171,6 +171,28 @@ Manual inspection of the Italian outputs against the retained images found:
 Across the remaining incomplete images, Greek RF and other unsupported routes remain outside this implementation; missing or inferred currency/identifiers are still explicit. Five of 17 payment fingerprints matched between repeats; agreement is not correctness. Fingerprint comparisons include the per-option fields and therefore have a broader scope than those in the field-policy study.
 
 The 34 external stages have **USD 0.1083088 estimated cost**; unknown stage-charge count is zero, while settled billing, taxes, credits and FX remain unknown. Maximum backend latency was 12.08 s, with all 34 timing samples present.
+
+### Approved roster: five-pass repeatability
+
+Five fresh passes on 14 October 2026 use the same shared `openai-mini-image-roles-v3@2-80e48b9875949eb2` definition and `gpt-4.1-mini-2025-04-14` model as the payment-option study. All supported countries and routes use that definition, including Italian notices; no country-specific profile selection is required. The guarded runner validates the approved 17-image roster and exact bytes before dispatch. Each pass has new keys and scan IDs: **85 fresh requests**, at most two concurrent requests, no retries, reused responses or provider substitutions. An isolated API data directory keeps the live service, saved selection, server identity and reviews intact. The earlier 34-request study remains separate.
+
+**Execution and completeness.** All **85/85 requests complete**, with **34 complete drafts (40.0%), 51 incomplete drafts, zero errors, zero timeouts and zero not-run cells**. Complete drafts still require human review; API completion and draft completeness do not establish correct fields.
+
+| Pass | Complete / incomplete | Readable accepted /96 | Critical accepted /60 | Backend median / p95 (17 samples) |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 6 / 11 | 78 | 50 | 7.47 / 30.80 s |
+| 2 | 8 / 9 | 68 | 44 | 6.74 / 28.92 s |
+| 3 | 6 / 11 | 69 | 44 | 5.33 / 27.48 s |
+| 4 | 7 / 10 | 80 | 56 | 5.43 / 33.01 s |
+| 5 | 7 / 10 | 72 | 48 | 5.60 / 10.19 s |
+
+**Reviewed field correctness.** Readable acceptance is **367/480 (76.5%)**: 363 exact matches plus four approved name variants. Critical acceptance is **242/300 (80.7%)**: 238 exact matches plus four approved variants. Confirmed absences are correct in **431/450** checks, reported separately. The frozen key and canonical image/source bindings match the preceding two-pass study. Fifteen images have matching label records; two remain unlabelled. Each pass excludes 123 fields, including 74 pending labels; notice/tax/reference/condition/date fields without approved labels remain unscored. These denominators are correlated repeated field observations, not independent fields or whole-invoice accuracy.
+
+The earlier two-pass sample scores 161/192 readable fields (83.9%) and 112/120 critical fields (93.3%) under the same definition. The lower five-pass scores expose sample variability; they do not measure a code regression or establish either sample as representative production accuracy.
+
+**Repeatability.** Of 60 reviewed critical field positions, **39 are accepted in all five passes**, 18 in some passes and three in none. Values or observation states vary at 21/60 positions. None of the 17 images has the same payment fingerprint in all five passes; one image has a varying candidate count. The fingerprint preserves linked payment options, selected option, field values/states/origins, unresolved readings, option labels/dates/conditions and review state, while ignoring generated IDs, evidence and explanatory prose. It excludes document-level fields. Differences are not automatically transcription errors, and agreement is not correctness. No best-of-five or majority-vote result is selected.
+
+**Latency and accounting.** Pooled backend latency over all **85 timing samples** is **5.79 s median / 25.95 s p95**, with a **33.01 s maximum**. Provider-stage median/p95 is **5.74 / 25.79 s**. The p95 uses nearest rank over individual request timings, rather than averaging pass percentiles; with 17 samples, each pass's p95 equals its maximum. Backend timings include queue, preprocessing, provider and postprocessing, and exclude mobile capture/upload/review/rendering. Timeout rate is **0/85**. All **85 external stages** have token-based estimates totalling **USD 0.2732056**, with zero unestimated stage charges. Settled billing, tax, FX and credits remain unknown. Each fresh request is counted once.
 
 ## Timing and costs
 
@@ -195,5 +217,6 @@ Reports retain exact dates, profile definitions, source hashes, labels, request 
 | Field-policy repeatability, local replay and scope filters | `.local/paid-review-fixes-2026-10-13-27da0194/` |
 | Payment-route audit | `.local/paid-review-fixes-2026-10-13-27da0194/route-audit.json` |
 | Approved-roster field-policy study | `.local/paid-approved-2026-10-13-4be9019b/` |
-| Approved-roster Italian-options study | `.local/paid-bill-options-2026-10-14-d35bc0ca/` |
+| Approved-roster payment-option study | `.local/paid-bill-options-2026-10-14-d35bc0ca/` |
+| Approved-roster five-pass repeatability | `.local/paid-five-pass-2026-10-14-17022aef/` |
 | Approved source/page/variant mappings and exclusions | `.local/evaluation/active-inventory.json` |
