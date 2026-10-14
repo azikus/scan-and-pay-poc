@@ -240,6 +240,15 @@
         },
         "biller_code": {
           "$ref": "#/$defs/Observation"
+        },
+        "notice_number": {
+          "$ref": "#/$defs/Observation"
+        },
+        "creditor_tax_code": {
+          "$ref": "#/$defs/Observation"
+        },
+        "bill_reference": {
+          "$ref": "#/$defs/Observation"
         }
       },
       "title": "BillerDestination",
@@ -247,7 +256,10 @@
       "required": [
         "kind",
         "scheme",
-        "biller_code"
+        "biller_code",
+        "notice_number",
+        "creditor_tax_code",
+        "bill_reference"
       ]
     },
     "Candidate": {
@@ -257,6 +269,15 @@
           "minLength": 1,
           "title": "Id",
           "type": "string"
+        },
+        "option_label": {
+          "$ref": "#/$defs/Observation"
+        },
+        "due_date": {
+          "$ref": "#/$defs/Observation"
+        },
+        "payment_condition": {
+          "$ref": "#/$defs/Observation"
         },
         "account_country": {
           "$ref": "#/$defs/Observation"
@@ -293,6 +314,9 @@
       },
       "required": [
         "id",
+        "option_label",
+        "due_date",
+        "payment_condition",
         "account_country",
         "beneficiary_name",
         "account_holder_name",

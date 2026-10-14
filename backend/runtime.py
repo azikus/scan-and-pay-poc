@@ -41,7 +41,9 @@ def review_extraction(result: Extraction, interpretation_policy: str = "strict")
     if interpretation_policy in {"draft_v1", "draft_v2", "draft_v3", "draft_v4"}:
         from backend.draft_policy import VERSION, review_draft
 
-        payment = review_draft(result.payment, result.evidence)
+        payment = review_draft(
+            result.payment, result.evidence, merge_duplicates=not result.findings
+        )
         if VERSION not in result.routing.applied_rule_packs:
             result.routing.applied_rule_packs.append(VERSION)
         if interpretation_policy == "draft_v2":

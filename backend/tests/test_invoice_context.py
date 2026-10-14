@@ -194,8 +194,8 @@ def test_context_is_standard_but_saved_request_options_remain_immutable(settings
     assert "context_policy" not in option.snapshot_json()
     definition = registry(settings)["test-profile"]
     current = ModelOption.model_validate_json(definition.parameters["option"])
-    assert current.context_policy == "invoice_v1"
-    assert "invoice-context@1" in definition.metadata.component_ids
+    assert current.context_policy == "invoice_v4"
+    assert "invoice-context@4" in definition.metadata.component_ids
     assert "ContextReading" in json.dumps(vision_request(current, "synthetic", "secret"))
     assert option.snapshot_json() == original_option
     assert "ContextReading" not in json.dumps(old_request)
@@ -253,3 +253,75 @@ def test_context_call_end_to_end_and_read_projection_does_not_change_saved_resul
         assert saved.runs[0].review_guidance is None
         assert len(calls) == 1
         assert calls[0]["tools"] == []
+
+
+@pytest.mark.parametrize("country", ["GB", "HR", "SK"])
+@pytest.mark.parametrize("basis", ["printed", "unsupported"])
+def test_absent_model_is_optional_in_validation_and_guidance(country, basis):
+    data = context_example(country, "en")
+    data["candidates"][0]["model"] = reading(basis=basis)
+    data["candidates"][0]["reference"] = reading(basis=basis)
+    data["candidates"][0]["reference_requirement"] = "not_stated"
+    run = context_run(data)
+    assert run.result_outcome == "success"
+    assert guidance(run).policy_version == "invoice-fields@4"
+    assert (
+        guidance(run).candidates[0].fields["/candidates/0/remittance/model"].requirement
+        == "optional"
+    )
+
+
+@pytest.mark.parametrize("amount,currency", [("80 EUR", "Euro"), ("80 Euros", None)])
+def test_whole_amount_and_currency_word_survive_end_to_end(amount, currency):
+    data = context_example("GB", "en")
+    candidate = data["candidates"][0]
+    candidate["amount_text"] = reading(amount)
+    candidate["currency"] = reading(currency) if currency else reading(basis="unsupported")
+    candidate["model"] = reading(basis="unsupported")
+    run = context_run(data)
+    assert run.result_outcome == "success"
+    amount_result = run.payment.candidates[0].amount
+    assert amount_result.value.value == "80.00"
+    assert amount_result.value.raw_text == amount
+    assert amount_result.currency.value == "EUR"
+    assert amount_result.currency.origin == "document"
+
+
+@pytest.mark.parametrize("operation", ["vision", "annotations"])
+async def test_applicability_prompt_revision_is_frozen_and_versioned(settings, operation):
+    from backend.adapters.documents import document_request
+    from backend.invoice_context import context_prompt
+
+    configured(settings, "mistral", operation)
+    option = settings.providers.options["test-profile"]
+    option.protocol_version, option.field_policy, option.context_policy = (
+        "5",
+        "partial_v1",
+        "invoice_v1",
+    )
+    old_snapshot = option.snapshot_json()
+    definition = registry(settings)["test-profile"]
+    current = ModelOption.model_validate_json(definition.parameters["option"])
+    assert current.context_policy == "invoice_v4"
+    assert definition.parameters["review"] == "5"
+    assert definition.parameters["normalization"] == "3"
+    assert "invoice-context@4" in definition.metadata.component_ids
+    assert "review@5" in definition.metadata.component_ids
+    assert option.snapshot_json() == old_snapshot
+    captured = []
+
+    async def capture(method, url, **kwargs):
+        captured.append(kwargs)
+        return {}, httpx.Response(200)
+
+    if operation == "vision":
+        request = vision_request(current, "synthetic", "secret")
+    else:
+        await document_request(current, settings, capture, "synthetic", b"synthetic", "secret")
+        request = captured
+    assert "ONLY the Croatian" in json.dumps(request)
+    assert "ONLY the Croatian" not in context_prompt("original", policy="invoice_v1")
+    extraction = extract_context(
+        json.dumps(context_example()), "image", "stage", version="5", policy="invoice_v2"
+    )
+    assert "invoice-context@2" in extraction.routing.applied_rule_packs

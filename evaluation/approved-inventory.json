@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "approved_on": "2026-10-13",
+  "image_count": 17,
+  "image_set_sha256": "79a54ff8c854f73f836dcdca80ad3d5e84e9048c2a27b39b01ff46bd47b5864f",
+  "note": "User-approved 17-image evaluation set. Only update after explicit user selection. Images and per-image identities stay in the private active inventory."
+}

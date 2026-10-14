@@ -107,7 +107,7 @@ The admin and live display **Next scan** controls share the same persisted selec
 
 Extract runs one profile. Compare resolves explicit profile IDs or `all_enabled` into an immutable eligible roster. Disabled, missing, unconfigured or image-incompatible explicit choices fail before dispatch. Compare returns independent results, with no vote or automatic winning result. No provider fallback or substitution is hidden in a method.
 
-Compatible compact LLM definitions include document country/language context as standard. Account-country evidence and actual payment-route guidance remain separate. Local rules decide field applicability; model explanations are labelled claims, not independent verification.
+Compatible compact LLM definitions include document country/language context as standard. The current `invoice-context@4` prompt separates Croatian remittance models from foreign identifiers and extracts pagoPA/CBILL draft identifiers without confusing payment channels with separate bills. `review@5` and normalization revision 3 are included in profile identity; new definitions get new versions without rewriting saved results or frozen request options. `backend/billers.py` owns scheme requirements, conservative identifier formatting and printed-channel guidance. Per-option labels, dates and conditions are retained. Exact duplicated pagoPA notices merge evidence only when field recovery has no findings; instalment choices retain distinct identifiers and are not labelled extraction conflicts. No payment-provider API is invoked. Account-country evidence and actual payment-route guidance remain separate; country/language alone never selects a biller scheme. Original v1/v2/v3 context prompts and schemas remain available for historical request reconstruction.
 
 ### Readiness and endpoints
 
@@ -180,6 +180,7 @@ Tests block sockets and use synthetic fixtures. Domain/orchestration gates requi
 ```sh
 node --check frontend/admin/admin.js
 node --check frontend/admin/context.js
+node --test frontend/admin/context.test.mjs
 node --check frontend/admin/theme.js
 node --check frontend/demo/demo.js
 node --test frontend/demo/state.test.mjs

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from backend.errors import ServiceError
-from backend.models import Model, Observation, Payment, Scan, Text
+from backend.models import BillerDestination, Model, Observation, Payment, Scan, Text
 
 
 class ClientReview(Model):
@@ -72,7 +72,28 @@ def validate_review(scan: Scan, review: ClientReview) -> None:
     if run is None or run.payment is None or run.result_outcome == "error":
         raise ServiceError(422, "invalid_run", "This run has no reviewable payment draft.")
     expected = review_values(run.payment, review.selected_candidate_id)
-    if review.values.keys() != expected.keys():
+    # A phone may be recovering a frozen pre-biller-fields confirmation. Only newly
+    # added, wholly absent observations may be omitted; never drop a printed value.
+    legacy_absent: set[str] = set()
+    for index, candidate in enumerate(run.payment.candidates):
+        if candidate.id == review.selected_candidate_id and isinstance(
+            candidate.destination, BillerDestination
+        ):
+            legacy_absent = {
+                f"/candidates/{index}/destination/{name}"
+                for name in ("notice_number", "creditor_tax_code", "bill_reference")
+                if getattr(candidate.destination, name) == Observation()
+            }
+    for index, candidate in enumerate(run.payment.candidates):
+        if candidate.id == review.selected_candidate_id:
+            legacy_absent.update(
+                f"/candidates/{index}/{name}"
+                for name in ("option_label", "due_date", "payment_condition")
+                if getattr(candidate, name) == Observation()
+            )
+    missing = expected.keys() - review.values.keys()
+    extra = review.values.keys() - expected.keys()
+    if extra or missing - legacy_absent:
         raise ServiceError(
             422,
             "invalid_review_fields",

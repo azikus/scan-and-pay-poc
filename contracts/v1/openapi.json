@@ -1162,6 +1162,15 @@
           },
           "biller_code": {
             "$ref": "#/components/schemas/Observation"
+          },
+          "notice_number": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "creditor_tax_code": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "bill_reference": {
+            "$ref": "#/components/schemas/Observation"
           }
         },
         "additionalProperties": false,
@@ -1193,6 +1202,15 @@
             "type": "string",
             "minLength": 1,
             "title": "Id"
+          },
+          "option_label": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "due_date": {
+            "$ref": "#/components/schemas/Observation"
+          },
+          "payment_condition": {
+            "$ref": "#/components/schemas/Observation"
           },
           "account_country": {
             "$ref": "#/components/schemas/Observation"
@@ -1253,6 +1271,29 @@
           "route": {
             "type": "string",
             "title": "Route"
+          },
+          "supported_draft": {
+            "type": "boolean",
+            "title": "Supported Draft",
+            "default": false
+          },
+          "payment_channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Payment Channels"
+          },
+          "payment_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Note"
           },
           "account_country": {
             "$ref": "#/components/schemas/ContextHint"
@@ -2591,9 +2632,19 @@
         "properties": {
           "policy_version": {
             "type": "string",
-            "const": "invoice-fields@1",
+            "enum": [
+              "invoice-fields@1",
+              "invoice-fields@2",
+              "invoice-fields@3",
+              "invoice-fields@4"
+            ],
             "title": "Policy Version",
-            "default": "invoice-fields@1"
+            "default": "invoice-fields@4"
+          },
+          "review_summary": {
+            "type": "string",
+            "title": "Review Summary",
+            "default": "Review the printed payment details."
           },
           "issuer_country": {
             "$ref": "#/components/schemas/ContextHint"

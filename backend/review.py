@@ -7,8 +7,16 @@ from typing import Literal
 import pycountry
 from schwifty import IBAN
 
+from backend.billers import (
+    BILLER_FIELDS,
+    normalize_identifier,
+    required_fields,
+    scheme_key,
+    valid_format,
+)
 from backend.models import (
     Alternative,
+    BillerDestination,
     Evidence,
     IBANDestination,
     Observation,
@@ -17,6 +25,7 @@ from backend.models import (
     Review,
     UKDestination,
 )
+from backend.payment_fields import has_reading
 
 
 def normalized(observation: Observation, value: str, step: str) -> Observation:
@@ -83,6 +92,9 @@ def normalize_payment(payment: Payment) -> Payment:
                     c.account_country, country.alpha_2, "explicit_country_to_iso_alpha2"
                 )
         d = c.destination
+        if isinstance(d, BillerDestination):
+            for field in BILLER_FIELDS[1:]:
+                setattr(d, field, normalize_identifier(getattr(d, field), field))
         if isinstance(d, UKDestination):
             if d.sort_code.value is not None:
                 d.sort_code = bank_normalized(d.sort_code, field="sort_code")
@@ -141,6 +153,9 @@ def review_payment(payment: Payment, evidence: list[Evidence]) -> Payment:
     complete_route = False
     for n, c in enumerate(result.candidates):
         p = f"/candidates/{n}"
+        for field in ("option_label", "due_date", "payment_condition"):
+            if has_reading(getattr(c, field)):
+                check(getattr(c, field), p + "/" + field)
         check(c.beneficiary_name, p + "/beneficiary_name", "beneficiary_unresolved")
         check(c.amount.value, p + "/amount/value")
         if c.amount.value.value is not None and Decimal(c.amount.value.value) <= 0:
@@ -190,6 +205,24 @@ def review_payment(payment: Payment, evidence: list[Evidence]) -> Payment:
                         p + "/destination/" + name,
                         "Account component has invalid format; no digits were repaired.",
                     )
+        elif isinstance(d, BillerDestination) and scheme_key(d) is not None:
+            meaningful |= any(has_reading(getattr(d, f)) for f in BILLER_FIELDS)
+            complete_route = True
+            key = scheme_key(d)
+            assert key is not None
+            required = required_fields(d)
+            for field in BILLER_FIELDS:
+                obs = getattr(d, field)
+                if field not in required and not has_reading(obs):
+                    continue
+                complete_route &= check(obs, p + "/destination/" + field)
+                if field != "scheme" and obs.value is not None and not valid_format(field, obs):
+                    complete_route = False
+                    reason(
+                        "invalid_biller_identifier",
+                        p + "/destination/" + field,
+                        "Printed bill identifier has an invalid format; no digits were repaired.",
+                    )
         elif isinstance(d, IBANDestination):
             meaningful |= d.iban.state != "missing"
             if d.iban.value is not None and c.account_country.value not in {None, d.iban.value[:2]}:
@@ -225,16 +258,20 @@ def review_payment(payment: Payment, evidence: list[Evidence]) -> Payment:
             )
         if r.reference_requirement == "required":
             check(r.reference, p + "/remittance/reference")
-        if r.model.state != "missing":
+        if has_reading(r.model):
             check(r.model, p + "/remittance/model")
             if r.model.value is not None and not re.fullmatch(r"HR[0-9]{2}", r.model.value):
                 reason(
-                    "invalid_account_format",
+                    "invalid_remittance_model",
                     p + "/remittance/model",
                     "Croatian model must preserve the printed HR model.",
                 )
         # A seen but unresolved reference/model cannot silently disappear from readiness.
-        if r.reference.state in {"ambiguous", "unreadable", "unsupported"}:
+        if (
+            r.reference.state in {"ambiguous", "unreadable", "unsupported"}
+            and has_reading(r.reference)
+            and r.reference_requirement != "required"
+        ):
             check(r.reference, p + "/remittance/reference")
         if c.account_holder_name.state in {"ambiguous", "unreadable"}:
             check(c.account_holder_name, p + "/account_holder_name", "beneficiary_unresolved")

@@ -107,7 +107,7 @@ class ModelOption(Model):
     field_policy: Literal["strict", "partial_v1"] = "strict"
     # Retained for saved request snapshots. The current registry always enables
     # invoice context for compatible compact LLM methods, regardless of this value.
-    context_policy: Literal["none", "invoice_v1"] = "none"
+    context_policy: Literal["none", "invoice_v1", "invoice_v2", "invoice_v3", "invoice_v4"] = "none"
     interpretation_policy: Literal["strict", "draft_v1", "draft_v2", "draft_v3", "draft_v4"] = (
         "strict"
     )
@@ -132,7 +132,7 @@ class ModelOption(Model):
 
     @model_validator(mode="after")
     def compatible(self) -> Self:
-        if self.context_policy == "invoice_v1" and (
+        if self.context_policy != "none" and (
             self.operation not in {"vision", "annotations"}
             or self.protocol_version not in {"5", "6"}
             or self.field_policy != "partial_v1"

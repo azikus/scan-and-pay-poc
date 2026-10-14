@@ -68,6 +68,15 @@
         },
         "biller_code": {
           "$ref": "#/$defs/Observation"
+        },
+        "notice_number": {
+          "$ref": "#/$defs/Observation"
+        },
+        "creditor_tax_code": {
+          "$ref": "#/$defs/Observation"
+        },
+        "bill_reference": {
+          "$ref": "#/$defs/Observation"
         }
       },
       "title": "BillerDestination",
@@ -80,6 +89,15 @@
           "minLength": 1,
           "title": "Id",
           "type": "string"
+        },
+        "option_label": {
+          "$ref": "#/$defs/Observation"
+        },
+        "due_date": {
+          "$ref": "#/$defs/Observation"
+        },
+        "payment_condition": {
+          "$ref": "#/$defs/Observation"
         },
         "account_country": {
           "$ref": "#/$defs/Observation"
@@ -140,6 +158,30 @@
         "route": {
           "title": "Route",
           "type": "string"
+        },
+        "supported_draft": {
+          "default": false,
+          "title": "Supported Draft",
+          "type": "boolean"
+        },
+        "payment_channels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Payment Channels",
+          "type": "array"
+        },
+        "payment_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Payment Note"
         },
         "account_country": {
           "$ref": "#/$defs/ContextHint"
@@ -957,9 +999,19 @@
       "additionalProperties": false,
       "properties": {
         "policy_version": {
-          "const": "invoice-fields@1",
-          "default": "invoice-fields@1",
+          "default": "invoice-fields@4",
+          "enum": [
+            "invoice-fields@1",
+            "invoice-fields@2",
+            "invoice-fields@3",
+            "invoice-fields@4"
+          ],
           "title": "Policy Version",
+          "type": "string"
+        },
+        "review_summary": {
+          "default": "Review the printed payment details.",
+          "title": "Review Summary",
           "type": "string"
         },
         "issuer_country": {

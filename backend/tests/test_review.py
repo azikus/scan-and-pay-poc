@@ -100,7 +100,7 @@ def test_explicit_account_country_names_preserve_meaning(uk, country, expected, 
             "missing_required_field",
         ),
         (lambda c: setattr(c.remittance, "model", obs("HR00")), None),
-        (lambda c: setattr(c.remittance, "model", obs("HR0O")), "invalid_account_format"),
+        (lambda c: setattr(c.remittance, "model", obs("HR0O")), "invalid_remittance_model"),
         (
             lambda c: setattr(c.remittance, "model", Observation(state="ambiguous")),
             "ambiguous_field",
@@ -320,3 +320,66 @@ def test_ocr_gross_not_due_and_duplicate_bank_values():
     assert p.candidates[0].destination.account_number.value is None
     assert len(p.candidates[0].destination.account_number.alternatives) == 2
     assert p.review.state == "needs_review"
+
+
+@pytest.mark.parametrize("field", ["model", "reference"])
+@pytest.mark.parametrize("country", ["GB", "HR", "GR", None])
+def test_empty_unsupported_optional_remittance_is_not_required(uk, field, country):
+    payment = uk.runs[0].payment
+    payment.document_context.issuer_country = obs(country) if country else Observation()
+    candidate = payment.candidates[0]
+    candidate.remittance.reference_requirement = "not_stated"
+    setattr(candidate.remittance, field, Observation(state="unsupported"))
+    result = review_payment(payment, uk.runs[0].evidence)
+    assert result.review.state == "ready_for_review"
+    assert getattr(result.candidates[0].remittance, field).state == "unsupported"
+    assert result.review.user_confirmation_required
+
+
+@pytest.mark.parametrize("field", ["model", "reference"])
+@pytest.mark.parametrize("state", ["ambiguous", "unreadable", "unsupported"])
+def test_printed_or_uncertain_remittance_still_blocks_readiness(uk, field, state):
+    candidate = uk.runs[0].payment.candidates[0]
+    candidate.remittance.reference_requirement = "not_stated"
+    observation = Observation(
+        state=state, raw_text="Printed value" if state == "unsupported" else None
+    )
+    setattr(candidate.remittance, field, observation)
+    result = review_payment(uk.runs[0].payment, uk.runs[0].evidence)
+    assert result.review.state == "needs_review"
+    assert any(r.path.endswith("/remittance/" + field) for r in result.review.reasons)
+
+
+def test_required_unsupported_reference_cannot_be_treated_as_optional(uk):
+    candidate = uk.runs[0].payment.candidates[0]
+    candidate.remittance.reference_requirement = "required"
+    candidate.remittance.reference = Observation(state="unsupported")
+    result = review_payment(uk.runs[0].payment, uk.runs[0].evidence)
+    assert result.review.state == "needs_review"
+    assert len([r for r in result.review.reasons if r.path.endswith("/reference")]) == 1
+
+
+@pytest.mark.parametrize(
+    "text,value,currency",
+    [
+        ("80", "80.00", None),
+        ("80 EUR", "80.00", "EUR"),
+        ("330,00 Euro", "330.00", "EUR"),
+        ("10 Euros", "10.00", "EUR"),
+        ("2 pounds sterling", "2.00", "GBP"),
+        ("-80 €", "-80.00", "EUR"),
+        ("0 EUR", "0.00", "EUR"),
+        ("80 USD", None, None),
+        ("8O EUR", None, "EUR"),
+        ("1,234", None, None),
+        ("1.234", None, None),
+        ("80/90 EUR", None, "EUR"),
+        ("80 GBP EUR", "80.00", None),
+        ("80 $ EUR", "80.00", None),
+    ],
+)
+def test_explicit_currency_words_and_whole_units_without_guessing(text, value, currency):
+    amount, unit = amount_observation(obs(text))
+    assert amount.value == value
+    assert amount.raw_text == text
+    assert unit.value == currency

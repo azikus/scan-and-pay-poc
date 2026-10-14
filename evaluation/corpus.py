@@ -9,6 +9,7 @@ from PIL import Image
 
 from backend.images import sha256
 from backend.store import private_write
+from evaluation.approved import validate_inputs
 
 
 def inventory(samples: Path) -> list[Path]:
@@ -88,6 +89,11 @@ def prepare(
 
 
 def validate_manifest(root: Path, manifest: dict[str, Any]) -> None:
+    if manifest.get("kind") == "approved_inventory":
+        validate_inputs(root, manifest["inputs"])
+        if len({i["id"] for i in manifest["inputs"]}) != len(manifest["inputs"]):
+            raise ValueError("Manifest has duplicate input IDs")
+        return
     actual = {p.relative_to(root).as_posix() for p in inventory(root / manifest["samples_path"])}
     if actual != {s["path"] for s in manifest["sources"]}:
         raise ValueError("Source inventory changed; prepare a new manifest")

@@ -15,6 +15,10 @@ struct PaymentConfirmation: View {
           if let context = draft.contextSummary {
             Text(context).font(Brand.font(13)).foregroundStyle(.secondary)
           }
+          if let channels = draft.paymentChannelSummary {
+            Text(channels).font(Brand.font(13)).foregroundStyle(.secondary)
+              .accessibilityIdentifier("confirmation-payment-channels")
+          }
           if let amount = draft.amountField {
             VStack(alignment: .leading, spacing: 6) {
               Text(draft.summaryAmount).font(Brand.font(46, .semibold)).minimumScaleFactor(0.6)

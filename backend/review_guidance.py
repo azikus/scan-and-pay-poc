@@ -4,7 +4,9 @@ from typing import Literal
 
 import pycountry
 
+from backend.billers import BILLER_FIELDS, channels, grounded, required_fields, scheme_key
 from backend.models import (
+    BillerDestination,
     CandidateGuidance,
     ContextHint,
     FieldRule,
@@ -14,6 +16,7 @@ from backend.models import (
     Run,
     Scan,
 )
+from backend.payment_fields import has_reading
 
 
 def context_hint(run: Run, observation: Observation, key: str) -> ContextHint:
@@ -96,13 +99,27 @@ def guidance(run: Run) -> ReviewGuidance | None:
 
         for path in ("/beneficiary_name", "/amount/value", "/amount/currency"):
             rule(path, "required", "Needed to review this payment draft.")
-        for path in ("/account_holder_name", "/account_country", "/remittance/purpose_code"):
+        for path in (
+            "/account_holder_name",
+            "/account_country",
+            "/remittance/purpose_code",
+            "/option_label",
+            "/due_date",
+            "/payment_condition",
+        ):
             rule(path, "optional", "Additional payment information when available.")
-        kind = candidate.destination.kind
+        destination = candidate.destination
+        kind = destination.kind
+        biller_key = scheme_key(destination) if isinstance(destination, BillerDestination) else None
+        supported_biller = (
+            biller_key is not None and grounded(destination.scheme, run.evidence)
+            if isinstance(destination, BillerDestination)
+            else False
+        )
         for route, names in {
             "uk_domestic": ("sort_code", "account_number"),
             "iban": ("iban", "bic"),
-            "biller_reference": ("scheme", "biller_code"),
+            "biller_reference": BILLER_FIELDS,
         }.items():
             for name in names:
                 requirement: Literal["required", "optional", "not_applicable", "unresolved"]
@@ -113,6 +130,11 @@ def guidance(run: Run) -> ReviewGuidance | None:
                     if kind != route
                     else "optional"
                     if name == "bic"
+                    or (
+                        route == "biller_reference"
+                        and isinstance(destination, BillerDestination)
+                        and name not in required_fields(destination)
+                    )
                     else "required"
                 )
                 rule(
@@ -124,6 +146,8 @@ def guidance(run: Run) -> ReviewGuidance | None:
                     if kind != route
                     else "Additional bank identifier; optional for this PoC's IBAN draft."
                     if name == "bic"
+                    else "Additional printed channel details; not required for the primary draft."
+                    if requirement == "optional"
                     else "Required by the extracted payment route.",
                 )
         reference = candidate.remittance.reference_requirement
@@ -145,15 +169,15 @@ def guidance(run: Run) -> ReviewGuidance | None:
         # Absence alone never establishes either the country or a missing HR00.
         rule(
             "/remittance/model",
-            "required" if model.state != "missing" else "optional",
+            "required" if has_reading(model) else "optional",
             "Preserve the model printed for this payment option."
-            if model.state != "missing"
+            if has_reading(model)
             else "Add a Croatian payment model only when specified by the document.",
         )
         warnings = [r for r in payment.review.reasons if r.path.startswith(prefix + "/")]
-        if kind in {"unresolved", "biller_reference"} and not any(
-            r.code == "unsupported_payment_route" for r in warnings
-        ):
+        if (
+            kind == "unresolved" or (kind == "biller_reference" and not supported_biller)
+        ) and not any(r.code == "unsupported_payment_route" for r in warnings):
             warnings.append(
                 Reason(
                     code="unsupported_payment_route",
@@ -165,12 +189,34 @@ def guidance(run: Run) -> ReviewGuidance | None:
             CandidateGuidance(
                 candidate_id=candidate.id,
                 route=kind,
+                supported_draft=kind in {"iban", "uk_domestic"} or supported_biller,
+                payment_channels=channels(destination, run.evidence)
+                if isinstance(destination, BillerDestination)
+                else [],
+                payment_note=(
+                    "pagoPA notice: use your bank’s CBILL/pagoPA bill-payment service. "
+                    "Repeated bank/postal sections refer to the same notice; pay only once. "
+                    if biller_key == "pagopa"
+                    else ""
+                )
+                + "Printed amount only. Not verified with the payment provider. "
+                "Confirmation is simulated; no money moves."
+                if supported_biller
+                else None,
                 account_country=context_hint(run, candidate.account_country, "account_country"),
                 fields=fields,
                 warnings=warnings,
             )
         )
     return ReviewGuidance(
+        review_summary=(
+            "Choose a payment option; its printed details are complete."
+            if payment.review.reasons
+            and all(r.code == "payment_option_required" for r in payment.review.reasons)
+            else "Review the flagged details."
+            if payment.review.reasons
+            else "Printed details are complete; review before simulated confirmation."
+        ),
         issuer_country=context_hint(run, payment.document_context.issuer_country, "issuer_country"),
         language=context_hint(run, payment.document_context.language, "language"),
         document_fields=doc_fields,

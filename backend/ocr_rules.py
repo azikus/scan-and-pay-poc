@@ -22,6 +22,7 @@ from backend.models import (
     UKDestination,
     UnresolvedDestination,
 )
+from backend.payment_fields import CURRENCY_TOKENS, currency_code
 
 LABELS = {
     "sort_code": r"sort[ -]?code",
@@ -115,9 +116,9 @@ def amount_observation(raw: Observation) -> tuple[Observation, Observation]:
     if raw.value is None:
         return raw, Observation()
     currency = Observation()
-    codes = set(re.findall(r"\b(?:GBP|EUR)\b|[£€]", raw.value, re.I))
-    normalized_codes = {"GBP" if c == "£" else "EUR" if c == "€" else c.upper() for c in codes}
-    if len(normalized_codes) == 1:
+    tokens = re.findall(CURRENCY_TOKENS, raw.value, re.I)
+    normalized_codes = {currency_code(c) for c in tokens} - {None}
+    if len(normalized_codes) == 1 and "$" not in tokens:
         currency = Observation(
             value=next(iter(normalized_codes)),
             raw_text=raw.raw_text,
@@ -129,13 +130,15 @@ def amount_observation(raw: Observation) -> tuple[Observation, Observation]:
         currency = Observation(
             raw_text=raw.raw_text, state="ambiguous", evidence_ids=raw.evidence_ids
         )
-    numeric = re.sub(r"\b(?:GBP|EUR)\b|[£€$]", "", raw.value, flags=re.I).strip()
+    numeric = re.sub(CURRENCY_TOKENS, "", raw.value, flags=re.I).strip()
     numeric = numeric.replace("\u00a0", " ")
-    # Require two printed decimal places. Grouping separators must form triples.
+    # Whole units have an exact decimal representation; never guess ambiguous grouping.
     if re.fullmatch(r"-?(?:[0-9]+|[0-9]{1,3}(?:[, ][0-9]{3})+)\.[0-9]{2}", numeric):
         value = numeric.replace(",", "").replace(" ", "")
     elif re.fullmatch(r"-?(?:[0-9]+|[0-9]{1,3}(?:[. ][0-9]{3})+),[0-9]{2}", numeric):
         value = numeric.replace(".", "").replace(" ", "").replace(",", ".")
+    elif re.fullmatch(r"-?[0-9]+", numeric):
+        value = numeric + ".00"
     else:
         return Observation(
             state="ambiguous", raw_text=raw.raw_text, evidence_ids=raw.evidence_ids
@@ -145,7 +148,11 @@ def amount_observation(raw: Observation) -> tuple[Observation, Observation]:
         raw_text=raw.raw_text,
         state="observed",
         evidence_ids=raw.evidence_ids,
-        normalization=["explicit_decimal_and_grouping"],
+        normalization=[
+            "explicit_whole_units"
+            if "." not in numeric and "," not in numeric
+            else "explicit_decimal_and_grouping"
+        ],
     ), currency
 
 
