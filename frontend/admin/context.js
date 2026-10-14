@@ -36,9 +36,14 @@ function renderInvoiceContext(scan) {
     const grid=element('div',undefined,'context-grid');
     grid.append(contextBlock('Issuer country',g.issuer_country,true),contextBlock('Document language',g.language));
     section.append(grid);
+    if(g.review_summary)section.append(element('p',g.review_summary,'completeness'));
     for(const [index,candidate] of g.candidates.entries()) {
       const option=element('div',undefined,'context-option');
       option.append(element('h3',`Option ${index+1} · ${routeNames[candidate.route]||candidate.route}`));
+      const printed=run.payment.candidates?.find(c=>c.id===candidate.candidate_id);
+      for(const [key,label] of [['option_label','Payment option'],['due_date','Due'],['payment_condition','When to use']]) {
+        if(printed?.[key]?.value)option.append(element('p',`${label}: ${printed[key].value}`));
+      }
       option.append(contextBlock('Account country',candidate.account_country,true));
       const requirements=Object.entries(candidate.fields);
       const missing=requirements.filter(([path,rule])=>{
@@ -46,7 +51,9 @@ function renderInvoiceContext(scan) {
         return rule.requirement==='required'&&!(obs?.value!=null&&obs.state==='observed'&&obs.origin==='document'&&!obs.normalization?.some(n=>n.startsWith('draft_beneficiary_from_')));
       });
       option.append(element('p',missing.length?`${missing.length} required ${missing.length===1?'detail needs':'details need'} input.`:'No required details are missing.','completeness'));
-      if(candidate.route==='unresolved'||candidate.route==='biller_reference')option.append(element('p','Payment route needs review. Field completeness does not resolve the destination.','muted'));
+      if(candidate.payment_channels?.length)option.append(element('p',`Payment service: ${candidate.payment_channels.join(', ')}`));
+      if(candidate.payment_note)option.append(element('p',candidate.payment_note,'muted'));
+      if(candidate.route==='unresolved'||(candidate.route==='biller_reference'&&!candidate.supported_draft))option.append(element('p','Payment route needs review. Field completeness does not resolve the destination.','muted'));
       for(const warning of candidate.warnings||[]) {
         option.append(element('p',`${warning.path.split('/').slice(3).join(' / ').replaceAll('_',' ')}: ${warning.message}`,'context-warning'));
       }

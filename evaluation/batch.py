@@ -11,6 +11,7 @@ import httpx
 from backend.config import Settings
 from backend.images import sha256
 from backend.store import private_write, utcnow
+from evaluation.approved import LOCK_PATH, checked_payload, validate_inputs
 from evaluation.corpus import validate_manifest
 
 TERMINAL = {"completed", "partially_completed", "failed", "interrupted"}
@@ -61,6 +62,11 @@ def run_batch(
         raise ValueError("Batch pacing must be between zero and sixty seconds")
     validate_manifest(root, manifest)
     state: dict[str, Any] = json.loads(state_path.read_text())
+    protected = (root / LOCK_PATH).exists() or manifest.get("kind") == "approved_inventory"
+    if protected:
+        validate_inputs(root, manifest["inputs"])
+        if any(r["state"] != "not_run" or r["scan_id"] is not None for r in state["rows"]):
+            raise ValueError("Use a fresh batch; approved paid runs cannot be resumed or replayed")
     expected = new_batch(manifest, state["profiles"], state["batch_id"])
     if expected["manifest_sha256"] != state["manifest_sha256"] or [
         (r["input_id"], r["profile_id"], r["profile_version"], r["key"]) for r in state["rows"]
@@ -89,13 +95,16 @@ def run_batch(
             continue
         try:
             if row["scan_id"] is None:
+                payload = (root / item["path"]).read_bytes()
+                if protected:
+                    checked_payload(item, payload)
                 # Persist key and uncertain state BEFORE POST; resume can reuse only this exact key.
                 row.update(state="submission_unknown", reason=None)
                 save(state_path, state)
                 response = client.post(
                     "/v1/scans",
                     headers={"Idempotency-Key": row["key"]},
-                    files={"image": ("image.png", (root / item["path"]).read_bytes(), "image/png")},
+                    files={"image": ("image.png", payload, "image/png")},
                     data={
                         "options": json.dumps({"mode": "extract", "profiles": [row["profile_id"]]})
                     },
@@ -121,6 +130,11 @@ def run_batch(
             result_path = state_path.parent / "results" / (row["scan_id"] + ".json")
             save(result_path, result)
             (run,) = result["runs"]
+            if protected and (
+                result.get("input", {}).get("original_sha256") != item["sha256"]
+                or run.get("profile_id") != row["profile_id"]
+            ):
+                raise ValueError("Returned result does not match the approved image/profile")
             if run["profile_version"] != row["profile_version"]:
                 raise ValueError("Returned profile snapshot mismatch")
             code = run["error"]["code"] if run.get("error") else None
@@ -154,6 +168,10 @@ def main() -> None:
     parser.add_argument("--url", default="http://127.0.0.1:8765")
     parser.add_argument("--inter-input-seconds", type=float, default=0)
     args = parser.parse_args()
+    root = Path.cwd()
+    manifest = json.loads(args.manifest.read_text())
+    # The paid CLI must fail closed even if the private inventory or approval is missing.
+    validate_inputs(root, manifest["inputs"])
     settings = Settings.from_env()
     with httpx.Client(
         base_url=args.url,
@@ -163,8 +181,8 @@ def main() -> None:
         follow_redirects=False,
     ) as client:
         state = run_batch(
-            Path.cwd(),
-            json.loads(args.manifest.read_text()),
+            root,
+            manifest,
             args.state.resolve(),
             client,
             inter_input_seconds=args.inter_input_seconds,

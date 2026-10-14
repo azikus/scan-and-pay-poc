@@ -6,6 +6,7 @@ from typing import Any
 from backend.config import ModelOption
 from backend.errors import ProviderError
 from backend.models import Evidence, Payment, Routing
+from backend.payment_fields import REVIEW_VERSION
 from backend.providers import PROMPT, VisionExtraction, structured_schema
 from backend.runtime import Context, Extraction
 
@@ -42,10 +43,13 @@ def vision_request(
             from backend.recipient_roles import prompt_v3, role_schema_v2
 
             instructions, schema = prompt_v3(instructions), role_schema_v2(schema)
-        if option.context_policy == "invoice_v1":
+        if option.context_policy in {"invoice_v1", "invoice_v2", "invoice_v3", "invoice_v4"}:
             from backend.invoice_context import context_prompt, context_schema
 
-            instructions, schema = context_prompt(instructions), context_schema(schema)
+            instructions, schema = (
+                context_prompt(instructions, policy=option.context_policy),
+                context_schema(schema, policy=option.context_policy),
+            )
         # Together recommends both constrained output and a prompt copy of the schema.
         if provider == "together":
             instructions += "\nJSON schema:\n" + json.dumps(schema)
@@ -282,5 +286,8 @@ def claims(text: str, context: Context, stage_id: str) -> Extraction:
     return Extraction(
         Payment(**parsed.payment.model_dump()),
         evidence,
-        Routing(applied_rule_packs=["generic-review@2"], reasons=["Unverified model claims."]),
+        Routing(
+            applied_rule_packs=["generic-review@" + REVIEW_VERSION],
+            reasons=["Unverified model claims."],
+        ),
     )

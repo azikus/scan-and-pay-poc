@@ -24,7 +24,15 @@ def example():
     candidate = {
         k: reading()
         for k in PaymentOption.model_fields
-        if k not in {"route", "amount_role", "reference_requirement"}
+        if k
+        not in {
+            "route",
+            "amount_role",
+            "reference_requirement",
+            "option_label",
+            "due_date",
+            "payment_condition",
+        }
     }
     candidate.update(
         beneficiary_name=reading("Synthetic Payee"),

@@ -92,7 +92,11 @@ struct PaymentDraft {
     "account_country": "Account country", "value": "Amount", "currency": "Currency",
     "sort_code": "Sort code", "account_number": "Account number", "iban": "IBAN", "bic": "BIC",
     "reference": "Payment reference", "model": "Payment model", "purpose_code": "Purpose code",
-    "scheme": "Biller scheme", "biller_code": "Biller code", "language": "Document language",
+    "scheme": "Biller scheme", "biller_code": "Biller code",
+    "language": "Document language",
+    "option_label": "Payment option", "payment_condition": "When to use this payment",
+    "notice_number": "pagoPA notice number", "creditor_tax_code": "Creditor tax code",
+    "bill_reference": "CBILL bill reference",
     "issuer_country": "Issuer country",
   ]
   init(response: JSONValue) throws {
@@ -123,10 +127,20 @@ struct PaymentDraft {
   }
   var reasons: [JSONValue] {
     payment["review"]["reasons"].array.filter {
+      if $0["code"].string == "payment_option_required" && candidateIndex != nil { return false }
       let path = $0["path"].string ?? ""
       return !path.hasPrefix("/candidates/") || candidateIndex == nil
         || path.hasPrefix(prefix + "/")
     }
+  }
+  var paymentChannelSummary: String? {
+    let channels = candidateGuidance["payment_channels"].array.compactMap { $0.string }
+    let note = candidateGuidance["payment_note"].string
+    let title =
+      channels.isEmpty ? nil : "Payment service: " + channels.joined(separator: ", ")
+    let condition = values[prefix + "/payment_condition"]?.string.map { "When to use: " + $0 }
+    let parts = [condition, title, note].compactMap { $0 }
+    return parts.isEmpty ? nil : parts.joined(separator: ". ")
   }
   var contextSummary: String? {
     let country = guidance["issuer_country"]
@@ -203,8 +217,12 @@ struct PaymentDraft {
   }
   func field(_ path: String, observation: JSONValue) -> DraftField {
     let key = path.split(separator: "/").last.map(String.init) ?? path
+    let scheme = candidate["destination"]["scheme"]["value"].string?.lowercased() ?? ""
+    let label =
+      key == "biller_code" && ["pagopa", "cbill"].contains(scheme)
+      ? "CBILL organisation code" : Self.labels[key] ?? key
     return DraftField(
-      id: path, label: Self.labels[key] ?? key, original: observation["value"].string,
+      id: path, label: label, original: observation["value"].string,
       observation: observation, value: values[path]?.string,
       isEdited: editedFieldIDs.contains(path))
   }
@@ -212,7 +230,8 @@ struct PaymentDraft {
     let order =
       [
         "beneficiary_name", "value", "currency", "iban", "sort_code", "account_number", "reference",
-        "model", "account_holder_name", "bic", "purpose_code", "biller_code", "scheme",
+        "model", "account_holder_name", "bic", "purpose_code", "scheme", "notice_number",
+        "creditor_tax_code", "biller_code", "bill_reference",
         "account_country",
       ] + Self.documentKeys + ["language", "issuer_country"]
     return relevantObservations.map { field($0.0, observation: $0.1) }.sorted {
@@ -238,11 +257,14 @@ struct PaymentDraft {
       return "required"
     }
     if kind == "iban" && path == prefix + "/destination/iban" { return "required" }
-    if kind == "biller_reference"
-      && ["/destination/scheme", "/destination/biller_code"].contains(where: { path == prefix + $0 }
-      )
-    {
-      return "required"
+    if kind == "biller_reference" {
+      let scheme = candidate["destination"]["scheme"]["value"].string?.lowercased()
+      let names =
+        scheme == "pagopa"
+        ? ["scheme", "notice_number", "creditor_tax_code"]
+        : scheme == "cbill"
+          ? ["scheme", "biller_code", "bill_reference"] : ["scheme", "biller_code"]
+      if names.contains(where: { path == prefix + "/destination/" + $0 }) { return "required" }
     }
     if path == prefix + "/remittance/reference" {
       switch candidate["remittance"]["reference_requirement"].string {
@@ -297,7 +319,9 @@ struct PaymentDraft {
     let amount = candidates[index]["amount"]
     let value = Self.isExtracted(amount["value"]) ? amount["value"]["value"].string : nil
     let currency = Self.isExtracted(amount["currency"]) ? amount["currency"]["value"].string : nil
-    return "Option \(index + 1) · \(value ?? "Amount unknown") \(currency ?? "")"
+    let label = candidates[index]["option_label"]["value"].string ?? "Option \(index + 1)"
+    let due = candidates[index]["due_date"]["value"].string.map { " · Due \($0)" } ?? ""
+    return "\(label) · \(value ?? "Amount unknown") \(currency ?? "")\(due)"
       .trimmingCharacters(in: .whitespaces)
   }
   mutating func edit(_ path: String, value: String) {
@@ -341,8 +365,33 @@ struct PaymentDraft {
     case "iban":
       if v("/destination/iban").isEmpty { issues.append("IBAN is missing.") }
     case "biller_reference":
-      if v("/destination/scheme").isEmpty || v("/destination/biller_code").isEmpty {
-        issues.append("Biller details are incomplete.")
+      let scheme = v("/destination/scheme").trimmingCharacters(in: .whitespacesAndNewlines)
+        .lowercased()
+      func checkIdentifier(_ name: String, _ pattern: String, _ message: String) {
+        let raw = v("/destination/" + name)
+        let value =
+          name == "bill_reference"
+          ? raw.trimmingCharacters(in: .whitespacesAndNewlines)
+          : raw.components(separatedBy: .whitespacesAndNewlines).joined().uppercased()
+        if value.range(of: pattern, options: .regularExpression) == nil { issues.append(message) }
+      }
+      if scheme == "pagopa" {
+        checkIdentifier("notice_number", "^[0-9]{18}$", "pagoPA notice number needs 18 digits.")
+        if !v("/destination/creditor_tax_code").isEmpty || v("/destination/biller_code").isEmpty {
+          checkIdentifier(
+            "creditor_tax_code", "^[0-9]{11}$",
+            "Provide the creditor tax code or CBILL organisation code.")
+        }
+        if !v("/destination/biller_code").isEmpty {
+          checkIdentifier(
+            "biller_code", "^[A-Z0-9]{5}$", "CBILL organisation code needs five letters or digits.")
+        }
+      } else if scheme == "cbill" {
+        checkIdentifier(
+          "biller_code", "^[A-Z0-9]{5}$", "CBILL organisation code needs five letters or digits.")
+        checkIdentifier("bill_reference", "^.+$", "CBILL bill reference is missing.")
+      } else {
+        issues.append("Biller payment scheme needs review.")
       }
     default: issues.append("Bank destination was not identified.")
     }

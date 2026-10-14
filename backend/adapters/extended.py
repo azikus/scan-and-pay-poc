@@ -251,7 +251,12 @@ class ExtendedAdapter:
                         raise ProviderError("invalid_provider_output")
                     context.run.diagnostics.returned_model = model
                     stage.returned_model = model
-                    if option.context_policy == "invoice_v1":
+                    if option.context_policy in {
+                        "invoice_v1",
+                        "invoice_v2",
+                        "invoice_v3",
+                        "invoice_v4",
+                    }:
                         from backend.invoice_context import extract_context
 
                         return extract_context(
@@ -259,6 +264,7 @@ class ExtendedAdapter:
                             context.scan.input.image_id,
                             stage.id,
                             version=option.protocol_version,
+                            policy=option.context_policy,
                         )
                     if option.protocol_version in {"4", "5", "6"}:
                         from backend.adapters.compact import extract

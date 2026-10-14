@@ -577,6 +577,10 @@ struct ReviewSheet: View {
       Text(context).font(Brand.font(13)).foregroundStyle(.secondary)
         .accessibilityIdentifier("invoice-context")
     }
+    if let channels = draft.paymentChannelSummary {
+      Text(channels).font(Brand.font(13)).foregroundStyle(.secondary)
+        .accessibilityIdentifier("payment-channels")
+    }
     if !draft.missingFields.isEmpty {
       Label(
         "Missing required details (\(draft.missingFields.count))",

@@ -84,6 +84,7 @@ The shared contract keeps payment details linked rather than collecting disconne
 | Amount and currency | Decimal/digit strings; amount role and uncertainty remain explicit |
 | UK bank transfer | Sort code and account number stay paired, including leading zeroes |
 | IBAN transfer | IBAN/BIC and the associated reference stay with the same payment option |
+| Italian bill payments | One CBILL/pagoPA bank-service flow, with printed notice/creditor identifiers, instalment dates and payment conditions |
 | Croatian payment reference | Model and poziv na broj remain distinct and linked to the candidate |
 | Document context | Issuer country, language and bank-account country stay separate |
 | Missing or conflicting values | Preserve useful fields, show review reasons, and allow correction |

@@ -18,7 +18,15 @@ def test_handoff_fixture_and_backend_review(cohort):
     result = review_payment(run.payment, run.evidence)
     assert result.review.state == run.payment.review.state
     assert result.review.user_confirmation_required is True
-    assert scan.model_dump(mode="json") == data
+    expanded = scan.model_dump(mode="json")
+    for saved_run, expanded_run in zip(data["runs"], expanded["runs"], strict=True):
+        for original, current in zip(
+            saved_run["payment"]["candidates"], expanded_run["payment"]["candidates"], strict=True
+        ):
+            for field in ("option_label", "due_date", "payment_condition"):
+                if field not in original:
+                    assert current.pop(field) == Observation().model_dump(mode="json")
+    assert expanded == data
 
 
 @pytest.mark.parametrize("state", ["missing", "unreadable", "ambiguous", "unsupported"])

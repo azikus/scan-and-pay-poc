@@ -1,6 +1,7 @@
 """Opt-in draft interpretation @1; historical review and prompts remain unchanged."""
 
-from backend.models import Candidate, Evidence, Observation, Payment
+from backend.billers import deduplicate_notices, grounded, scheme_key
+from backend.models import BillerDestination, Candidate, Evidence, Observation, Payment
 from backend.review import normalize_payment, review_payment
 
 VERSION = "payment-draft@1"
@@ -91,8 +92,15 @@ def preferred_candidate(payment: Payment) -> Candidate | None:
                 destination.account_number.value,
             )
         elif destination.kind == "biller_reference":
-            linked.extend([destination.scheme, destination.biller_code])
-            route = (destination.kind, destination.scheme.value, destination.biller_code.value)
+            identifiers = [
+                destination.scheme,
+                destination.biller_code,
+                destination.notice_number,
+                destination.creditor_tax_code,
+                destination.bill_reference,
+            ]
+            linked.extend(o for o in identifiers if o.state != "missing")
+            route = (destination.kind, *(o.value for o in identifiers))
         else:
             route = (destination.kind, c.id)
         if any(o.state != "observed" or o.value is None or o.alternatives for o in linked):
@@ -102,18 +110,45 @@ def preferred_candidate(payment: Payment) -> Candidate | None:
     return chosen if all(identity(c) == identity(chosen) for c in pool) else None
 
 
-def review_draft(payment: Payment, evidence: list[Evidence]) -> Payment:
-    result = review_payment(draft_beneficiaries(payment, evidence), evidence)
+def review_draft(
+    payment: Payment, evidence: list[Evidence], *, merge_duplicates: bool = True
+) -> Payment:
+    prepared = normalize_payment(draft_beneficiaries(payment, evidence))
+    if merge_duplicates:
+        prepared = deduplicate_notices(prepared, evidence)
+    result = review_payment(prepared, evidence)
     accepted = {
         f"/candidates/{i}/amount/role"
         for i, c in enumerate(result.candidates)
         if c.amount.role == "invoice_total"
+        or (
+            c.amount.role == "instalment"
+            and isinstance(c.destination, BillerDestination)
+            and scheme_key(c.destination) is not None
+        )
     }
     result.review.reasons = [
         r
         for r in result.review.reasons
         if not (r.code == "amount_role_unresolved" and r.path in accepted)
     ]
+    # Different, grounded notice numbers are choices, not contradictory readings.
+    notices = [
+        c.destination.notice_number
+        for c in result.candidates
+        if isinstance(c.destination, BillerDestination) and scheme_key(c.destination) == "pagopa"
+    ]
+    if (
+        len(notices) == len(result.candidates) > 1
+        and all(grounded(n, evidence) for n in notices)
+        and len({n.value for n in notices}) == len(notices)
+    ):
+        for reason in result.review.reasons:
+            if reason.code == "conflicting_candidates":
+                reason.code = "payment_option_required"
+                reason.message = (
+                    "Choose the printed full payment or instalment you intend to review."
+                )
     preferred = preferred_candidate(normalize_payment(result))
     if preferred is not None:
         # Selection is a draft preference, not a claim of completeness or ownership.

@@ -77,6 +77,9 @@ class BillerDestination(Model):
     kind: Literal["biller_reference"] = "biller_reference"
     scheme: Observation = Field(default_factory=Observation)
     biller_code: Observation = Field(default_factory=Observation)
+    notice_number: Observation = Field(default_factory=Observation)
+    creditor_tax_code: Observation = Field(default_factory=Observation)
+    bill_reference: Observation = Field(default_factory=Observation)
 
 
 class UnresolvedDestination(Model):
@@ -105,6 +108,9 @@ class Remittance(Model):
 
 class Candidate(Model):
     id: Text
+    option_label: Observation = Field(default_factory=Observation)
+    due_date: Observation = Field(default_factory=Observation)
+    payment_condition: Observation = Field(default_factory=Observation)
     account_country: Observation = Field(default_factory=Observation)
     beneficiary_name: Observation = Field(default_factory=Observation)
     account_holder_name: Observation = Field(default_factory=Observation)
@@ -261,13 +267,19 @@ class FieldRule(Model):
 class CandidateGuidance(Model):
     candidate_id: str
     route: str
+    supported_draft: bool = False
+    payment_channels: list[str] = Field(default_factory=list)
+    payment_note: str | None = None
     account_country: ContextHint
     fields: dict[str, FieldRule]
     warnings: list[Reason] = Field(default_factory=list)
 
 
 class ReviewGuidance(Model):
-    policy_version: Literal["invoice-fields@1"] = "invoice-fields@1"
+    policy_version: Literal[
+        "invoice-fields@1", "invoice-fields@2", "invoice-fields@3", "invoice-fields@4"
+    ] = "invoice-fields@4"
+    review_summary: str = "Review the printed payment details."
     issuer_country: ContextHint
     language: ContextHint
     document_fields: dict[str, FieldRule]

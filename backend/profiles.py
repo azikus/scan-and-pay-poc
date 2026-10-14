@@ -8,6 +8,7 @@ from backend.config import ModelOption, ProviderConfig, Settings, option_resourc
 from backend.errors import ServiceError
 from backend.images import PreparedImage
 from backend.models import ExcludedProfile, Model, Options, Text
+from backend.payment_fields import NORMALIZATION_VERSION, REVIEW_VERSION
 
 
 class DestinationMetadata(Model):
@@ -78,14 +79,14 @@ def registry(settings: Settings) -> dict[str, Definition]:
             "openai-luna-vision",
             "openai",
             "gpt-6-luna",
-            ["openai-responses@1", "review@2"],
+            ["openai-responses@1", "review@" + REVIEW_VERSION],
         ),
         (
             "mistral",
             "mistral-ocr-rules",
             "mistral",
             "mistral-ocr-4-1",
-            ["mistral-ocr@1", "label-rules@1", "review@2"],
+            ["mistral-ocr@1", "label-rules@1", "review@" + REVIEW_VERSION],
         ),
     ):
         config: ProviderConfig = getattr(settings.providers, provider)
@@ -104,7 +105,8 @@ def registry(settings: Settings) -> dict[str, Definition]:
             "attempts": 1,
             "stage_timeout_seconds": 90,
             "job_deadline_seconds": 240,
-            "review": "2",
+            "review": REVIEW_VERSION,
+            "normalization": NORMALIZATION_VERSION,
         }
         if provider == "openai":
             parameters.update(
@@ -171,7 +173,7 @@ def registry(settings: Settings) -> dict[str, Definition]:
             and option.protocol_version in {"5", "6"}
             and option.field_policy == "partial_v1"
         ):
-            option = option.model_copy(update={"context_policy": "invoice_v1"})
+            option = option.model_copy(update={"context_policy": "invoice_v4"})
         assert option.config is not None
         config = option.config
         missing = []
@@ -217,7 +219,8 @@ def registry(settings: Settings) -> dict[str, Definition]:
         parameters = {
             "attempts": 1,
             "stage_timeout_seconds": 90,
-            "review": "2",
+            "review": REVIEW_VERSION,
+            "normalization": NORMALIZATION_VERSION,
             "operation": option.operation,
             "max_output_tokens": option.max_output_tokens,
             "prompt": "payment-image@" + option.protocol_version
@@ -229,7 +232,11 @@ def registry(settings: Settings) -> dict[str, Definition]:
         }
         version = (
             "2-"
-            + hashlib.sha256((option.snapshot_json() + resource_hash).encode()).hexdigest()[:16]
+            + hashlib.sha256(
+                (
+                    option.snapshot_json() + resource_hash + REVIEW_VERSION + NORMALIZATION_VERSION
+                ).encode()
+            ).hexdigest()[:16]
         )
         method = {
             "vision": "direct_vision",
@@ -253,7 +260,10 @@ def registry(settings: Settings) -> dict[str, Definition]:
                     method="rules", execution="local", payload_classes=["ocr_text", "layout"]
                 )
             )
-        components = [f"{option.provider}-{option.operation}@{option.protocol_version}", "review@2"]
+        components = [
+            f"{option.provider}-{option.operation}@{option.protocol_version}",
+            "review@" + REVIEW_VERSION,
+        ]
         if option.interpretation_policy in {"draft_v1", "draft_v2", "draft_v3", "draft_v4"}:
             components.append("payment-draft@1")
             parameters["interpretation_policy"] = option.interpretation_policy
@@ -271,9 +281,10 @@ def registry(settings: Settings) -> dict[str, Definition]:
         if option.field_policy == "partial_v1":
             components.append("partial-fields@1")
             parameters["field_policy"] = "partial_v1"
-        if option.context_policy == "invoice_v1":
-            components.append("invoice-context@1")
-            parameters["prompt"] = str(parameters["prompt"]) + "+invoice-context@1"
+        if option.context_policy in {"invoice_v1", "invoice_v2", "invoice_v3", "invoice_v4"}:
+            context_version = option.context_policy.removeprefix("invoice_v")
+            components.append("invoice-context@" + context_version)
+            parameters["prompt"] = str(parameters["prompt"]) + "+invoice-context@" + context_version
         if option.operation == "ocr":
             components.insert(1, "label-rules@" + option.rules_version)
             if option.rules_version == "3":
@@ -335,7 +346,7 @@ def registry(settings: Settings) -> dict[str, Definition]:
                 parts[0].metadata.version,
                 "payment-ocr@1",
                 parts[1].metadata.version,
-                "review@2",
+                "review@" + REVIEW_VERSION,
             ]
             + (["payment-draft@1"] if draft else [])
             + (["payment-party-roles@1"] if policy == "draft_v2" else [])

@@ -122,7 +122,11 @@ def recover(text: str, image_id: str, stage_id: str, *, version: str) -> Extract
                 "model": "remittance/model",
                 "purpose_code": "remittance/purpose_code",
             }.get(key, key)
-            item[key] = required_reading(candidate, key, base + "/" + field)
+            item[key] = (
+                {"values": [], "basis": "printed"}
+                if key in {"option_label", "due_date", "payment_condition"} and key not in candidate
+                else required_reading(candidate, key, base + "/" + field)
+            )
         item["amount_role"] = enum(
             candidate,
             "amount_role",
@@ -139,7 +143,13 @@ def recover(text: str, image_id: str, stage_id: str, *, version: str) -> Extract
         kinds = {
             "uk_domestic": {"sort_code", "account_number"},
             "iban": {"iban", "bic"},
-            "biller_reference": {"scheme", "biller_code"},
+            "biller_reference": {
+                "scheme",
+                "biller_code",
+                "notice_number",
+                "creditor_tax_code",
+                "bill_reference",
+            },
             "unresolved": {"details"},
         }
         if (
@@ -183,7 +193,12 @@ def recover(text: str, image_id: str, stage_id: str, *, version: str) -> Extract
                 item["destination"] = {
                     "kind": kind,
                     **{
-                        key: required_reading(dest, key, base + "/destination/" + key)
+                        key: (
+                            {"values": [], "basis": "printed"}
+                            if key in {"notice_number", "creditor_tax_code", "bill_reference"}
+                            and key not in dest
+                            else required_reading(dest, key, base + "/destination/" + key)
+                        )
                         for key in sorted(allowed)
                     },
                 }

@@ -9,6 +9,97 @@ final class ScanAndPayTests: XCTestCase {
       Bundle.main.url(forResource: "uk-extract.synthetic", withExtension: "json"))
     return try JSONDecoder().decode(JSONValue.self, from: Data(contentsOf: url))
   }
+  func billerDraft(scheme: String = "pagoPA", dual: Bool = true) throws -> PaymentDraft {
+    var response = try fixture().object
+    var run = response["runs"]!.array[0].object
+    var payment = run["payment"]!.object
+    var candidate = payment["candidates"]!.array[0].object
+    func observed(_ value: String?) -> JSONValue {
+      .object([
+        "value": value.map(JSONValue.string) ?? .null,
+        "state": .string(value == nil ? "missing" : "observed"),
+        "origin": .string("document"),
+      ])
+    }
+    candidate["destination"] = .object([
+      "kind": .string("biller_reference"), "scheme": observed(scheme),
+      "biller_code": observed(dual || scheme == "CBILL" ? "0X123" : nil),
+      "notice_number": observed(scheme == "pagoPA" ? "000000000000000001" : nil),
+      "creditor_tax_code": observed(scheme == "pagoPA" ? "00000000001" : nil),
+      "bill_reference": observed(scheme == "CBILL" ? "BILL-0001" : nil),
+    ])
+    payment["candidates"] = .array([.object(candidate)])
+    run["payment"] = .object(payment)
+    let channels =
+      scheme == "CBILL"
+      ? ["CBILL via your bank"]
+      : ["Your bank’s CBILL/pagoPA service"]
+    run["review_guidance"] = .object([
+      "candidates": .array([
+        .object([
+          "candidate_id": candidate["id"]!,
+          "payment_channels": .array(channels.map(JSONValue.string)),
+          "payment_note": .string(
+            "Not verified with the payment provider. Confirmation is simulated; no money moves."),
+        ])
+      ])
+    ])
+    response["runs"] = .array([.object(run)])
+    return try PaymentDraft(response: .object(response))
+  }
+  func testBillerChannelsAreOneDraftAndConfirmationRetainsIdentifiers() throws {
+    var draft = try billerDraft()
+    XCTAssertEqual(draft.candidates.count, 1)
+    XCTAssertTrue(draft.paymentIssues.isEmpty)
+    XCTAssertTrue(draft.canConfirm)
+    XCTAssertTrue(draft.paymentChannelSummary?.contains("CBILL/pagoPA service") == true)
+    XCTAssertTrue(draft.paymentChannelSummary?.contains("simulated") == true)
+    let path = draft.prefix + "/destination/notice_number"
+    XCTAssertEqual(draft.confirmation["values"][path].string, "000000000000000001")
+    XCTAssertEqual(draft.requirement(for: draft.prefix + "/destination/biller_code"), "optional")
+    draft.edit(path, value: "123")
+    XCTAssertTrue(draft.paymentIssues.contains("pagoPA notice number needs 18 digits."))
+    draft.edit(path, value: "")
+    XCTAssertTrue(draft.missingFields.contains { $0.id == path })
+    XCTAssertEqual(draft.confirmation["simulated"], .bool(true))
+  }
+  func testPagoPANeedsNoCBILLCodeAndCBILLDoesNotImplyPagoPA() throws {
+    let pagoPA = try billerDraft(dual: false)
+    XCTAssertTrue(pagoPA.paymentIssues.isEmpty)
+    XCTAssertTrue(pagoPA.paymentChannelSummary?.contains("CBILL/pagoPA") == true)
+    var cbill = try billerDraft(scheme: "CBILL")
+    XCTAssertTrue(cbill.paymentIssues.isEmpty)
+    XCTAssertFalse(cbill.paymentChannelSummary?.contains("pagoPA") == true)
+    cbill.edit(cbill.prefix + "/destination/bill_reference", value: "")
+    XCTAssertTrue(cbill.paymentIssues.contains("CBILL bill reference is missing."))
+    cbill.edit(cbill.prefix + "/destination/scheme", value: "unknown")
+    XCTAssertTrue(cbill.paymentIssues.contains("Biller payment scheme needs review."))
+  }
+  func testPrintedConditionAndInstalmentDetailsSurviveConfirmation() throws {
+    let original = try billerDraft()
+    var response = original.response.object
+    var run = original.run.object
+    var payment = original.payment.object
+    var candidate = original.candidate.object
+    for (key, value) in [
+      "option_label": "Rata 1", "due_date": "01/12/2025",
+      "payment_condition": "Only if direct debit failed; check with your bank first.",
+    ] {
+      candidate[key] = .object([
+        "value": .string(value), "state": .string("observed"), "origin": .string("document"),
+      ])
+    }
+    payment["candidates"] = .array([.object(candidate)])
+    run["payment"] = .object(payment)
+    response["runs"] = .array([.object(run)])
+    var draft = try PaymentDraft(response: .object(response))
+    XCTAssertTrue(draft.optionLabel(at: 0).contains("Rata 1"))
+    XCTAssertTrue(draft.optionLabel(at: 0).contains("Due 01/12/2025"))
+    XCTAssertTrue(draft.paymentChannelSummary?.contains("check with your bank first") == true)
+    XCTAssertEqual(draft.confirmation["values"][draft.prefix + "/due_date"].string, "01/12/2025")
+    draft.edit(draft.prefix + "/destination/creditor_tax_code", value: "")
+    XCTAssertTrue(draft.paymentIssues.isEmpty)
+  }
   func testNullRoundTripAndLeadingZeros() throws {
     let json = try fixture()
     var draft = try PaymentDraft(response: json)

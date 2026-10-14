@@ -77,11 +77,11 @@ async def document_request(
 
                 annotation_prompt = prompt_v3(annotation_prompt)
                 annotation_schema = role_schema_v2(annotation_schema)
-            if option.context_policy == "invoice_v1":
+            if option.context_policy in {"invoice_v1", "invoice_v2", "invoice_v3", "invoice_v4"}:
                 from backend.invoice_context import context_prompt, context_schema
 
-                annotation_prompt = context_prompt(annotation_prompt)
-                annotation_schema = context_schema(annotation_schema)
+                annotation_prompt = context_prompt(annotation_prompt, policy=option.context_policy)
+                annotation_schema = context_schema(annotation_schema, policy=option.context_policy)
             payload["document_annotation_format"] = {
                 "type": "json_schema",
                 "json_schema": {
@@ -166,7 +166,7 @@ def document_extraction(
             raise ProviderError("invalid_provider_output")
         context.run.diagnostics.returned_model = model
         if option.operation == "annotations":
-            if option.context_policy == "invoice_v1":
+            if option.context_policy in {"invoice_v1", "invoice_v2", "invoice_v3", "invoice_v4"}:
                 from backend.invoice_context import extract_context
 
                 return extract_context(
@@ -174,6 +174,7 @@ def document_extraction(
                     context.scan.input.image_id,
                     stage.id,
                     version=option.protocol_version,
+                    policy=option.context_policy,
                 )
             if option.protocol_version in {"4", "5", "6"}:
                 from backend.adapters.compact import extract

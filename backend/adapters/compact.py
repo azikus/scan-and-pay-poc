@@ -6,7 +6,6 @@ models to emit coordinates or internal evidence IDs. Historical protocols stay s
 
 from typing import Annotated, Any, Literal
 
-import pycountry
 from pydantic import Field
 
 from backend.models import (
@@ -27,6 +26,7 @@ from backend.models import (
     UnresolvedDestination,
 )
 from backend.ocr_rules import amount_observation
+from backend.payment_fields import REVIEW_VERSION, currency_code, has_reading
 from backend.runtime import Extraction
 
 PROMPT = """Extract printed payment fields from the single image as JSON matching the schema.
@@ -60,6 +60,9 @@ class Reading(Model):
 
 
 class PaymentOption(Model):
+    option_label: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
+    due_date: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
+    payment_condition: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
     beneficiary_name: Reading
     account_holder_name: Reading
     amount_text: Reading
@@ -94,6 +97,9 @@ class BillerReading(Model):
     kind: Literal["biller_reference"]
     scheme: Reading
     biller_code: Reading
+    notice_number: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
+    creditor_tax_code: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
+    bill_reference: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
 
 
 class UnresolvedReading(Model):
@@ -102,6 +108,9 @@ class UnresolvedReading(Model):
 
 
 class PaymentOptionV5(Model):
+    option_label: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
+    due_date: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
+    payment_condition: Reading = Field(default_factory=lambda: Reading(values=[], basis="printed"))
     beneficiary_name: Reading
     account_holder_name: Reading
     amount_text: Reading
@@ -161,15 +170,25 @@ def schema(version: str = "4") -> dict[str, Any]:
     result: dict[str, Any] = strict(
         (CompactExtractionV5 if version in {"5", "6"} else CompactExtraction).model_json_schema()
     )
+    if version in {"5", "6"}:
+        biller = result["$defs"]["BillerReading"]
+        for key in ("notice_number", "creditor_tax_code", "bill_reference"):
+            biller["properties"].pop(key)
+            biller["required"].remove(key)
+    option = result["$defs"]["PaymentOptionV5" if version in {"5", "6"} else "PaymentOption"]
+    for key in ("option_label", "due_date", "payment_condition"):
+        option["properties"].pop(key)
+        option["required"].remove(key)
     return result
 
 
 def extract(text: str, image_id: str, stage_id: str, *, version: str = "4") -> Extraction:
     untyped: list[Reading] = []
+    biller_details: dict[int, BillerReading] = {}
     if version in {"5", "6"}:
         native = CompactExtractionV5.model_validate_json(text)
         candidates = []
-        for native_item in native.candidates:
+        for native_index, native_item in enumerate(native.candidates):
             native_destination = native_item.destination
             native_fields = {
                 n: Reading(values=[], basis="printed")
@@ -190,6 +209,7 @@ def extract(text: str, image_id: str, stage_id: str, *, version: str = "4") -> E
             elif isinstance(native_destination, IBANReading):
                 native_fields.update(iban=native_destination.iban, bic=native_destination.bic)
             elif isinstance(native_destination, BillerReading):
+                biller_details[native_index] = native_destination
                 native_fields.update(
                     biller_scheme=native_destination.scheme,
                     biller_code=native_destination.biller_code,
@@ -292,6 +312,9 @@ def extract(text: str, image_id: str, stage_id: str, *, version: str = "4") -> E
             destination = BillerDestination(
                 scheme=fields["biller_scheme"], biller_code=fields["biller_code"]
             )
+            if index in biller_details:
+                for name in ("notice_number", "creditor_tax_code", "bill_reference"):
+                    setattr(destination, name, observation(getattr(biller_details[index], name)))
         else:
             destination = UnresolvedDestination(reason="No supported payment route claimed")
         amount, embedded_currency = amount_observation(fields["amount_text"])
@@ -302,14 +325,14 @@ def extract(text: str, image_id: str, stage_id: str, *, version: str = "4") -> E
         currency = fields["currency"]
         if currency.value is not None:
             raw_code = currency.value.strip()
-            code = {"€": "EUR", "£": "GBP"}.get(raw_code, raw_code.upper())
-            if pycountry.currencies.get(alpha_3=code) is not None:
+            code = currency_code(raw_code)
+            if code is not None:
                 currency.value = code
                 if code != raw_code:
                     currency.normalization.append("explicit_currency_token")
             else:
                 currency.value, currency.state = None, "ambiguous"
-        if currency.state == "missing":
+        if currency.state in {"missing", "unsupported"} and not has_reading(currency):
             currency = embedded_currency
         elif (
             embedded_currency.value is not None
@@ -333,6 +356,9 @@ def extract(text: str, image_id: str, stage_id: str, *, version: str = "4") -> E
         payment.candidates.append(
             Candidate(
                 id=f"candidate-{index + 1}",
+                option_label=fields["option_label"],
+                due_date=fields["due_date"],
+                payment_condition=fields["payment_condition"],
                 beneficiary_name=fields["beneficiary_name"],
                 account_holder_name=fields["account_holder_name"],
                 amount=Amount(value=amount, currency=currency, role=item.amount_role),
@@ -350,7 +376,7 @@ def extract(text: str, image_id: str, stage_id: str, *, version: str = "4") -> E
         Payment.model_validate(payment.model_dump()),
         evidence,
         Routing(
-            applied_rule_packs=["compact-claims@" + version, "generic-review@2"],
+            applied_rule_packs=["compact-claims@" + version, "generic-review@" + REVIEW_VERSION],
             reasons=[
                 "Printed field claims mapped to backend identities; no model coordinates requested."
             ],
